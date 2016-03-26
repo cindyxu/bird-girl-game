@@ -1,0 +1,26 @@
+BEGIN|getting_ready
+SAY|willowby|neutral|Your majesty ...
+SAY|willowby|neutral|Right this way, your majesty ...
+SAY|willowby|neutral|Yes, of course I swear my eternal loyalty to you for eternity! Your majesty!!
+SAY|willowby|neutral|Oh, I can't believe it's the day! Just wait until the prince meets me. I'll be the best angel there ever was.
+SAY|willowby|neutral|I'll bedazzle him with my good manners, and he'll be so impressed that he'll name me his royal advisor!
+SAY|willowby|neutral|...
+SAY|willowby|neutral|But truth be told, I'm really quite nervous.
+END|
+
+BEGIN|intro_mom
+SAY|mom|neutral|I'm so proud of you.
+SAY|willowby|neutral|Oh, mother! Do you think I'll be okay?
+SAY|mom|neutral|Of course you'll be, munchkin! The prince will love you!
+SAY|mom|neutral|Here, I knit you a new set of clothes. It will be breezy in the castle, and you've already grown out of your old one.
+SAY|mom|neutral|This time they're cloud-themed, because you're an angel now!
+SAY|willowby|neutral|Mother! You've done too much for me again!
+SAY|willowby|neutral|But, they're wonderful. I'll wear them everywhere! I'll keep them for the rest of my life!
+END|
+
+BEGIN|leaving_mom
+SAY|mom|neutral|You'd best go now. Don't leave Hictory waiting!
+SAY|willowby|neutral|Yes, mother! I'll make you proud!
+SAY|||Use the arrow keys to walk around.
+SAY|||Press A to talk with people or interact with objects.
+END|

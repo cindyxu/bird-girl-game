@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Portrait
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Exterior0
+  - Interior0
+  - SortedEdge0
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: slayer0
+    uniqueID: 3854360383
+    locked: 0
+  - name: slayer1
+    uniqueID: 489451751
+    locked: 0
+  - name: slayer2
+    uniqueID: 1645381463
+    locked: 0
+  - name: slayer3
+    uniqueID: 3607898283
+    locked: 0
+  - name: slayer4
+    uniqueID: 1143160453
+    locked: 0
+  - name: slayerui
+    uniqueID: 2652950737
+    locked: 0
