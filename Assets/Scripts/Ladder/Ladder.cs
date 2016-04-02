@@ -21,10 +21,6 @@ public class Ladder : MonoBehaviour {
 		rightCollider.GetComponent<Renderer> ().enabled = false;
 		bottomCollider.GetComponent<Renderer> ().enabled = false;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	}
 
 	public void EnableClimbable(Collider2D targetCollider, bool climbable) {
 		Physics2D.IgnoreCollision (targetCollider, mCollider2D, !climbable);

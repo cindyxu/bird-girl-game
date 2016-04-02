@@ -2,19 +2,20 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class LadderClimber : MonoBehaviour {
+public class LadderClimber {
 
 	private List<Collider2D> mBodyColliders = new List<Collider2D> ();
 	private List<Collider2D> mTopColliders = new List<Collider2D> ();
 
+	private GameObject mGameObject;
 	private Collider2D mCollider2D;
 
-
-	void Awake () {
-		mCollider2D = GetComponent<Collider2D> ();
+	public LadderClimber (GameObject gameObject) {
+		mGameObject = gameObject;
+		mCollider2D = gameObject.GetComponent<Collider2D> ();
 	}
 
-	void OnEnable () {
+	public void Reset () {
 		mBodyColliders.Clear ();
 		mTopColliders.Clear ();
 	}
@@ -37,8 +38,7 @@ public class LadderClimber : MonoBehaviour {
 		return null;
 	}
 
-	void OnTriggerStay2D (Collider2D collider2D) {
-
+	public void HandleTriggerStay2D (Collider2D collider2D) {
 		Ladder ladder = collider2D.GetComponent<Ladder> ();
 		if (ladder != null && !mBodyColliders.Contains (collider2D)) {
 			mBodyColliders.Add (collider2D);
@@ -53,8 +53,7 @@ public class LadderClimber : MonoBehaviour {
 		}
 	}
 
-	void OnTriggerExit2D (Collider2D collider2D) {
-
+	public void HandleTriggerExit2D (Collider2D collider2D) {
 		Ladder ladder = collider2D.gameObject.GetComponent<Ladder> ();
 		if (ladder != null) {
 			mBodyColliders.Remove (collider2D);
@@ -68,7 +67,7 @@ public class LadderClimber : MonoBehaviour {
 	}
 
 	int CompareLadderColliders(Collider2D collider1, Collider2D collider2) {
-		return (collider1.bounds.ClosestPoint (transform.position).x - transform.position.x)
-			.CompareTo(collider2.bounds.ClosestPoint (transform.position).x - transform.position.x);
+		return (collider1.bounds.ClosestPoint (mGameObject.transform.position).x - mGameObject.transform.position.x)
+			.CompareTo(collider2.bounds.ClosestPoint (mGameObject.transform.position).x - mGameObject.transform.position.x);
 	}
 }

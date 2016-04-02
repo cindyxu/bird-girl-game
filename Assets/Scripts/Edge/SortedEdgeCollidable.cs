@@ -1,49 +1,52 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class SortedEdgeCollidable : MonoBehaviour {
+public class SortedEdgeCollidable {
 
-	private Renderer mRenderer;
-	public SortedEdge currentEdge;
 	public delegate void OnSortedEdgeChanged(SortedEdge sortedEdge);
 	public OnSortedEdgeChanged onSortedEdgeChanged = (sortedEdge) => {};
 
+	private GameObject mGameObject;
+	private Renderer mRenderer;
+	private SortedEdge mCurrentEdge;
+
 	// Use this for initialization
-	void Awake () {
-		mRenderer = GetComponent<Renderer> ();
+	public SortedEdgeCollidable(GameObject gameObject) {
+		mGameObject = gameObject;
+		mRenderer = gameObject.GetComponent<Renderer> ();
 	}
 
-	void OnCollisionEnter2D (Collision2D collision) {
+	public void HandleCollisionEnter2D (Collision2D collision) {
 		bool isDownCollision = Mathf.RoundToInt (collision.contacts [0].normal.y) > 0;
 		if (collision.enabled && isDownCollision) {
 			SortedEdge sortedEdge = collision.gameObject.GetComponent<SortedEdge> ();
-			if (sortedEdge != null && currentEdge != sortedEdge) {
+			if (sortedEdge != null && mCurrentEdge != sortedEdge) {
 				SetCurrentSurface (sortedEdge);
 			}
 		}
 	}
 
-	void OnCollisionExit2D (Collision2D collision) {
+	public void HandleCollisionExit2D (Collision2D collision) {
 		if (collision.enabled) {
 			SortedEdge sortedEdge = collision.gameObject.GetComponent<SortedEdge> ();
-			if (sortedEdge != null && sortedEdge == currentEdge) {
+			if (sortedEdge != null && sortedEdge == mCurrentEdge) {
 				SetCurrentSurface (null);
 			}
 		}
 	}
 
 	public SortedEdge GetCurrentEdge() {
-		return currentEdge;
+		return mCurrentEdge;
 	}
 
 	private void SetCurrentSurface (SortedEdge sortedEdge) {
-		currentEdge = sortedEdge;
+		mCurrentEdge = sortedEdge;
 		if (sortedEdge != null) {
 			mRenderer.sortingLayerName = sortedEdge.sortingLayerName;
-			gameObject.layer = sortedEdge.gameObject.layer;
+			mGameObject.layer = sortedEdge.gameObject.layer;
 		} else {
-			gameObject.layer = LayerMask.NameToLayer ("Default");
+			mGameObject.layer = LayerMask.NameToLayer ("Default");
 		}
-		onSortedEdgeChanged (currentEdge);
+		onSortedEdgeChanged (mCurrentEdge);
 	}
 }

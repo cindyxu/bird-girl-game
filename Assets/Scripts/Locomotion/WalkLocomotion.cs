@@ -1,17 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (LadderClimber))]
-[RequireComponent (typeof (SortedEdgeCollidable))]
 [RequireComponent (typeof (ActionTriggerer))]
-[RequireComponent (typeof (InputManager))]
+[RequireComponent (typeof (InputCatcher))]
 public class WalkLocomotion : MonoBehaviour {
 
 	private Rigidbody2D mRigidbody2D;
+	private ActionTriggerer mActionTriggerer;
+
 	private LadderClimber mLadderClimber;
 	private SortedEdgeCollidable mSortedEdgeCollidable;
-	private ActionTriggerer mActionTriggerer;
-	private InputManager mInputManager;
+
+	private InputCatcher mInputCatcher;
 
 	public float walkSpeed;
 	public float jumpSpeed;
@@ -26,10 +26,11 @@ public class WalkLocomotion : MonoBehaviour {
 
 	void Awake () {
 		mRigidbody2D = GetComponent<Rigidbody2D> ();
-		mSortedEdgeCollidable = GetComponent<SortedEdgeCollidable> ();
 		mActionTriggerer = GetComponent<ActionTriggerer> ();
-		mLadderClimber = GetComponent<LadderClimber> ();
-		mInputManager = GetComponent<InputManager> ();
+		mInputCatcher = GetComponent<InputCatcher> ();
+
+		mSortedEdgeCollidable = new SortedEdgeCollidable (gameObject);
+		mLadderClimber = new LadderClimber (gameObject);
 	}
 
 	void Start () {
@@ -38,30 +39,25 @@ public class WalkLocomotion : MonoBehaviour {
 
 	void OnEnable () {
 		isGrounded = (mSortedEdgeCollidable.GetCurrentEdge () != null);
-		mSortedEdgeCollidable.enabled = true;
-		mLadderClimber.enabled = true;
+		mLadderClimber.Reset ();
 	}
 
-	void OnDisable() {
-		mSortedEdgeCollidable.enabled = false;
-		mLadderClimber.enabled = false;
-	}
-
-	public void LadderJump(int direction) {
+	public void LadderJump (int direction) {
 		movementOverride += delegate {
 			mRigidbody2D.velocity = new Vector2 (walkSpeed * direction, jumpSpeed / 2f);
 		};
 	}
 
-	void Update() {
+	void Update () {
 		Vector2 velocity = new Vector2 (0, mRigidbody2D.velocity.y);
-		if (mInputManager.getLeft()) {
+		Debug.Log (mInputCatcher.getJumpPress());
+		if (mInputCatcher.getLeft()) {
 			velocity.x -= walkSpeed;
 		}
-		if (mInputManager.getRight()) {
+		if (mInputCatcher.getRight()) {
 			velocity.x += walkSpeed;
 		}
-		if (mInputManager.getJumpPress() && isGrounded) {
+		if (mInputCatcher.getJumpPress() && isGrounded) {
 			velocity.y = jumpSpeed;
 		}
 		velocity.y = Mathf.Max (velocity.y, -maxVelocity);
@@ -72,20 +68,36 @@ public class WalkLocomotion : MonoBehaviour {
 		}
 		movementOverride = null;
 
-		if (mInputManager.getActionPress() && mActionTriggerer.TryTrigger ()) {
+		if (mInputCatcher.getActionPress() && mActionTriggerer.TryTrigger ()) {
 			return;
 		} 
-		if (mInputManager.getUp()) {
+		if (mInputCatcher.getUp()) {
 			Ladder ascendLadder = mLadderClimber.GetAscendLadder ();
 			if (ascendLadder != null) onClimbLadder (ascendLadder, 1);
 		}
-		if (mInputManager.getDownPress() && isGrounded) {
+		if (mInputCatcher.getDownPress() && isGrounded) {
 			Ladder descendLadder = mLadderClimber.GetDescendLadder ();
 			if (descendLadder != null) onClimbLadder (descendLadder, -1);
 		}
 	}
 
-	void OnSortedEdgeChanged(SortedEdge sortedEdge) {
+	void OnCollisionEnter2D (Collision2D collision) {
+		mSortedEdgeCollidable.HandleCollisionEnter2D (collision);
+	}
+
+	void OnCollisionExit2D (Collision2D collision) {
+		mSortedEdgeCollidable.HandleCollisionExit2D (collision);
+	}
+
+	void OnTriggerStay2D (Collider2D collider) {
+		mLadderClimber.HandleTriggerStay2D (collider);
+	}
+
+	void OnTriggerExit2D (Collider2D collider) {
+		mLadderClimber.HandleTriggerExit2D (collider);
+	}
+
+	void OnSortedEdgeChanged (SortedEdge sortedEdge) {
 		isGrounded = (sortedEdge != null);
 	}
 }

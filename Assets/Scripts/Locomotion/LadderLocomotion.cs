@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (InputManager))]
+[RequireComponent (typeof (InputCatcher))]
 public class LadderLocomotion : MonoBehaviour
 {
 	private Rigidbody2D mRigidbody2D;
 	private Collider2D mCollider2D;
 	private RoomTraveller mRoomTraveller;
-	private InputManager mInputManager;
+	private InputCatcher mInputCatcher;
 
 	public float climbSpeed;
 	public float slideSpeed;
@@ -25,7 +25,7 @@ public class LadderLocomotion : MonoBehaviour
 		mRigidbody2D = GetComponent<Rigidbody2D> ();
 		mCollider2D = GetComponent<Collider2D> ();
 		mRoomTraveller = GetComponent<RoomTraveller> ();
-		mInputManager = GetComponent<InputManager> ();
+		mInputCatcher = GetComponent<InputCatcher> ();
 		mGravityScale = mRigidbody2D.gravityScale;
 	}
 
@@ -65,35 +65,21 @@ public class LadderLocomotion : MonoBehaviour
 	void OnTriggerStay2D(Collider2D other) {
 		if (!isActiveAndEnabled) return;
 
-		if (other == mCurrentLadder.bottomCollider && mInputManager.getDown()) {
+		if (other == mCurrentLadder.bottomCollider && mInputCatcher.getDown()) {
 			onLadderEndReached (1);
 		}
 
-		else if (other == mCurrentLadder.topCollider && mInputManager.getUp()) {
+		else if (other == mCurrentLadder.topCollider && mInputCatcher.getUp()) {
 			OnClimbToTop ();
 		}
 	}
 
-	private void OnClimbToTop() {
-		Vector3 position = transform.position;
-		position.y = mCurrentLadder.GetComponent<Collider2D> ().bounds.max.y 
-			+ mCollider2D.bounds.extents.y - mCollider2D.offset.y;
-		transform.position = position;
-
-		Room topRoom = mCurrentLadder.topCollider.GetComponentInParent<Room> ();
-		if (topRoom != mRoomTraveller.GetCurrentRoom ()) {
-			mRoomTraveller.TransportTo (topRoom);
-		}
-
-		onLadderEndReached (-1);
-	}
-
 	void Update() {
-		if (mInputManager.getJumpPress()) {
-			if (mInputManager.getLeft()) {
+		if (mInputCatcher.getJumpPress()) {
+			if (mInputCatcher.getLeft()) {
 				onLadderDismount (-1);
 				return;
-			} else if (mInputManager.getRight()) {
+			} else if (mInputCatcher.getRight()) {
 				onLadderDismount (1);
 				return;
 			}
@@ -102,6 +88,24 @@ public class LadderLocomotion : MonoBehaviour
 
 	void FixedUpdate() {
 		UpdateLadderMovement ();
+	}
+
+	private void OnClimbToTop() {
+		Vector3 position = transform.position;
+		position.y = mCurrentLadder.GetComponent<Collider2D> ().bounds.max.y 
+			+ mCollider2D.bounds.extents.y - mCollider2D.offset.y;
+		transform.position = position;
+
+		Vector2 velocity = mRigidbody2D.velocity;
+		velocity.y = 0;
+		mRigidbody2D.velocity = velocity;
+
+		Room topRoom = mCurrentLadder.topCollider.GetComponentInParent<Room> ();
+		if (topRoom != mRoomTraveller.GetCurrentRoom ()) {
+			mRoomTraveller.TransportTo (topRoom);
+		}
+
+		onLadderEndReached (-1);
 	}
 
 	private void UpdateLadderMovement() {

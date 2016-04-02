@@ -1,52 +1,52 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (InputManager))]
+[RequireComponent (typeof (InputCatcher))]
 public class PlayerInputFeeder : MonoBehaviour {
 
-	private InputManager mInputManager;
+	private InputCatcher mInputCatcher;
 
 	void Awake() {
-		mInputManager = GetComponent<InputManager> ();
+		mInputCatcher = GetComponent<InputCatcher> ();
 	}
 
 	void Update() {
 		KeyBindingManager kmManager = GameState.keybindingManager;
 
 		if (kmManager.GetKeyDown (ActionKey.LEFT)) {
-			mInputManager.onLeftPress ();
+			mInputCatcher.onLeftPress ();
 		}
 		if (kmManager.GetKeyUp (ActionKey.LEFT)) {
-			mInputManager.onLeftRelease ();
+			mInputCatcher.onLeftRelease ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.RIGHT)) {
-			mInputManager.onRightPress ();
+			mInputCatcher.onRightPress ();
 		} 
 		if (kmManager.GetKeyUp (ActionKey.RIGHT)) {
-			mInputManager.onRightRelease ();
+			mInputCatcher.onRightRelease ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.UP)) {
-			mInputManager.onUpPress ();
+			mInputCatcher.onUpPress ();
 		}
 		if (kmManager.GetKeyUp (ActionKey.UP)) {
-			mInputManager.onUpRelease ();
+			mInputCatcher.onUpRelease ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.DOWN)) {
-			mInputManager.onDownPress ();
+			mInputCatcher.onDownPress ();
 		} 
 		if (kmManager.GetKeyUp (ActionKey.DOWN)) {
-			mInputManager.onDownRelease ();
+			mInputCatcher.onDownRelease ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.JUMP)) {
-			mInputManager.onJumpPress ();
+			mInputCatcher.onJumpPress ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.ACTION)) {
-			mInputManager.onActionPress ();
+			mInputCatcher.onActionPress ();
 		}
 	}
 }
