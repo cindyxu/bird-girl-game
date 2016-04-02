@@ -88,7 +88,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 131812}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7097acab244c9cf4f9cf2da1b5830b88, type: 3}
+  m_Script: {fileID: 11500000, guid: 92555a35308f0e34d8dca586e9e2b717, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 10
@@ -113,11 +113,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 131812}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55313d49600cb4e46b8691fc3b6fb706, type: 3}
+  m_Script: {fileID: 11500000, guid: b430798756306544daa7503f44b69997, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  climbSpeed: 10
-  slideSpeed: 10
+  climbSpeed: 5
+  slideSpeed: 5
 --- !u!114 &11461970
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -219,11 +219,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: climbSpeed
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: slideSpeed
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: m_LocalPosition.x

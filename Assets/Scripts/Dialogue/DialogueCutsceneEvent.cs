@@ -2,35 +2,31 @@
 using System.Collections;
 using Fungus;
 
-public class DialogueCutsceneEvent : ICutsceneEvent {
+public class DialogueCutsceneEvent : MonoBehaviour {
 
 	private Dialogue mDialogue;
 	private int mClusterIdx = 0;
-	private bool mFinished = false;
 
 	private DialogueBox mDialogueBox;
+
+	private Cutscene.EventFinished mCallback;
 
 	public DialogueCutsceneEvent(Dialogue dialogue) {
 		mDialogue = dialogue;
 	}
 
-	public void StartCutscene() {
+	public void StartEvent(Cutscene.EventFinished callback) {
+		mCallback = callback;
+
 		mClusterIdx = 0;
-		mFinished = false;
 		NextCluster ();
 	}
 
-	public void UpdateCutscene() {
-		if (Input.GetKeyDown (KeyCode.S)) {
+	public void Update() {
+		KeyBindingManager inputManager = GameState.keybindingManager;
+		if (inputManager.GetKeyDown(ActionKey.ACTION)) {
 			mDialogueBox.OnNextLineEvent ();
 		}
-	}
-
-	public bool IsCutsceneDone() {
-		return mFinished;
-	}
-
-	public void FinishCutscene() {
 	}
 
 	private void NextCluster() {
@@ -43,7 +39,7 @@ public class DialogueCutsceneEvent : ICutsceneEvent {
 			mDialogueBox.GetComponent<Canvas> ().enabled = true;
 			mDialogueBox.WriteCluster (cluster, OnWriterFinished);
 		} else {
-			mFinished = true;
+			mCallback (StartEvent);
 		}
 	}
 

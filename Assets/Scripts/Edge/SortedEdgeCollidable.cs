@@ -13,12 +13,7 @@ public class SortedEdgeCollidable : MonoBehaviour {
 		mRenderer = GetComponent<Renderer> ();
 	}
 
-	// Update is called once per frame
-	void Update () {
-	}
-
 	void OnCollisionEnter2D (Collision2D collision) {
-		Debug.Log ("collision with " + collision.collider + ", " + collision.collider.transform.parent.name + ", " + collision.enabled);
 		bool isDownCollision = Mathf.RoundToInt (collision.contacts [0].normal.y) > 0;
 		if (collision.enabled && isDownCollision) {
 			SortedEdge sortedEdge = collision.gameObject.GetComponent<SortedEdge> ();

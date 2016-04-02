@@ -3,31 +3,34 @@ using System.Collections.Generic;
 
 public class Cutscene {
 
-	private List<ICutsceneEvent> mStartingEvts = new List<ICutsceneEvent>();
-	private List<ICutsceneEvent> mEvts = new List<ICutsceneEvent> ();
-	private Dictionary<ICutsceneEvent, List<ICutsceneEvent>> mParents = 
-		new Dictionary<ICutsceneEvent, List<ICutsceneEvent>>();
-	private Dictionary<ICutsceneEvent, List<ICutsceneEvent>> mChildren = 
-		new Dictionary<ICutsceneEvent, List<ICutsceneEvent>>();
+	public delegate void EventFinished(Event cutsceneEvent);
+	public delegate void Event(EventFinished onCutsceneEnd);
+
+	private List<Event> mStartingEvts = new List<Event>();
+	private List<Event> mEvts = new List<Event> ();
+	private Dictionary<Event, List<Event>> mParents = 
+		new Dictionary<Event, List<Event>>();
+	private Dictionary<Event, List<Event>> mChildren = 
+		new Dictionary<Event, List<Event>>();
 
 	private Cutscene() { }
 
-	public List<ICutsceneEvent> GetStartingEvents() {
+	public List<Event> GetStartingEvents() {
 		return mStartingEvts;
 	}
 
-	public List<ICutsceneEvent> GetEvents() {
+	public List<Event> GetEvents() {
 		return mEvts;
 	}
 
-	public List<ICutsceneEvent> GetParents(ICutsceneEvent child) {
-		List<ICutsceneEvent> parentList;
+	public List<Event> GetParents(Event child) {
+		List<Event> parentList;
 		mParents.TryGetValue(child, out parentList);
 		return parentList;
 	}
 
-	public List<ICutsceneEvent> GetChildren(ICutsceneEvent parent) {
-		List<ICutsceneEvent> childList;
+	public List<Event> GetChildren(Event parent) {
+		List<Event> childList;
 		mChildren.TryGetValue(parent, out childList);
 		return childList;
 	}
@@ -41,11 +44,11 @@ public class Cutscene {
 		}
 
 		public Cutscene Build() {
-			foreach (KeyValuePair<ICutsceneEvent, List<ICutsceneEvent>> pair in mCutscene.mParents) {
-				ICutsceneEvent child = pair.Key;
-				foreach (ICutsceneEvent parent in pair.Value) {
+			foreach (KeyValuePair<Event, List<Event>> pair in mCutscene.mParents) {
+				Event child = pair.Key;
+				foreach (Event parent in pair.Value) {
 					if (!mCutscene.mChildren.ContainsKey(parent)) {
-						mCutscene.mChildren.Add(parent, new List<ICutsceneEvent>());
+						mCutscene.mChildren.Add(parent, new List<Event>());
 					}
 					mCutscene.mChildren [parent].Add (child);
 				}
@@ -53,24 +56,28 @@ public class Cutscene {
 			return mCutscene;
 		}
 
-		public EventBuilder Play(ICutsceneEvent evt) {
+		public EventBuilder Play(Event evt) {
 			mCutscene.mStartingEvts.Add (evt);
 			mCutscene.mEvts.Add (evt);
 			return new EventBuilder (mCutscene, evt);
 		}
 
 		public class EventBuilder {
-			private ICutsceneEvent mCutsceneEvent;
+			private Event mCutsceneEvent;
 			private Cutscene mCutscene;
 
-			internal EventBuilder(Cutscene cutscene, ICutsceneEvent cutsceneEvent) {
+			internal EventBuilder(Cutscene cutscene, Event cutsceneEvent) {
 				mCutscene = cutscene;
 				mCutsceneEvent = cutsceneEvent;
 			}
 
-			public EventBuilder After(params ICutsceneEvent[] evts) {
+			public EventBuilder After(params Event[] evts) {
 				mCutscene.mStartingEvts.Remove (mCutsceneEvent);
-				mCutscene.mParents.Add (mCutsceneEvent, new List<ICutsceneEvent>(evts));
+				if (mCutscene.mParents.ContainsKey (mCutsceneEvent)) {
+					mCutscene.mParents [mCutsceneEvent].AddRange (evts);
+				} else {
+					mCutscene.mParents.Add (mCutsceneEvent, new List<Event> (evts));
+				}
 				return this;
 			}
 		}

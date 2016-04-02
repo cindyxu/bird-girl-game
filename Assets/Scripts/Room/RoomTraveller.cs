@@ -10,9 +10,9 @@ public class RoomTraveller : MonoBehaviour {
 	private IntraDoor mCurrentDoor;
 
 	public delegate void OnLeaveRoom(RoomTraveller traveller, Room room);
-	public OnLeaveRoom onLeaveRoom;
+	public event OnLeaveRoom onLeaveRoom;
 	public delegate void OnEnterRoom(RoomTraveller traveller, Room room);
-	public OnEnterRoom onEnterRoom;
+	public event OnEnterRoom onEnterRoom;
 
 	// Use this for initialization
 	void Awake () {
@@ -40,9 +40,6 @@ public class RoomTraveller : MonoBehaviour {
 		Room prevRoom = mCurrentRoom;
 		prevRoom.DisableWith (gameObject);
 		onLeaveRoom (this, prevRoom);
-
-//		gameObject.SetActive (false);
-//		gameObject.SetActive (true);
 
 		mCurrentRoom = toRoom;
 		mCurrentRoom.EnableWith (gameObject);

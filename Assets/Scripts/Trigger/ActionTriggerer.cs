@@ -12,19 +12,14 @@ public class ActionTriggerer : MonoBehaviour {
 		mCollider2D = GetComponent<Collider2D> ();
 	}
 
-	// Use this for initialization
-	void Start () {
-	}
-
 	// Update is called once per frame
-	void Update () {
-		if (Input.GetKeyDown (KeyCode.S)) {
-			for (int i = 0; i < mTriggers.Count; i++) {
-				if (mTriggers [i].Execute (this)) {
-					break;
-				}
+	public bool TryTrigger () {
+		for (int i = 0; i < mTriggers.Count; i++) {
+			if (mTriggers [i].Execute (this)) {
+				return true;
 			}
 		}
+		return false;
 	}
 
 	void FixedUpdate() {

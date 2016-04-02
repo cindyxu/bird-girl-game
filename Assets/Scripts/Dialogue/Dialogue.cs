@@ -5,8 +5,6 @@ using System.Collections.Generic;
 [System.Serializable]
 public class Dialogue {
 
-	private const string SAY_TOKEN = "SAY";
-
 	public readonly Cluster[] clusters;
 
 	private Dialogue(Cluster[] clusters) {
@@ -28,10 +26,14 @@ public class Dialogue {
 
 	public static Dialogue CreateFromLines(List<string> lines) {
 		List<Cluster> clusterList = new List<Cluster> ();
+		string currSpeaker = null;
+		string currEmote = null;
 		foreach (string line in lines) {
-			string[] segs = line.Split ('|');
-			if (segs.Length > 0 && segs [0].Equals (SAY_TOKEN)) {
-				clusterList.Add (new Cluster (segs [1], segs [2], segs [3]));
+			string[] segs = line.Split ('\t');
+			if (segs.Length >= 4 && !string.IsNullOrEmpty(segs [3])) {
+				if (!string.IsNullOrEmpty (segs [1])) currSpeaker = segs [1];
+				if (!string.IsNullOrEmpty (segs [2])) currEmote = segs [2];
+				clusterList.Add (new Cluster (currSpeaker, currEmote, segs [3]));
 			}
 		}
 		Cluster[] clusters = clusterList.ToArray ();

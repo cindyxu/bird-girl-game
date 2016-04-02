@@ -9,8 +9,9 @@ public class DialogueLibrary : MonoBehaviour {
 	private static Dictionary<string, Dialogue> mDialogues = new Dictionary<string, Dialogue> ();
 	private static Dictionary<string, DialogueBox> mDialogueBoxes = new Dictionary<string, DialogueBox> ();
 
-	private const string BEGIN_TOKEN = "BEGIN";
-	private const string END_TOKEN = "END";
+	private const string BEGIN_TOKEN = "{";
+	private const string END_TOKEN = "}";
+	private const char SEP_CHAR = '\t';
 
 	void Awake () {
 		loadLibraryJson ();
@@ -51,7 +52,7 @@ public class DialogueLibrary : MonoBehaviour {
 		for (int i = 0; i < lines.Count; i++) {
 			string line = lines [i];
 			if (line.StartsWith (BEGIN_TOKEN)) {
-				string[] segs = line.Split ('|');
+				string[] segs = line.Split (SEP_CHAR);
 				name = segs [1];
 				beginIdx = i + 1;
 			} else if (line.StartsWith (END_TOKEN)) {

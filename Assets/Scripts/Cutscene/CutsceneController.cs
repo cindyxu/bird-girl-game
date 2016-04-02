@@ -6,38 +6,35 @@ using Eppy;
 
 public class CutsceneController : MonoBehaviour {
 
-	private List<Eppy.Tuple<Runner, System.Action>> mQueuedRunners = new List<Eppy.Tuple<Runner, System.Action>>();
+	public delegate void OnCutsceneStart(Cutscene cutscene);
+	public OnCutsceneStart onCutsceneStart = delegate(Cutscene cutscene) {};
+	public delegate void OnCutsceneEnd(Cutscene cutscene);
+	public OnCutsceneEnd onCutsceneEnd = delegate(Cutscene cutscene) {};
 
-	public delegate void OnCutsceneStart();
-	public OnCutsceneStart onCutsceneStart = delegate() {};
-	public delegate void OnCutsceneEnd();
-	public OnCutsceneEnd onCutsceneEnd = delegate() {};
+	private List<Eppy.Tuple<Runner, OnCutsceneEnd>> mQueuedRunners = new List<Eppy.Tuple<Runner, OnCutsceneEnd>>();
+
 	private bool mInCutscene = false;
 
 	// Use this for initialization
 	void Start () {
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+	public void OnRunnerFinished() {
+		Runner runner = mQueuedRunners [0].Item1;
+		if (mQueuedRunners [0].Item2 != null) {
+			mQueuedRunners [0].Item2 (runner.GetCutscene ());
+		}
+		mQueuedRunners.RemoveAt (0);
 		if (mQueuedRunners.Count > 0) {
-			if (mQueuedRunners [0].Item1.updateCutscene ()) {
-				if (mQueuedRunners [0].Item2 != null) {
-					mQueuedRunners [0].Item2 ();
-				}
-				mQueuedRunners.RemoveAt (0);
-				if (mQueuedRunners.Count > 0) {
-					StartNextRunner ();
-				} else {
-					mInCutscene = false;
-					onCutsceneEnd ();
-				}
-			};
+			StartNextRunner ();
+		} else {
+			mInCutscene = false;
+			onCutsceneEnd (runner.GetCutscene ());
 		}
 	}
 
-	public void PlayCutscene(Cutscene cutscene, System.Action onFinished = null) {
-		mQueuedRunners.Add (new Eppy.Tuple<Runner, Action>(new Runner(cutscene), onFinished));
+	public void PlayCutscene(Cutscene cutscene, OnCutsceneEnd onFinished = null) {
+		mQueuedRunners.Add (new Eppy.Tuple<Runner, OnCutsceneEnd>(new Runner(cutscene, OnRunnerFinished), onFinished));
 		if (mQueuedRunners.Count == 1) {
 			StartNextRunner ();
 		}
@@ -46,7 +43,7 @@ public class CutsceneController : MonoBehaviour {
 	private void StartNextRunner() {
 		mQueuedRunners [0].Item1.startCutscene ();
 		mInCutscene = true;
-		onCutsceneStart ();
+		onCutsceneStart (mQueuedRunners[0].Item1.GetCutscene ());
 	}
 
 	public bool IsInCutscene() {
@@ -54,42 +51,46 @@ public class CutsceneController : MonoBehaviour {
 	}
 
 	public class Runner {
+
 		private Cutscene mCutscene;
-		private Dictionary<ICutsceneEvent, int> mParentCts;
-		private List<ICutsceneEvent> mRunningEvts = new List<ICutsceneEvent>();
+		private Dictionary<Cutscene.Event, int> mParentCts;
+		private List<Cutscene.Event> mRunningEvts = new List<Cutscene.Event>();
 
-		internal Runner(Cutscene cutscene) {
+		public delegate void OnRunnerFinished();
+		private OnRunnerFinished mOnRunnerFinished;
+
+		public Runner(Cutscene cutscene, OnRunnerFinished onRunnerFinished) {
 			mCutscene = cutscene;
+			mOnRunnerFinished = onRunnerFinished;
 		}
 
-		internal void startCutscene () {
+		public Cutscene GetCutscene () {
+			return mCutscene;
+		}
+
+		public void startCutscene () {
 			mParentCts = getParentCounts (mCutscene);
-			foreach(ICutsceneEvent evt in mCutscene.GetStartingEvents()) {
+			foreach(Cutscene.Event evt in mCutscene.GetStartingEvents()) {
 				mRunningEvts.Add(evt);
-				evt.StartCutscene();
+				evt (onCutsceneFinished);
 			}
 		}
 
-		internal bool updateCutscene () {
-			for (int i = mRunningEvts.Count - 1; i >= 0; i--) {
-				ICutsceneEvent cutsceneEvt = mRunningEvts [i];
-				cutsceneEvt.UpdateCutscene ();
-				if (cutsceneEvt.IsCutsceneDone ()) {
-					cutsceneEvt.FinishCutscene ();
-					parentFinished (cutsceneEvt);
-					mRunningEvts.Remove (cutsceneEvt);
-				}
+		public void onCutsceneFinished(Cutscene.Event cutsceneEvt) {
+			parentFinished (cutsceneEvt);
+			mRunningEvts.Remove (cutsceneEvt);
+			if (mRunningEvts.Count == 0) {
+				mOnRunnerFinished ();
 			}
-			return mRunningEvts.Count == 0;
 		}
 
-		private static Dictionary<ICutsceneEvent, int> getParentCounts(Cutscene cutscene) {
-			Dictionary<ICutsceneEvent, int> parentCts = new Dictionary<ICutsceneEvent, int>();
+		private static Dictionary<Cutscene.Event, int> getParentCounts(Cutscene cutscene) {
+			Dictionary<Cutscene.Event, int> parentCts = new Dictionary<Cutscene.Event, int>();
 
-			foreach (ICutsceneEvent parent in cutscene.GetEvents()) {
-				List<ICutsceneEvent> children = cutscene.GetChildren (parent);
+			foreach (Cutscene.Event parent in cutscene.GetEvents()) {
+				List<Cutscene.Event> children = cutscene.GetChildren (parent);
 				if (children != null) {
-					foreach (ICutsceneEvent child in children) {
+					foreach (Cutscene.Event child in children) {
 						int ct = 0;
 						parentCts.TryGetValue (child, out ct);
 						parentCts[child] = ct + 1;
@@ -99,18 +100,18 @@ public class CutsceneController : MonoBehaviour {
 			return parentCts;
 		}
 
-		private void parentFinished(ICutsceneEvent parentEvt) {
-			List<ICutsceneEvent> dependentEvts = mCutscene.GetChildren(parentEvt);
+		private void parentFinished(Cutscene.Event parentEvt) {
+			List<Cutscene.Event> dependentEvts = mCutscene.GetChildren(parentEvt);
 			if (dependentEvts == null) {
 				return;
 			}
-			foreach (ICutsceneEvent evt in dependentEvts) {
+			foreach (Cutscene.Event evt in dependentEvts) {
 				int ct = 0;
 				mParentCts.TryGetValue (evt, out ct);
 				mParentCts [evt] = ct--;
 				if (ct == 0) {
 					mRunningEvts.Add (evt);
-					evt.StartCutscene ();
+					evt (onCutsceneFinished);
 				}
 			}
 		}

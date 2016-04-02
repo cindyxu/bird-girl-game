@@ -18,10 +18,6 @@ public class IntraDoor : MonoBehaviour {
 		mRigidbody2D = GetComponent<Rigidbody2D> ();
 		mCollider2D = GetComponent<Collider2D> ();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	}
 
 	public Room GetRoom() {
 		return mRoom;
@@ -31,15 +27,15 @@ public class IntraDoor : MonoBehaviour {
 		return mSortingLayerName;
 	}
 
-	public ICutsceneEvent CreateEnterCutsceneEvent(GameObject gameObject) {
-		return new DefaultEnterCutsceneEvent (gameObject, this);
+	public Cutscene.Event CreateEnterCutsceneEvent(GameObject gameObject) {
+		return new DefaultEnterCutsceneEvent (gameObject, this).StartEvent;
 	}
 
-	public ICutsceneEvent CreateLeaveCutsceneEvent(GameObject gameObject) {
-		return new DefaultLeaveCutsceneEvent (gameObject, this);
+	public Cutscene.Event CreateLeaveCutsceneEvent(GameObject gameObject) {
+		return new DefaultLeaveCutsceneEvent (gameObject, this).StartEvent;
 	}
 
-	public class DefaultLeaveCutsceneEvent : ICutsceneEvent {
+	public class DefaultLeaveCutsceneEvent {
 
 		private GameObject mTarget;
 		Rigidbody2D mTargetRigidbody2D;
@@ -56,9 +52,9 @@ public class IntraDoor : MonoBehaviour {
 			mDoor = door;
 		}
 
-		public void StartCutscene() {
+		public void StartEvent(Cutscene.EventFinished callback) {
 			Action onFinished = delegate() {
-				StartDisappear();
+				StartDisappear(StartEvent, callback);
 			};
 			mTargetRigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
 			iTween.MoveTo (mTarget, iTween.Hash (
@@ -70,9 +66,12 @@ public class IntraDoor : MonoBehaviour {
 			));
 		}
 
-		private void StartDisappear() {
+		private void StartDisappear(Cutscene.Event instigator, Cutscene.EventFinished callback) {
 			Action onFinished = delegate() {
-				mFinished = true;
+				mTargetRigidbody2D.constraints = mConstraints;
+				mTargetCollider2D.enabled = false;
+				mTargetCollider2D.enabled = true;
+				callback(instigator);
 			};
 			iTween.FadeTo (mTarget, iTween.Hash (
 				"alpha", 0,
@@ -80,21 +79,9 @@ public class IntraDoor : MonoBehaviour {
 				"oncomplete", onFinished
 			));
 		}
-
-		public void UpdateCutscene() { }
-
-		public bool IsCutsceneDone() {
-			return mFinished;
-		}
-
-		public void FinishCutscene() {
-			mTargetRigidbody2D.constraints = mConstraints;
-			mTargetCollider2D.enabled = false;
-			mTargetCollider2D.enabled = true;
-		}
 	}
 
-	public class DefaultEnterCutsceneEvent : ICutsceneEvent {
+	public class DefaultEnterCutsceneEvent {
 
 		private GameObject mTarget;
 		Rigidbody2D mTargetRigidbody2D;
@@ -102,8 +89,6 @@ public class IntraDoor : MonoBehaviour {
 		private RigidbodyConstraints2D mConstraints;
 
 		private IntraDoor mDoor;
-
-		private bool mFinished;
 
 		public DefaultEnterCutsceneEvent(GameObject target, IntraDoor door) {
 			mTarget = target;
@@ -113,9 +98,9 @@ public class IntraDoor : MonoBehaviour {
 			mDoor = door;
 		}
 
-		public void StartCutscene() {
+		public void StartEvent(Cutscene.EventFinished callback) {
 			Action onFinished = delegate() {
-				StartAppear();
+				StartAppear(StartEvent, callback);
 			};
 			mTargetRigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
 			iTween.FadeTo (mTarget, iTween.Hash (
@@ -130,27 +115,18 @@ public class IntraDoor : MonoBehaviour {
 			));
 		}
 
-		private void StartAppear() {
+		private void StartAppear(Cutscene.Event instigator, Cutscene.EventFinished callback) {
 			Action onFinished = delegate() {
-				mFinished = true;
+				mTargetRigidbody2D.constraints = mConstraints;
+				mTargetCollider2D.enabled = false;
+				mTargetCollider2D.enabled = true;
+				callback(instigator);
 			};
 			iTween.FadeTo (mTarget, iTween.Hash (
 				"alpha", 1,
 				"time", 0.1,
 				"oncomplete", onFinished
 			));
-		}
-
-		public void UpdateCutscene() { }
-
-		public bool IsCutsceneDone() {
-			return mFinished;
-		}
-
-		public void FinishCutscene() {
-			mTargetRigidbody2D.constraints = mConstraints;
-			mTargetCollider2D.enabled = false;
-			mTargetCollider2D.enabled = true;
 		}
 	}
 }

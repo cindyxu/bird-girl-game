@@ -19,15 +19,17 @@ public class IntraDoorTrigger : ActionTrigger {
 		}
 
 		Cutscene.Builder cutsceneBuilder = new Cutscene.Builder ();
-		ICutsceneEvent leaveDoorEvt = mIntraDoor.CreateLeaveCutsceneEvent (traveller.gameObject);
-		ICutsceneEvent transitionEvt = new SimpleCutsceneEvent (delegate() {
+		Cutscene.Event leaveDoorEvt = mIntraDoor.CreateLeaveCutsceneEvent (traveller.gameObject);
+		Cutscene.Event transitionEvt = null;
+		transitionEvt = delegate(Cutscene.EventFinished callback) {
 			traveller.TransportTo(mIntraDoor.destination.GetRoom());
 			Renderer renderer = traveller.GetComponent<Renderer>();
 			if (renderer != null) {
 				renderer.sortingLayerName = mIntraDoor.destination.GetSortingLayerName ();
 			}
-		});
-		ICutsceneEvent enterDoorEvt = mIntraDoor.destination.CreateEnterCutsceneEvent (traveller.gameObject);
+			callback(transitionEvt);
+		};
+		Cutscene.Event enterDoorEvt = mIntraDoor.destination.CreateEnterCutsceneEvent (traveller.gameObject);
 
 		if (leaveDoorEvt != null) {
 			cutsceneBuilder.Play (leaveDoorEvt);

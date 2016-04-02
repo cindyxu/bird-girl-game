@@ -7,7 +7,7 @@ public class DialogueActionTrigger : ActionTrigger {
 
 	public override bool Execute(ActionTriggerer triggerer) {
 		Cutscene.Builder builder = new Cutscene.Builder ();
-		builder.Play (new DialogueCutsceneEvent (GameState.dialogueLibrary.GetDialogue (dialogueName)));
+		builder.Play (new DialogueCutsceneEvent (GameState.dialogueLibrary.GetDialogue (dialogueName)).StartEvent);
 		GameState.cutsceneController.PlayCutscene (builder.Build());
 		return true;
 	}
