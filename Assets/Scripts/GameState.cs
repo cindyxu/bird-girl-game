@@ -11,10 +11,19 @@ public class GameState : MonoBehaviour {
 	public static DialogueLibrary dialogueLibrary;
 	public static KeyBindingManager keybindingManager;
 
+	public GameObject player;
+	private static PlayerRoomController mPlayerRoomController;
+
 	void Awake() {
 		cutsceneController = GetComponent<CutsceneController> ();
 		dialogueLibrary = GetComponent<DialogueLibrary> ();
 		keybindingManager = GetComponent<KeyBindingManager> ();
+
+		mPlayerRoomController = new PlayerRoomController ();
+	}
+
+	void Start() {
+		mPlayerRoomController.SetRoomTraveller (player.GetComponent<Inhabitant> ().GetRoomTraveller ());
 	}
 
 	void Update()

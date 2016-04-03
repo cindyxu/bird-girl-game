@@ -7,7 +7,7 @@ public class Inhabitant : MonoBehaviour {
 
 	private InhabitantController mInhabitantController;
 
-	void Awake() { 
+	void Awake() {
 		mInhabitantController = new HumanoidController (gameObject, startRoom);
 	}
 

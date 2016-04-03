@@ -39,6 +39,9 @@ public class WalkLocomotion : Locomotion {
 	public override void Enable () {
 		isGrounded = (mSortedEdgeCollidable.GetCurrentEdge () != null);
 		mLadderClimber.Reset ();
+
+		mInputCatcher.OnUpRelease ();
+		mInputCatcher.OnDownRelease ();
 	}
 
 	public override void Disable () {
