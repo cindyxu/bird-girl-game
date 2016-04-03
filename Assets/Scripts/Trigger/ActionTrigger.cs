@@ -19,5 +19,5 @@ public abstract class ActionTrigger : MonoBehaviour {
 	}
 
 	public abstract int GetPriority ();
-	public abstract bool Execute(ActionTriggerer triggerer);
+	public abstract bool Execute(GameObject gameObject);
 }

@@ -1,23 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (RoomTraveller))]
+[RequireComponent (typeof (Inhabitant))]
 public class PlayerRoomController : MonoBehaviour {
 
-	private RoomTraveller mRoomTraveller;
+	private Inhabitant mInhabitant;
 
 	// Use this for initialization
 	void Awake () {
-		mRoomTraveller = GetComponent<RoomTraveller> ();
-		mRoomTraveller.onEnterRoom += OnEnterRoom;
-		mRoomTraveller.onLeaveRoom += OnLeaveRoom;
+		mInhabitant = GetComponent<Inhabitant> ();
 	}
 
 	void Start() {
-		foreach (Room room in mRoomTraveller.GetRooms()) {
+		RoomTraveller roomTraveller = mInhabitant.GetRoomTraveller();
+		roomTraveller.onEnterRoom += OnEnterRoom;
+		roomTraveller.onLeaveRoom += OnLeaveRoom;
+
+		foreach (Room room in roomTraveller.GetRooms()) {
 			room.Hide ();
 		}
-		mRoomTraveller.GetCurrentRoom ().Show ();
+		roomTraveller.GetCurrentRoom ().Show ();
 	}
 
 	void OnLeaveRoom(RoomTraveller traveller, Room room) {

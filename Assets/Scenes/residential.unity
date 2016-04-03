@@ -1195,7 +1195,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 11494774, guid: 7574494e9caa7e94084926cf19b9930c, type: 2}
+    - target: {fileID: 0}
+      propertyPath: startRoom
+      value: 
+      objectReference: {fileID: 518904788}
+    - target: {fileID: 11463488, guid: 7574494e9caa7e94084926cf19b9930c, type: 2}
       propertyPath: startRoom
       value: 
       objectReference: {fileID: 518904788}
@@ -2075,9 +2079,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1436413957}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e8d30999cb773c44b050e8e672ba4ec, type: 3}
+  m_Script: {fileID: 11500000, guid: e1cf639f7a51ae64a8e69b375bb576b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  leftKey: 276
+  rightKey: 275
+  upKey: 273
+  downKey: 274
+  jumpKey: 115
+  actionKey: 97
 --- !u!1 &1456415106
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,8 +7,8 @@ public class LadderClimber {
 	private List<Collider2D> mBodyColliders = new List<Collider2D> ();
 	private List<Collider2D> mTopColliders = new List<Collider2D> ();
 
-	private GameObject mGameObject;
-	private Collider2D mCollider2D;
+	private readonly GameObject mGameObject;
+	private readonly Collider2D mCollider2D;
 
 	public LadderClimber (GameObject gameObject) {
 		mGameObject = gameObject;
@@ -32,13 +32,16 @@ public class LadderClimber {
 	}
 
 	public Ladder GetDescendLadder() {
+		Debug.Log (mTopColliders.Count);
 		if (mTopColliders.Count > 0) {
+			Debug.Log (mTopColliders [0].GetComponent<LadderTop> ().ladder);
 			return mTopColliders [0].GetComponent<LadderTop> ().ladder;
 		}
 		return null;
 	}
 
 	public void HandleTriggerStay2D (Collider2D collider2D) {
+		Debug.Log ("handle trigger stay");
 		Ladder ladder = collider2D.GetComponent<Ladder> ();
 		if (ladder != null && !mBodyColliders.Contains (collider2D)) {
 			mBodyColliders.Add (collider2D);

@@ -11,25 +11,26 @@ public class IntraDoorTrigger : ActionTrigger {
 		mIntraDoor = GetComponent<IntraDoor> ();
 	}
 
-	public override bool Execute(ActionTriggerer triggerer) {
+	public override bool Execute(GameObject target) {
 		Debug.Log ("Triggered " + name);
-		RoomTraveller traveller = triggerer.GetComponent<RoomTraveller> ();
-		if (traveller == null) {
+		Inhabitant inhabitant = target.GetComponent<Inhabitant> ();
+		if (inhabitant == null) {
 			return false;
 		}
 
+		RoomTraveller traveller = inhabitant.GetRoomTraveller ();
 		Cutscene.Builder cutsceneBuilder = new Cutscene.Builder ();
-		Cutscene.Event leaveDoorEvt = mIntraDoor.CreateLeaveCutsceneEvent (traveller.gameObject);
+		Cutscene.Event leaveDoorEvt = mIntraDoor.CreateLeaveCutsceneEvent (target);
 		Cutscene.Event transitionEvt = null;
 		transitionEvt = delegate(Cutscene.EventFinished callback) {
 			traveller.TransportTo(mIntraDoor.destination.GetRoom());
-			Renderer renderer = traveller.GetComponent<Renderer>();
+			Renderer renderer = target.GetComponent<Renderer>();
 			if (renderer != null) {
 				renderer.sortingLayerName = mIntraDoor.destination.GetSortingLayerName ();
 			}
 			callback(transitionEvt);
 		};
-		Cutscene.Event enterDoorEvt = mIntraDoor.destination.CreateEnterCutsceneEvent (traveller.gameObject);
+		Cutscene.Event enterDoorEvt = mIntraDoor.destination.CreateEnterCutsceneEvent (target);
 
 		if (leaveDoorEvt != null) {
 			cutsceneBuilder.Play (leaveDoorEvt);

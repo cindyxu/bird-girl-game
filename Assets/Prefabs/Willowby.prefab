@@ -11,14 +11,8 @@ GameObject:
   - 212: {fileID: 21265574}
   - 50: {fileID: 5007442}
   - 61: {fileID: 6166514}
-  - 114: {fileID: 11470520}
-  - 114: {fileID: 11494774}
-  - 114: {fileID: 11404388}
   - 114: {fileID: 11428980}
-  - 114: {fileID: 11461970}
-  - 114: {fileID: 11432536}
-  - 114: {fileID: 11421048}
-  - 114: {fileID: 11482374}
+  - 114: {fileID: 11463488}
   m_Layer: 0
   m_Name: Willowby
   m_TagString: Untagged
@@ -69,31 +63,6 @@ BoxCollider2D:
   m_Offset: {x: 0, y: -0.15}
   serializedVersion: 2
   m_Size: {x: 0.5, y: 0.9}
---- !u!114 &11404388
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 131812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4ab02947da790c458826b27c65a8624, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &11421048
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 131812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92555a35308f0e34d8dca586e9e2b717, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  walkSpeed: 10
-  jumpSpeed: 15
-  maxVelocity: 100
 --- !u!114 &11428980
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -105,20 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b23345491a3e6dd4b9afddaf9d0c1f4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &11432536
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 131812}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b430798756306544daa7503f44b69997, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  climbSpeed: 5
-  slideSpeed: 5
---- !u!114 &11461970
+--- !u!114 &11463488
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -126,41 +82,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 131812}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26548efa9950c734699963b9a3cca12a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &11470520
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 131812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e05e76cbc1e41b745875f7ea9f9f430b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentEdge: {fileID: 0}
---- !u!114 &11482374
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 131812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73cdd575f64188d4ebb01e2860c36974, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &11494774
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 131812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7db830948ae96bd4483e1fd7f6a77264, type: 3}
+  m_Script: {fileID: 11500000, guid: 92912b3036a062940ac2c16aa9c0e392, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   startRoom: {fileID: 0}

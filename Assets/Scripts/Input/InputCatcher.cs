@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class InputCatcher : MonoBehaviour {
+public class InputCatcher {
 
 	private bool mLeftPress;
 	private bool mLeft;
@@ -14,7 +14,7 @@ public class InputCatcher : MonoBehaviour {
 	private bool mJumpPress;
 	private bool mActionPress;
 
-	void Update() {
+	public void ResetPresses() {
 		mLeftPress = false;
 		mRightPress = false;
 		mUpPress = false;
@@ -23,64 +23,64 @@ public class InputCatcher : MonoBehaviour {
 		mActionPress = false;
 	}
 
-	public void onLeftPress() {
+	public void OnLeftPress() {
 		mLeftPress = mLeft = true;
 	}
 
-	public void onLeftRelease() {
+	public void OnLeftRelease() {
 		mLeft = false;
 	}
 
-	public void onRightPress() {
+	public void OnRightPress() {
 		mRightPress = mRight = true;
 	}
 
-	public void onRightRelease() {
+	public void OnRightRelease() {
 		mRight = false;
 	}
 
-	public void onUpPress() {
+	public void OnUpPress() {
 		mUpPress = mUp = true;
 	}
 
-	public void onUpRelease() {
+	public void OnUpRelease() {
 		mUp = false;
 	}
 
-	public void onDownPress() {
+	public void OnDownPress() {
 		mDownPress = mDown = true;
 	}
 
-	public void onDownRelease() {
+	public void OnDownRelease() {
 		mDown = false;
 	}
 
-	public void onJumpPress() {
+	public void OnJumpPress() {
 		mJumpPress = true;
 	}
 
-	public void onActionPress() {
+	public void OnActionPress() {
 		mActionPress = true;
 	}
 
-	public bool getLeftPress() { return mLeftPress; }
+	public bool GetLeftPress() { return mLeftPress; }
 
-	public bool getLeft() { return mLeft; }
+	public bool GetLeft() { return mLeft; }
 
-	public bool getRightPress() { return mRightPress; }
+	public bool GetRightPress() { return mRightPress; }
 
-	public bool getRight() { return mRight; }
+	public bool GetRight() { return mRight; }
 
-	public bool getUpPress() { return mUpPress; }
+	public bool GetUpPress() { return mUpPress; }
 
-	public bool getUp() { return mUp; }
+	public bool GetUp() { return mUp; }
 
-	public bool getDownPress() { return mDownPress; }
+	public bool GetDownPress() { return mDownPress; }
 
-	public bool getDown() { return mDown; }
+	public bool GetDown() { return mDown; }
 
-	public bool getJumpPress() { return mJumpPress; }
+	public bool GetJumpPress() { return mJumpPress; }
 
-	public bool getActionPress() { return mActionPress; }
+	public bool GetActionPress() { return mActionPress; }
 
 }

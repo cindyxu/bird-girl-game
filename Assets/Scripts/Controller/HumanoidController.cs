@@ -1,55 +1,50 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (WalkLocomotion))]
-[RequireComponent (typeof (LadderLocomotion))]
-public class HumanoidController : MonoBehaviour {
+public class HumanoidController : InhabitantController {
 
 	private WalkLocomotion mWalkLocomotion;
 	private LadderLocomotion mLadderLocomotion;
 
-	private MonoBehaviour mCurrentLocomotion;
+	private PlayerInputFeeder mPlayerInputFeeder;
+	private AiWalkInputFeeder mAiWalkInputFeeder;
+	private InputFeeder mCurrentInputFeeder;
 
-	void Awake() {
-		mWalkLocomotion = GetComponent<WalkLocomotion> ();
+	public HumanoidController(GameObject gameObject, Room startRoom) : base(gameObject, startRoom) {
+		mWalkLocomotion = new WalkLocomotion (gameObject, pInputCatcher);
 		mWalkLocomotion.onClimbLadder += OnClimbLadder;
 
-		mLadderLocomotion = GetComponent<LadderLocomotion> ();
+		mLadderLocomotion = new LadderLocomotion (gameObject, pInputCatcher, pRoomTraveller);
 		mLadderLocomotion.onLadderEndReached += OnLadderEndReached;
 		mLadderLocomotion.onLadderDismount += OnLadderDismount;
+
+		mPlayerInputFeeder = new PlayerInputFeeder (pInputCatcher);
+		mCurrentInputFeeder = mPlayerInputFeeder;
+		mAiWalkInputFeeder = new AiWalkInputFeeder (gameObject, pInputCatcher);
 	}
 
-	void Start() {
-		StartWalkLocomotion ();
+	protected override Locomotion GetStartLocomotion() {
+		return mWalkLocomotion;
 	}
 
-	private void StartWalkLocomotion() {
-		if (mCurrentLocomotion != null) {
-			mCurrentLocomotion.enabled = false;
-		}
-		mCurrentLocomotion = mWalkLocomotion;
-		mWalkLocomotion.enabled = true;
-	}
-
-	private void StartLadderLocomotion(Ladder ladder) {
-		if (mCurrentLocomotion != null) {
-			mCurrentLocomotion.enabled = false;
-		}
-		mCurrentLocomotion = mLadderLocomotion;
-		mLadderLocomotion.SetLadder (ladder);
-		mLadderLocomotion.enabled = true;
+	protected override void FeedInput() {
+		mCurrentInputFeeder.FeedInput ();
 	}
 
 	void OnClimbLadder(Ladder ladder, int direction) {
-		StartLadderLocomotion (ladder);
+		mLadderLocomotion.SetLadder (ladder);
+		StartLocomotion (mLadderLocomotion);
 	}
 
-	void OnLadderEndReached(int direction) {
-		StartWalkLocomotion ();
+	void OnLadderEndReached(int direction, Room destRoom) {
+		StartLocomotion (mWalkLocomotion);
+		if (destRoom != pRoomTraveller.GetCurrentRoom ()) {
+			pRoomTraveller.TransportTo (destRoom);
+		}
 	}
 
 	void OnLadderDismount (int direction) {
-		StartWalkLocomotion ();
+		StartLocomotion (mWalkLocomotion);
 		mWalkLocomotion.LadderJump (direction);
 	}
 }

@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class RoomTraveller : MonoBehaviour {
+public class RoomTraveller {
     
-	public Room startRoom;
 	private Room mCurrentRoom;
 	private Room[] mRooms;
 
+	private GameObject mGameObject;
+	private Collider2D mCollider2D;
 	private IntraDoor mCurrentDoor;
 
 	public delegate void OnLeaveRoom(RoomTraveller traveller, Room room);
@@ -15,16 +16,18 @@ public class RoomTraveller : MonoBehaviour {
 	public event OnEnterRoom onEnterRoom;
 
 	// Use this for initialization
-	void Awake () {
+	public RoomTraveller (GameObject gameObject, Room startRoom) {
+		mGameObject = gameObject;
+		mCollider2D = mGameObject.GetComponent<Collider2D> ();
 		mRooms = Object.FindObjectsOfType<Room> ();
 		mCurrentRoom = startRoom;
 	}
 
-	void Start() {
+	public void SetupRooms() {
 		foreach (Room room in mRooms) {
-			room.DisableWith (gameObject);
+			room.DisableWith (mGameObject);
 		}
-		mCurrentRoom.EnableWith (gameObject);
+		mCurrentRoom.EnableWith (mGameObject);
 	}
 
 	public Room GetCurrentRoom() {
@@ -38,16 +41,15 @@ public class RoomTraveller : MonoBehaviour {
 	public void TransportTo (Room toRoom) {
 		Debug.Log ("Transport to " + toRoom);
 		Room prevRoom = mCurrentRoom;
-		prevRoom.DisableWith (gameObject);
+		prevRoom.DisableWith (mGameObject);
 		onLeaveRoom (this, prevRoom);
 
 		mCurrentRoom = toRoom;
-		mCurrentRoom.EnableWith (gameObject);
+		mCurrentRoom.EnableWith (mGameObject);
 
-		gameObject.GetComponent<Collider2D> ().enabled = false;
-		gameObject.GetComponent<Collider2D> ().enabled = true;
+		mCollider2D.enabled = false;
+		mCollider2D.enabled = true;
 
 		onEnterRoom (this, mCurrentRoom);
-
     }
 }

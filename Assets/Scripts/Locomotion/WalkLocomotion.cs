@@ -1,21 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (ActionTriggerer))]
-[RequireComponent (typeof (InputCatcher))]
-public class WalkLocomotion : MonoBehaviour {
+public class WalkLocomotion : Locomotion {
 
+	private GameObject mGameObject;
 	private Rigidbody2D mRigidbody2D;
-	private ActionTriggerer mActionTriggerer;
 
 	private LadderClimber mLadderClimber;
 	private SortedEdgeCollidable mSortedEdgeCollidable;
+	private ActionTriggerer mActionTriggerer;
 
 	private InputCatcher mInputCatcher;
 
-	public float walkSpeed;
-	public float jumpSpeed;
-	public float maxVelocity;
+	private float mWalkSpeed = 12;
+	private float mJumpSpeed = 12;
+	private float mMaxVelocity = 100;
 	private bool isGrounded = false;
 
 	public delegate void OnClimbLadder(Ladder ladder, int direction);
@@ -24,43 +23,39 @@ public class WalkLocomotion : MonoBehaviour {
 	private delegate void MovementOverride();
 	private MovementOverride movementOverride;
 
-	void Awake () {
-		mRigidbody2D = GetComponent<Rigidbody2D> ();
-		mActionTriggerer = GetComponent<ActionTriggerer> ();
-		mInputCatcher = GetComponent<InputCatcher> ();
+	public WalkLocomotion (GameObject gameObject, InputCatcher inputCatcher) {
+		mGameObject = gameObject;
+		mRigidbody2D = mGameObject.GetComponent<Rigidbody2D> ();
+
+		mInputCatcher = inputCatcher;
 
 		mSortedEdgeCollidable = new SortedEdgeCollidable (gameObject);
 		mLadderClimber = new LadderClimber (gameObject);
-	}
+		mActionTriggerer = new ActionTriggerer (gameObject);
 
-	void Start () {
 		mSortedEdgeCollidable.onSortedEdgeChanged += OnSortedEdgeChanged;
 	}
 
-	void OnEnable () {
+	public override void Enable () {
 		isGrounded = (mSortedEdgeCollidable.GetCurrentEdge () != null);
 		mLadderClimber.Reset ();
 	}
 
-	public void LadderJump (int direction) {
-		movementOverride += delegate {
-			mRigidbody2D.velocity = new Vector2 (walkSpeed * direction, jumpSpeed / 2f);
-		};
+	public override void Disable () {
 	}
 
-	void Update () {
+	public override void HandleUpdate () {
 		Vector2 velocity = new Vector2 (0, mRigidbody2D.velocity.y);
-		Debug.Log (mInputCatcher.getJumpPress());
-		if (mInputCatcher.getLeft()) {
-			velocity.x -= walkSpeed;
+		if (mInputCatcher.GetLeft()) {
+			velocity.x -= mWalkSpeed;
 		}
-		if (mInputCatcher.getRight()) {
-			velocity.x += walkSpeed;
+		if (mInputCatcher.GetRight()) {
+			velocity.x += mWalkSpeed;
 		}
-		if (mInputCatcher.getJumpPress() && isGrounded) {
-			velocity.y = jumpSpeed;
+		if (mInputCatcher.GetJumpPress() && isGrounded) {
+			velocity.y = mJumpSpeed;
 		}
-		velocity.y = Mathf.Max (velocity.y, -maxVelocity);
+		velocity.y = Mathf.Max (velocity.y, -mMaxVelocity);
 		mRigidbody2D.velocity = velocity;
 
 		if (movementOverride != null) {
@@ -68,33 +63,45 @@ public class WalkLocomotion : MonoBehaviour {
 		}
 		movementOverride = null;
 
-		if (mInputCatcher.getActionPress() && mActionTriggerer.TryTrigger ()) {
+		if (mInputCatcher.GetActionPress() && mActionTriggerer.TryTrigger ()) {
 			return;
 		} 
-		if (mInputCatcher.getUp()) {
+		if (mInputCatcher.GetUp()) {
 			Ladder ascendLadder = mLadderClimber.GetAscendLadder ();
 			if (ascendLadder != null) onClimbLadder (ascendLadder, 1);
 		}
-		if (mInputCatcher.getDownPress() && isGrounded) {
+		if (mInputCatcher.GetDownPress() && isGrounded) {
 			Ladder descendLadder = mLadderClimber.GetDescendLadder ();
 			if (descendLadder != null) onClimbLadder (descendLadder, -1);
 		}
 	}
 
-	void OnCollisionEnter2D (Collision2D collision) {
+	public override void HandleFixedUpdate() {
+		mActionTriggerer.RemoveInvalidTriggers ();
+	}
+
+	public override void HandleCollisionEnter2D (Collision2D collision) {
 		mSortedEdgeCollidable.HandleCollisionEnter2D (collision);
 	}
 
-	void OnCollisionExit2D (Collision2D collision) {
+	public override void HandleCollisionExit2D (Collision2D collision) {
 		mSortedEdgeCollidable.HandleCollisionExit2D (collision);
 	}
 
-	void OnTriggerStay2D (Collider2D collider) {
+	public override void HandleTriggerStay2D (Collider2D collider) {
+		mActionTriggerer.HandleTriggerStay2D (collider);
 		mLadderClimber.HandleTriggerStay2D (collider);
 	}
 
-	void OnTriggerExit2D (Collider2D collider) {
+	public override void HandleTriggerExit2D (Collider2D collider) {
+		mActionTriggerer.HandleTriggerExit2D (collider);
 		mLadderClimber.HandleTriggerExit2D (collider);
+	}
+
+	public void LadderJump (int direction) {
+		movementOverride += delegate {
+			mRigidbody2D.velocity = new Vector2 (mWalkSpeed * direction, mJumpSpeed / 2f);
+		};
 	}
 
 	void OnSortedEdgeChanged (SortedEdge sortedEdge) {
