@@ -41,8 +41,7 @@ public class LadderClimber {
 	}
 
 	public void HandleTriggerStay2D (Collider2D collider2D) {
-		Debug.Log ("handle trigger stay");
-		Ladder ladder = collider2D.GetComponent<Ladder> ();
+		Ladder ladder = collider2D.GetComponentInParent<Ladder> ();
 		if (ladder != null && !mBodyColliders.Contains (collider2D)) {
 			mBodyColliders.Add (collider2D);
 			mBodyColliders.Sort (CompareLadderColliders);

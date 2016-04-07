@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Collections;
+using UnityEngine;
 
 public class CutsceneFactory {
 
-	public delegate System.Object RetrieveObject(System.Object[] passedParams);
-	public delegate Cutscene.Event BuildEvent(System.Object[] passedParams);
+	public delegate object RetrieveObject(object[] passedParams);
+	public delegate Cutscene.Event BuildEvent(object[] passedParams);
 
 	private Dictionary<string, BuildEvent> mBuildEvents = new Dictionary<string, BuildEvent> ();
 	private Dictionary<string, string[]> mAfterEvents = new Dictionary<string, string[]> ();
@@ -15,8 +16,8 @@ public class CutsceneFactory {
 			argRetrievers [i] = CutsceneParser.GetRetriever (actionParams [i]);
 		}
 
-		BuildEvent buildEvent = delegate(System.Object[] goParams) {
-			System.Object[] eventParamObjs = new System.Object[actionParams.Length];
+		BuildEvent buildEvent = delegate(object[] goParams) {
+			object[] eventParamObjs = new object[actionParams.Length];
 			for (int i = 0; i < actionParams.Length; i++) {
 				eventParamObjs [i] = argRetrievers [i] (goParams);
 			}
@@ -24,16 +25,19 @@ public class CutsceneFactory {
 		};
 
 		mBuildEvents [name] = buildEvent;
-		mAfterEvents [name] = afterEvents;
+		if (afterEvents != null) {
+			mAfterEvents [name] = afterEvents;
+		}
 	}
 
-	public Cutscene BuildCutscene(params System.Object[] cutsceneParams) {
+	public Cutscene BuildCutscene(params object[] cutsceneParams) {
 		Cutscene.Builder cutsceneBuilder = new Cutscene.Builder ();
 
 		Dictionary<string, Cutscene.Event> events = new Dictionary<string, Cutscene.Event> ();
 		foreach (KeyValuePair<string, BuildEvent> pair in mBuildEvents) {
 			string name = pair.Key;
 			BuildEvent buildEvent = pair.Value;
+			Debug.Log ("event " + name);
 			events [name] = buildEvent (cutsceneParams);
 		}
 
@@ -44,6 +48,7 @@ public class CutsceneFactory {
 			bool success = mAfterEvents.TryGetValue (pair.Key, out parentNames);
 			if (success) {
 				Cutscene.Event[] parents = new Cutscene.Event[parentNames.Length];
+				Debug.Log (pair.Key + " parents " + string.Join(",", parentNames));
 				for (int i = 0; i < parents.Length; i++) {
 					parents [i] = events [parentNames [i]];
 				}

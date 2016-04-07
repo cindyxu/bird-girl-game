@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-public class DialogueLibrary : MonoBehaviour {
+public class DialogueLibrary {
 
-	public string prefix;
+	public string prefix = "Dialogue";
 	private static Dictionary<string, Dialogue> mDialogues = new Dictionary<string, Dialogue> ();
 	private static Dictionary<string, DialogueBox> mDialogueBoxes = new Dictionary<string, DialogueBox> ();
 
@@ -13,8 +13,8 @@ public class DialogueLibrary : MonoBehaviour {
 	private const string END_TOKEN = "}";
 	private const char SEP_CHAR = '\t';
 
-	void Awake () {
-		loadLibraryJson ();
+	public DialogueLibrary() {
+		loadLibraryTxt ();
 		findDialogueBoxes ();
 	}
 
@@ -27,7 +27,7 @@ public class DialogueLibrary : MonoBehaviour {
 	}
 
 	private void findDialogueBoxes() {
-		DialogueBox[] boxes = FindObjectsOfType<DialogueBox> ();
+		DialogueBox[] boxes = GameObject.FindObjectsOfType<DialogueBox> ();
 		foreach (DialogueBox box in boxes) {
 			mDialogueBoxes.Add (box.characterName, box);
 		}
@@ -41,6 +41,7 @@ public class DialogueLibrary : MonoBehaviour {
 			TextAsset asset = Resources.Load<TextAsset> (prefix + "/" + extLessName);
 			List<string> lines = new List<string> ();
 			lines.AddRange (asset.text.Split (new string[] {"\n", "\r\n"}, System.StringSplitOptions.RemoveEmptyEntries));
+			parseDialogueTxt (lines);
 		}
 		Debug.Log ("Added " + info.Length + " dialogues");
 	}

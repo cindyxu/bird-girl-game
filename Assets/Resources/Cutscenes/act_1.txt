@@ -1,0 +1,29 @@
+{ intro
+willowby_getting_ready
+dialogue willowby_getting_ready
+
+mom_enters
+walk_to %GMom %f0.5 %f0
+willowby_getting_ready
+mom_intro
+dialogue mom_intro
+mom_enters
+willowby_walks_closer
+walk_to %GWillowby %f-0.2 %f0
+mom_intro
+mom_walks_closer
+walk_to %GMom %f0 %f0
+mom_intro
+willowby_mom_hug_pause
+wait %f0.8
+willowby_walks_closer mom_walks_closer
+willowby_parts
+walk_to %GWillowby %f-0.7 %f0
+willowby_mom_hug_pause
+mom_parts
+walk_to %GMom %f0.5 %f0
+willowby_mom_hug_pause
+willowby_departs
+dialogue willowby_departs
+willowby_parts mom_parts
+}

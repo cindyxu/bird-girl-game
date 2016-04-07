@@ -4,12 +4,12 @@ using System;
 public abstract class InhabitantController {
 
 	private Locomotion mCurrentLocomotion;
+	protected readonly GameObject pGameObject;
 	protected readonly RoomTraveller pRoomTraveller;
-	protected readonly InputCatcher pInputCatcher;
 
 	public InhabitantController(GameObject gameObject, Room startRoom) {
+		pGameObject = gameObject;
 		pRoomTraveller = new RoomTraveller (gameObject, startRoom);
-		pInputCatcher = new InputCatcher ();
 	}
 
 	protected abstract Locomotion GetStartLocomotion();
@@ -18,6 +18,14 @@ public abstract class InhabitantController {
 
 	public RoomTraveller GetRoomTraveller() {
 		return pRoomTraveller;
+	}
+
+	public virtual bool RequestMoveTo(string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
+		return false;
+	}
+
+	public virtual bool EnablePlayerInput(bool enabled) {
+		return false;
 	}
 
 	protected void StartLocomotion(Locomotion locomotion) {
@@ -37,7 +45,6 @@ public abstract class InhabitantController {
 	}
 
 	public void HandleUpdate() {
-		pInputCatcher.ResetPresses ();
 		FeedInput ();
 		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleUpdate ();
 	}

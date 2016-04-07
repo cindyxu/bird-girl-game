@@ -11,9 +11,8 @@ GameObject:
   - 212: {fileID: 21265574}
   - 50: {fileID: 5007442}
   - 61: {fileID: 6166514}
-  - 114: {fileID: 11428980}
   - 114: {fileID: 11463488}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Willowby
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -63,17 +62,6 @@ BoxCollider2D:
   m_Offset: {x: 0, y: -0.15}
   serializedVersion: 2
   m_Size: {x: 0.5, y: 0.9}
---- !u!114 &11428980
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 131812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b23345491a3e6dd4b9afddaf9d0c1f4a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &11463488
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -85,7 +73,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92912b3036a062940ac2c16aa9c0e392, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startRoom: {fileID: 0}
 --- !u!212 &21265574
 SpriteRenderer:
   m_ObjectHideFlags: 1

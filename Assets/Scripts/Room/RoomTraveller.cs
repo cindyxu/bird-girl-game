@@ -25,9 +25,9 @@ public class RoomTraveller {
 
 	public void SetupRooms() {
 		foreach (Room room in mRooms) {
-			room.DisableWith (mGameObject);
+			room.Exit (mGameObject);
 		}
-		mCurrentRoom.EnableWith (mGameObject);
+		mCurrentRoom.Enter (mGameObject);
 	}
 
 	public Room GetCurrentRoom() {
@@ -41,11 +41,11 @@ public class RoomTraveller {
 	public void TransportTo (Room toRoom) {
 		Debug.Log ("Transport to " + toRoom);
 		Room prevRoom = mCurrentRoom;
-		prevRoom.DisableWith (mGameObject);
+		prevRoom.Exit (mGameObject);
 		onLeaveRoom (this, prevRoom);
 
 		mCurrentRoom = toRoom;
-		mCurrentRoom.EnableWith (mGameObject);
+		mCurrentRoom.Enter (mGameObject);
 
 		mCollider2D.enabled = false;
 		mCollider2D.enabled = true;

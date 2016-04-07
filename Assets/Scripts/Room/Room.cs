@@ -22,7 +22,7 @@ public class Room : MonoBehaviour {
 		return mSortedEdges;
 	}
 
-	public void EnableWith(GameObject obj) {
+	public void Enter(GameObject obj) {
 		Collider2D objCollider2D = obj.GetComponent<Collider2D> ();
 		foreach (SortedEdge surface in mSortedEdges) {
 			Physics2D.IgnoreCollision (objCollider2D, surface.GetComponent<Collider2D> (), false);
@@ -38,7 +38,7 @@ public class Room : MonoBehaviour {
 		}
 	}
 
-	public void DisableWith(GameObject obj) {
+	public void Exit(GameObject obj) {
 		Collider2D objCollider2D = obj.GetComponent<Collider2D> ();
 		foreach (SortedEdge surface in mSortedEdges) {
 			Physics2D.IgnoreCollision (objCollider2D, surface.GetComponent<Collider2D> ());
@@ -54,17 +54,17 @@ public class Room : MonoBehaviour {
 		}
 	}
 
-	public void Hide() {
+	public void Hide(float time = 0.03f) {
 		iTween.FadeTo(gameObject, iTween.Hash(
 			"alpha", 0,
-			"speed", 0.5
+			"time", time
 		));
 	}
 
-	public void Show() {
+	public void Show(float time = 0.03f) {
 		iTween.FadeTo(gameObject, iTween.Hash(
 			"alpha", 1,
-			"speed", 0.5
+			"time", time
 		));
 	}
 }

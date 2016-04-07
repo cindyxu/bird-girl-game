@@ -5,34 +5,34 @@ using System.Collections.Generic;
 using System.IO;
 using Fungus;
 
-public class CutsceneLibrary : MonoBehaviour {
+public class CutsceneLibrary {
 
-	public string prefix;
+	public string prefix = "Cutscenes";
 	private Dictionary<string, CutsceneFactory> mFactories = new Dictionary<string, CutsceneFactory> ();
 
 	private const string BEGIN_TOKEN = "{";
 	private const string END_TOKEN = "}";
 	private const char SEP_CHAR = '\t';
 
-	public Cutscene BuildCutscene(string name, params System.Object[] cutsceneParams) {
-		return mFactories [name].BuildCutscene (cutsceneParams);
-	}
-
-	void Awake() {
+	public CutsceneLibrary() {
 		DirectoryInfo directoryInfo = new DirectoryInfo ("Assets/Resources/" + prefix);
-		FileInfo[] info = directoryInfo.GetFiles ("*.json");
+		FileInfo[] info = directoryInfo.GetFiles ("*.txt");
 		foreach (FileInfo f in info) {
 			string extLessName = Path.GetFileNameWithoutExtension (f.Name);
 			TextAsset asset = Resources.Load<TextAsset> (prefix + "/" + extLessName);
 			string[] lines = asset.text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
 			parseLines (lines);
 		}
-		Debug.Log ("Added " + info.Length + " cutscenes");
+	}
+
+	public Cutscene BuildCutscene(string name, params object[] cutsceneParams) {
+		return mFactories [name].BuildCutscene (cutsceneParams);
 	}
 
 	private void parseLines(string[] lines) {
 		string name = null;
 		int beginIdx = -1;
+		int cutsceneCt = 0;
 		for (int i = 0; i < lines.Length; i++) {
 			if (lines [i].StartsWith (BEGIN_TOKEN)) {
 				string[] segs = lines [i].Split (null);
@@ -42,8 +42,10 @@ public class CutsceneLibrary : MonoBehaviour {
 				string[] cutsceneLines = new string[i - beginIdx];
 				Array.ConstrainedCopy (lines, beginIdx, cutsceneLines, 0, cutsceneLines.Length);
 				addCutscene (name, cutsceneLines);
+				cutsceneCt++;
 			}
 		}
+		Debug.Log ("Added " + cutsceneCt + " cutscenes");
 	}
 
 	private void addCutscene(string name, string[] lines) {
@@ -51,9 +53,7 @@ public class CutsceneLibrary : MonoBehaviour {
 	}
 
 	private CutsceneFactory parseCutscene(string[] lines) {
-
 		CutsceneFactory factory = new CutsceneFactory ();
-
 		for (int i = 0; i < lines.Length; i+=3) {
 			string name = lines [i];
 			string action = lines [i+1];
@@ -62,13 +62,11 @@ public class CutsceneLibrary : MonoBehaviour {
 			string[] actionSegs = action.Split (null);
 			string[] actionParams = new string[actionSegs.Length - 1];
 			Array.ConstrainedCopy (actionSegs, 1, actionParams, 0, actionParams.Length);
-			string[] afterEvents = after.Split (null);
+			string[] afterEvents = (string.IsNullOrEmpty(after) ? null : after.Split (null));
 
-			factory.AddEvent (name, actionParams [0], actionParams, afterEvents);
+			factory.AddEvent (name, actionSegs [0], actionParams, afterEvents);
 		}
 
 		return factory;
 	}
-
-
 }

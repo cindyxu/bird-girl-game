@@ -108,7 +108,7 @@ public class CutsceneController : MonoBehaviour {
 			foreach (Cutscene.Event evt in dependentEvts) {
 				int ct = 0;
 				mParentCts.TryGetValue (evt, out ct);
-				mParentCts [evt] = ct--;
+				mParentCts [evt] = --ct;
 				if (ct == 0) {
 					mRunningEvts.Add (evt);
 					evt (onCutsceneFinished);

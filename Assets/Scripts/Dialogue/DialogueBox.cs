@@ -12,7 +12,7 @@ public class DialogueBox : MonoBehaviour {
 	private Writer mWriter;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		mWriter = GetComponent<Writer> ();
 		buildPortraits ();
 	}

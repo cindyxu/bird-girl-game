@@ -3,24 +3,52 @@ using System.Collections;
 
 public class HumanoidController : InhabitantController {
 
-	private WalkLocomotion mWalkLocomotion;
-	private LadderLocomotion mLadderLocomotion;
+	private readonly WalkLocomotion mWalkLocomotion;
+	private readonly LadderLocomotion mLadderLocomotion;
 
-	private PlayerInputFeeder mPlayerInputFeeder;
-	private AiWalkInputFeeder mAiWalkInputFeeder;
+	private readonly InputCatcher mInputCatcher;
+
 	private InputFeeder mCurrentInputFeeder;
 
 	public HumanoidController(GameObject gameObject, Room startRoom) : base(gameObject, startRoom) {
-		mWalkLocomotion = new WalkLocomotion (gameObject, pInputCatcher);
+		mInputCatcher = new InputCatcher ();
+
+		mWalkLocomotion = new WalkLocomotion (gameObject, mInputCatcher);
 		mWalkLocomotion.onClimbLadder += OnClimbLadder;
 
-		mLadderLocomotion = new LadderLocomotion (gameObject, pInputCatcher, pRoomTraveller);
+		mLadderLocomotion = new LadderLocomotion (gameObject, mInputCatcher, pRoomTraveller);
 		mLadderLocomotion.onLadderEndReached += OnLadderEndReached;
 		mLadderLocomotion.onLadderDismount += OnLadderDismount;
 
-		mPlayerInputFeeder = new PlayerInputFeeder (pInputCatcher);
-		mCurrentInputFeeder = mPlayerInputFeeder;
-		mAiWalkInputFeeder = new AiWalkInputFeeder (gameObject, pInputCatcher);
+		mCurrentInputFeeder = new AiInputFeeder (gameObject, mInputCatcher);
+	}
+
+	public override bool RequestMoveTo(string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
+		switch (locomotion) {
+			case "walk":
+				mWalkLocomotion.SetSpeed (1);
+				InputFeeder lastFeeder = mCurrentInputFeeder;
+				AiInputFeeder followFeeder = new AiInputFeeder (pGameObject, mInputCatcher);
+				AiInputFeeder.OnReachDestination onReachDestination = delegate {
+					mWalkLocomotion.SetSpeed (2);
+					mCurrentInputFeeder = lastFeeder;
+					callback ();
+				};
+				followFeeder.SetDest (getDest, onReachDestination);
+				mCurrentInputFeeder = followFeeder;
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public override bool EnablePlayerInput(bool enable) {
+		if (enable && !(mCurrentInputFeeder is PlayerInputFeeder)) {
+			mCurrentInputFeeder = new PlayerInputFeeder (mInputCatcher);
+		} else if (!enable && !(mCurrentInputFeeder is AiInputFeeder)) {
+			mCurrentInputFeeder = new AiInputFeeder (pGameObject, mInputCatcher);
+		}
+		return true;
 	}
 
 	protected override Locomotion GetStartLocomotion() {
@@ -28,6 +56,7 @@ public class HumanoidController : InhabitantController {
 	}
 
 	protected override void FeedInput() {
+		mInputCatcher.ResetPresses ();
 		mCurrentInputFeeder.FeedInput ();
 	}
 

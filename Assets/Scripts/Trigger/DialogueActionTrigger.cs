@@ -7,7 +7,14 @@ public class DialogueActionTrigger : ActionTrigger {
 
 	public override bool Execute(GameObject gameObject) {
 		Cutscene.Builder builder = new Cutscene.Builder ();
-		builder.Play (new DialogueCutsceneEvent (GameState.dialogueLibrary.GetDialogue (dialogueName)).StartEvent);
+		Dialogue dialogue = GameState.dialogueLibrary.GetDialogue (dialogueName);
+		Cutscene.Event cutsceneEvent = null;
+		cutsceneEvent = delegate(Cutscene.EventFinished callback) {
+			GameState.dialogueController.StartDialogueEvent (dialogue, delegate {
+				callback (cutsceneEvent);
+			});
+		};
+		builder.Play (cutsceneEvent);
 		GameState.cutsceneController.PlayCutscene (builder.Build());
 		return true;
 	}

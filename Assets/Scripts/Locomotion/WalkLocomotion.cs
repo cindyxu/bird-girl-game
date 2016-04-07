@@ -12,7 +12,7 @@ public class WalkLocomotion : Locomotion {
 
 	private InputCatcher mInputCatcher;
 
-	private float mWalkSpeed = 12;
+	private float mWalkSpeed = 8;
 	private float mJumpSpeed = 12;
 	private float mMaxVelocity = 100;
 	private bool isGrounded = false;
@@ -45,6 +45,11 @@ public class WalkLocomotion : Locomotion {
 	}
 
 	public override void Disable () {
+	}
+
+	public void SetSpeed(int speed) {
+		if (speed == 1) mWalkSpeed = 2;
+		else mWalkSpeed = 8;
 	}
 
 	public override void HandleUpdate () {

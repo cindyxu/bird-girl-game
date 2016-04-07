@@ -17,9 +17,6 @@ public class Ladder : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		leftCollider.GetComponent<Renderer> ().enabled = false;
-		rightCollider.GetComponent<Renderer> ().enabled = false;
-		bottomCollider.GetComponent<Renderer> ().enabled = false;
 	}
 
 	public void EnableClimbable(Collider2D targetCollider, bool climbable) {

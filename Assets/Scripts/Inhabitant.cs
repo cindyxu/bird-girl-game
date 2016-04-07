@@ -3,20 +3,40 @@ using System.Collections;
 
 public class Inhabitant : MonoBehaviour {
 
-	public Room startRoom;
-
+	private Collider2D mCollider2D;
 	private InhabitantController mInhabitantController;
 
-	void Awake() {
-		mInhabitantController = new HumanoidController (gameObject, startRoom);
+	public delegate void OnCmdFinished();
+
+	public delegate Vector2 GetDest();
+	public bool RequestMoveTo (string locomotion, GetDest getDest, Inhabitant.OnCmdFinished callback) {
+		return mInhabitantController.RequestMoveTo (locomotion, getDest, callback);
+	}
+
+	public bool EnablePlayerInput(bool enabled) {
+		return mInhabitantController.EnablePlayerInput (enabled);
 	}
 
 	public RoomTraveller GetRoomTraveller() {
 		return mInhabitantController.GetRoomTraveller();
 	}
 
+	void Awake() {
+		Room startRoom = GetComponentInParent<Room> ();
+		mInhabitantController = new HumanoidController (gameObject, startRoom);
+		mCollider2D = GetComponent<Collider2D> ();
+	}
+
 	void Start() {
+		IgnoreCollisions ();
 		if (mInhabitantController != null) mInhabitantController.HandleStart ();
+	}
+
+	private void IgnoreCollisions() {
+		Inhabitant[] inhabitants = GameObject.FindObjectsOfType<Inhabitant> ();
+		foreach (Inhabitant inhabitant in inhabitants) {
+			Physics2D.IgnoreCollision (inhabitant.GetComponent<Collider2D> (), mCollider2D);
+		}
 	}
 
 	void Update() {
