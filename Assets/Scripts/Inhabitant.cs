@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Inhabitant : MonoBehaviour {
 
+	public Room startRoom;
+
 	private Collider2D mCollider2D;
 	private InhabitantController mInhabitantController;
 
@@ -17,12 +19,15 @@ public class Inhabitant : MonoBehaviour {
 		return mInhabitantController.EnablePlayerInput (enabled);
 	}
 
+	public void Reset () {
+		mInhabitantController.Reset ();
+	}
+
 	public RoomTraveller GetRoomTraveller() {
 		return mInhabitantController.GetRoomTraveller();
 	}
 
 	void Awake() {
-		Room startRoom = GetComponentInParent<Room> ();
 		mInhabitantController = new HumanoidController (gameObject, startRoom);
 		mCollider2D = GetComponent<Collider2D> ();
 	}

@@ -3,15 +3,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-[Serializable]
-public class KeyBindingManager : MonoBehaviour {
+public class KeyBindingManager {
 
-	public KeyCode leftKey;
-	public KeyCode rightKey;
-	public KeyCode upKey;
-	public KeyCode downKey;
-	public KeyCode jumpKey;
-	public KeyCode actionKey;
+	public KeyCode leftKey = KeyCode.LeftArrow;
+	public KeyCode rightKey = KeyCode.RightArrow;
+	public KeyCode upKey = KeyCode.UpArrow;
+	public KeyCode downKey = KeyCode.DownArrow;
+	public KeyCode jumpKey = KeyCode.A;
+	public KeyCode actionKey = KeyCode.S;
 
 	public bool GetKeyDown(ActionKey key) {
 		switch (key) {

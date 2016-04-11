@@ -34,8 +34,8 @@ public class LadderClimber {
 	public Ladder GetDescendLadder() {
 		Debug.Log (mTopColliders.Count);
 		if (mTopColliders.Count > 0) {
-			Debug.Log (mTopColliders [0].GetComponent<LadderTop> ().ladder);
-			return mTopColliders [0].GetComponent<LadderTop> ().ladder;
+			Debug.Log (mTopColliders [0].GetComponent<LadderDescend> ().ladder);
+			return mTopColliders [0].GetComponent<LadderDescend> ().ladder;
 		}
 		return null;
 	}
@@ -47,7 +47,7 @@ public class LadderClimber {
 			mBodyColliders.Sort (CompareLadderColliders);
 		
 		} else {
-			LadderTop ladderTop = collider2D.GetComponent<LadderTop> ();
+			LadderDescend ladderTop = collider2D.GetComponent<LadderDescend> ();
 			if (ladderTop != null && !mTopColliders.Contains (collider2D)) {
 				mTopColliders.Add (collider2D);
 				mTopColliders.Sort (CompareLadderColliders);
@@ -61,7 +61,7 @@ public class LadderClimber {
 			mBodyColliders.Remove (collider2D);
 		
 		} else {
-			LadderTop ladderTop = collider2D.GetComponent <LadderTop> ();
+			LadderDescend ladderTop = collider2D.GetComponent <LadderDescend> ();
 			if (ladderTop != null) {
 				mTopColliders.Remove (collider2D);
 			}

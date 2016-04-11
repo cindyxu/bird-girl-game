@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Eppy;
 
-public class CutsceneController : MonoBehaviour {
+public class CutsceneController {
 
 	public delegate void OnCutsceneStart(Cutscene cutscene);
 	public OnCutsceneStart onCutsceneStart = delegate(Cutscene cutscene) {};
@@ -14,10 +14,6 @@ public class CutsceneController : MonoBehaviour {
 	private List<Eppy.Tuple<Runner, OnCutsceneEnd>> mQueuedRunners = new List<Eppy.Tuple<Runner, OnCutsceneEnd>>();
 
 	private bool mInCutscene = false;
-
-	// Use this for initialization
-	void Start () {
-	}
 
 	public void OnRunnerFinished() {
 		Runner runner = mQueuedRunners [0].Item1;

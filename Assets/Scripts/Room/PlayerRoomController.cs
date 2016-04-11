@@ -23,14 +23,20 @@ public class PlayerRoomController {
 		foreach (Room room in mRoomTraveller.GetRooms()) {
 			room.Hide (0f);
 		}
-		mRoomTraveller.GetCurrentRoom ().Show (0f);
+		if (mRoomTraveller.GetCurrentRoom () != null) {
+			mRoomTraveller.GetCurrentRoom ().Show (0f);
+		}
 	}
 
 	void OnLeaveRoom(RoomTraveller traveller, Room room) {
-		room.Hide ();
+		if (room != null) {
+			room.Hide ();
+		}
 	}
 
 	void OnEnterRoom(RoomTraveller traveller, Room room) {
-		room.Show ();
+		if (room != null) {
+			room.Show ();
+		}
 	}
 }

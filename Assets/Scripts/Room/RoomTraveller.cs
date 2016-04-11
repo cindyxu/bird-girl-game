@@ -8,7 +8,8 @@ public class RoomTraveller {
 
 	private GameObject mGameObject;
 	private Collider2D mCollider2D;
-	private IntraDoor mCurrentDoor;
+	private Renderer mRenderer;
+	private IntraDoorTrigger mCurrentDoor;
 
 	public delegate void OnLeaveRoom(RoomTraveller traveller, Room room);
 	public event OnLeaveRoom onLeaveRoom;
@@ -19,6 +20,7 @@ public class RoomTraveller {
 	public RoomTraveller (GameObject gameObject, Room startRoom) {
 		mGameObject = gameObject;
 		mCollider2D = mGameObject.GetComponent<Collider2D> ();
+		mRenderer = mGameObject.GetComponent<Renderer> ();
 		mRooms = Object.FindObjectsOfType<Room> ();
 		mCurrentRoom = startRoom;
 	}
@@ -27,7 +29,9 @@ public class RoomTraveller {
 		foreach (Room room in mRooms) {
 			room.Exit (mGameObject);
 		}
-		mCurrentRoom.Enter (mGameObject);
+		if (mCurrentRoom != null) {
+			mCurrentRoom.Enter (mGameObject);
+		}
 	}
 
 	public Room GetCurrentRoom() {
@@ -38,17 +42,26 @@ public class RoomTraveller {
 		return mRooms;
 	}
 
-	public void TransportTo (Room toRoom) {
+	public void TransportTo (Room toRoom, string sortingLayer) {
 		Debug.Log ("Transport to " + toRoom);
 		Room prevRoom = mCurrentRoom;
-		prevRoom.Exit (mGameObject);
+		if (prevRoom != null) {
+			prevRoom.Exit (mGameObject);
+		}
 		onLeaveRoom (this, prevRoom);
 
 		mCurrentRoom = toRoom;
-		mCurrentRoom.Enter (mGameObject);
 
-		mCollider2D.enabled = false;
-		mCollider2D.enabled = true;
+		if (mCurrentRoom != null) {
+			mCurrentRoom.Enter (mGameObject);
+
+			mCollider2D.enabled = false;
+			mCollider2D.enabled = true;
+
+			if (mRenderer != null) {
+				mRenderer.sortingLayerName = sortingLayer;
+			}
+		}
 
 		onEnterRoom (this, mCurrentRoom);
     }

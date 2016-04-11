@@ -9,14 +9,12 @@ public class Ladder : MonoBehaviour {
 	public Collider2D rightCollider;
 	public Collider2D topCollider;
 	public Collider2D bottomCollider;
+	public LadderDescend descend;
+
 	private Collider2D mCollider2D;
 
 	void Awake () {
 		mCollider2D = GetComponent<Collider2D> ();
-	}
-
-	// Use this for initialization
-	void Start () {
 	}
 
 	public void EnableClimbable(Collider2D targetCollider, bool climbable) {
@@ -30,6 +28,9 @@ public class Ladder : MonoBehaviour {
 	}
 
 	public void EnableClimbing(Collider2D targetCollider, bool climbing) {
+		if (climbing) {
+			Physics2D.IgnoreCollision (targetCollider, mCollider2D, false);
+		}
 		Physics2D.IgnoreCollision (targetCollider, leftCollider, !climbing);
 		Physics2D.IgnoreCollision (targetCollider, rightCollider, !climbing);
 		Physics2D.IgnoreCollision (targetCollider, topCollider, !climbing);

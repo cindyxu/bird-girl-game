@@ -14,7 +14,7 @@ public class LadderLocomotion : Locomotion {
 
 	private Ladder mCurrentLadder;
 
-	public delegate void OnLadderEndReached(int direction, Room destRoom);
+	public delegate void OnLadderEndReached(int direction);
 	public event OnLadderEndReached onLadderEndReached;
 
 	public delegate void OnLadderDismount(int direction);
@@ -39,7 +39,7 @@ public class LadderLocomotion : Locomotion {
 
 		Room room = mCurrentLadder.GetComponentInParent<Room> ();
 		if (room != mRoomTraveller.GetCurrentRoom ()) {
-			mRoomTraveller.TransportTo (room);
+			mRoomTraveller.TransportTo (room, mCurrentLadder.GetComponent<Renderer> ().sortingLayerName);
 		}
 
 		mCurrentLadder.EnableClimbing (mCollider2D, true);
@@ -65,7 +65,7 @@ public class LadderLocomotion : Locomotion {
 
 	public override void HandleTriggerStay2D(Collider2D other) {
 		if (other == mCurrentLadder.bottomCollider && mInputCatcher.GetDown()) {
-			onLadderEndReached (1, mCurrentLadder.GetComponentInParent<Room> ());
+			onLadderEndReached (-1);
 		}
 
 		else if (other == mCurrentLadder.topCollider && mInputCatcher.GetUp()) {
@@ -113,7 +113,12 @@ public class LadderLocomotion : Locomotion {
 		velocity.y = 0;
 		mRigidbody2D.velocity = velocity;
 
-		onLadderEndReached (-1, mCurrentLadder.topCollider.GetComponentInParent<Room> ());
+		Room destRoom = mCurrentLadder.descend.GetComponentInParent<Room> ();
+		if (destRoom != mRoomTraveller.GetCurrentRoom ()) {
+			mRoomTraveller.TransportTo (destRoom, mCurrentLadder.descend.sortingLayerName);
+		}
+
+		onLadderEndReached (1);
 	}
 }
 

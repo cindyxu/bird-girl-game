@@ -13,7 +13,7 @@ public class HumanoidController : InhabitantController {
 	public HumanoidController(GameObject gameObject, Room startRoom) : base(gameObject, startRoom) {
 		mInputCatcher = new InputCatcher ();
 
-		mWalkLocomotion = new WalkLocomotion (gameObject, mInputCatcher);
+		mWalkLocomotion = new WalkLocomotion (gameObject, mInputCatcher, pTriggerer);
 		mWalkLocomotion.onClimbLadder += OnClimbLadder;
 
 		mLadderLocomotion = new LadderLocomotion (gameObject, mInputCatcher, pRoomTraveller);
@@ -21,6 +21,14 @@ public class HumanoidController : InhabitantController {
 		mLadderLocomotion.onLadderDismount += OnLadderDismount;
 
 		mCurrentInputFeeder = new AiInputFeeder (gameObject, mInputCatcher);
+	}
+
+	public override void Reset() {
+		base.Reset ();
+		if (GetCurrentLocomotion () != mWalkLocomotion) {
+			StartLocomotion (mWalkLocomotion);
+		}
+		mWalkLocomotion.Reset ();
 	}
 
 	public override bool RequestMoveTo(string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
@@ -65,11 +73,8 @@ public class HumanoidController : InhabitantController {
 		StartLocomotion (mLadderLocomotion);
 	}
 
-	void OnLadderEndReached(int direction, Room destRoom) {
+	void OnLadderEndReached(int direction) {
 		StartLocomotion (mWalkLocomotion);
-		if (destRoom != pRoomTraveller.GetCurrentRoom ()) {
-			pRoomTraveller.TransportTo (destRoom);
-		}
 	}
 
 	void OnLadderDismount (int direction) {

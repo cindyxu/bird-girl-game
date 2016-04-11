@@ -4,12 +4,15 @@ using System;
 public abstract class InhabitantController {
 
 	private Locomotion mCurrentLocomotion;
+
 	protected readonly GameObject pGameObject;
 	protected readonly RoomTraveller pRoomTraveller;
+	protected readonly Triggerer pTriggerer;
 
 	public InhabitantController(GameObject gameObject, Room startRoom) {
 		pGameObject = gameObject;
 		pRoomTraveller = new RoomTraveller (gameObject, startRoom);
+		pTriggerer = new Triggerer (gameObject);
 	}
 
 	protected abstract Locomotion GetStartLocomotion();
@@ -28,6 +31,11 @@ public abstract class InhabitantController {
 		return false;
 	}
 
+	public virtual void Reset() {
+		pRoomTraveller.TransportTo (null, null);
+		pTriggerer.Reset ();
+	}
+
 	protected void StartLocomotion(Locomotion locomotion) {
 		if (mCurrentLocomotion != null) {
 			mCurrentLocomotion.Disable ();
@@ -36,6 +44,12 @@ public abstract class InhabitantController {
 		if (locomotion != null) {
 			mCurrentLocomotion.Enable ();
 		}
+		pGameObject.GetComponent<Collider2D> ().enabled = false;
+		pGameObject.GetComponent<Collider2D> ().enabled = true;
+	}
+
+	protected Locomotion GetCurrentLocomotion() {
+		return mCurrentLocomotion;
 	}
 
 	public void HandleStart() {
@@ -51,6 +65,7 @@ public abstract class InhabitantController {
 
 	public void HandleFixedUpdate() {
 		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleFixedUpdate ();
+		pTriggerer.RemoveInvalidTriggers ();
 	}
 
 	public void HandleCollisionEnter2D(Collision2D collision) {
@@ -67,14 +82,17 @@ public abstract class InhabitantController {
 
 	public void HandleTriggerEnter2D(Collider2D other) {
 		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleTriggerEnter2D(other);
+		pTriggerer.HandleTriggerEnter2D (other);
 	}
 
 	public void HandleTriggerExit2D(Collider2D other) {
 		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleTriggerExit2D(other);
+		pTriggerer.HandleTriggerExit2D (other);
 	}
 
 	public void HandleTriggerStay2D(Collider2D other) {
 		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleTriggerStay2D(other);
+		pTriggerer.HandleTriggerStay2D (other);
 	}
 }
 

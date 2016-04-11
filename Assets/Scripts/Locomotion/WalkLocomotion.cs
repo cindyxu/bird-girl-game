@@ -8,7 +8,7 @@ public class WalkLocomotion : Locomotion {
 
 	private LadderClimber mLadderClimber;
 	private SortedEdgeCollidable mSortedEdgeCollidable;
-	private ActionTriggerer mActionTriggerer;
+	private Triggerer mTriggerer;
 
 	private InputCatcher mInputCatcher;
 
@@ -23,28 +23,30 @@ public class WalkLocomotion : Locomotion {
 	private delegate void MovementOverride();
 	private MovementOverride movementOverride;
 
-	public WalkLocomotion (GameObject gameObject, InputCatcher inputCatcher) {
+	public WalkLocomotion (GameObject gameObject, InputCatcher inputCatcher, Triggerer triggerer) {
 		mGameObject = gameObject;
 		mRigidbody2D = mGameObject.GetComponent<Rigidbody2D> ();
 
 		mInputCatcher = inputCatcher;
+		mTriggerer = triggerer;
 
 		mSortedEdgeCollidable = new SortedEdgeCollidable (gameObject);
 		mLadderClimber = new LadderClimber (gameObject);
-		mActionTriggerer = new ActionTriggerer (gameObject);
 
 		mSortedEdgeCollidable.onSortedEdgeChanged += OnSortedEdgeChanged;
 	}
 
 	public override void Enable () {
 		isGrounded = (mSortedEdgeCollidable.GetCurrentEdge () != null);
-		mLadderClimber.Reset ();
-
-		mInputCatcher.OnUpRelease ();
-		mInputCatcher.OnDownRelease ();
 	}
 
 	public override void Disable () {
+		Reset ();
+	}
+
+	public void Reset() {
+		mLadderClimber.Reset ();
+		mTriggerer.Reset ();
 	}
 
 	public void SetSpeed(int speed) {
@@ -71,7 +73,7 @@ public class WalkLocomotion : Locomotion {
 		}
 		movementOverride = null;
 
-		if (mInputCatcher.GetActionPress() && mActionTriggerer.TryTrigger ()) {
+		if (mInputCatcher.GetActionPress() && mTriggerer.TryTrigger ()) {
 			return;
 		} 
 		if (mInputCatcher.GetUp()) {
@@ -84,10 +86,6 @@ public class WalkLocomotion : Locomotion {
 		}
 	}
 
-	public override void HandleFixedUpdate() {
-		mActionTriggerer.RemoveInvalidTriggers ();
-	}
-
 	public override void HandleCollisionEnter2D (Collision2D collision) {
 		mSortedEdgeCollidable.HandleCollisionEnter2D (collision);
 	}
@@ -97,12 +95,10 @@ public class WalkLocomotion : Locomotion {
 	}
 
 	public override void HandleTriggerStay2D (Collider2D collider) {
-		mActionTriggerer.HandleTriggerStay2D (collider);
 		mLadderClimber.HandleTriggerStay2D (collider);
 	}
 
 	public override void HandleTriggerExit2D (Collider2D collider) {
-		mActionTriggerer.HandleTriggerExit2D (collider);
 		mLadderClimber.HandleTriggerExit2D (collider);
 	}
 

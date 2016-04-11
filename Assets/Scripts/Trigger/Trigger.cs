@@ -2,22 +2,23 @@
 using System.Collections;
 
 [RequireComponent (typeof (Collider2D))]
-public abstract class ActionTrigger : MonoBehaviour {
+public abstract class Trigger : MonoBehaviour {
 
-	private Collider2D mCollider2D;
+	protected Collider2D pCollider2D;
 
 	public virtual void Awake() {
-		mCollider2D = GetComponent<Collider2D> ();
+		pCollider2D = GetComponent<Collider2D> ();
 	}
 
 	void OnEnable() {
-		mCollider2D.enabled = true;
+		pCollider2D.enabled = true;
 	}
 
 	void OnDisable() {
-		mCollider2D.enabled = false;
+		pCollider2D.enabled = false;
 	}
 
 	public abstract int GetPriority ();
+	public abstract bool IsActionTrigger ();
 	public abstract bool Execute(GameObject gameObject);
 }

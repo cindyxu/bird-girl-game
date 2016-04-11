@@ -1,15 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (IntraDoor))]
-public class IntraDoorTrigger : ActionTrigger {
+public class IntraDoorTrigger : DoorTrigger {
 
-	private IntraDoor mIntraDoor;
-
-	public override void Awake() {
-		base.Awake ();
-		mIntraDoor = GetComponent<IntraDoor> ();
-	}
+	public IntraDoorTrigger destination;
 
 	public override bool Execute(GameObject target) {
 		Debug.Log ("Triggered " + name);
@@ -17,20 +11,15 @@ public class IntraDoorTrigger : ActionTrigger {
 		if (inhabitant == null) {
 			return false;
 		}
-
-		RoomTraveller traveller = inhabitant.GetRoomTraveller ();
 		Cutscene.Builder cutsceneBuilder = new Cutscene.Builder ();
-		Cutscene.Event leaveDoorEvt = mIntraDoor.CreateLeaveCutsceneEvent (target);
+		Cutscene.Event leaveDoorEvt = CreateLeaveCutsceneEvent (target);
 		Cutscene.Event transitionEvt = null;
 		transitionEvt = delegate(Cutscene.EventFinished callback) {
-			traveller.TransportTo(mIntraDoor.destination.GetRoom());
-			Renderer renderer = target.GetComponent<Renderer>();
-			if (renderer != null) {
-				renderer.sortingLayerName = mIntraDoor.destination.GetSortingLayerName ();
-			}
+			RoomTraveller traveller = inhabitant.GetRoomTraveller ();
+			traveller.TransportTo(destination.GetRoom(), destination.GetSortingLayerName ());
 			callback(transitionEvt);
 		};
-		Cutscene.Event enterDoorEvt = mIntraDoor.destination.CreateEnterCutsceneEvent (target);
+		Cutscene.Event enterDoorEvt = destination.CreateEnterCutsceneEvent (target);
 
 		if (leaveDoorEvt != null) {
 			cutsceneBuilder.Play (leaveDoorEvt);
@@ -49,5 +38,4 @@ public class IntraDoorTrigger : ActionTrigger {
 	public override int GetPriority() {
 		return 0;
 	}
-
 }

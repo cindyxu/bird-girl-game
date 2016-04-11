@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class DialogueActionTrigger : ActionTrigger {
+public class DialogueActionTrigger : Trigger {
 
 	public string dialogueName;
 
@@ -21,5 +21,9 @@ public class DialogueActionTrigger : ActionTrigger {
 
 	public override int GetPriority() {
 		return 1;
+	}
+
+	public override bool IsActionTrigger() {
+		return true;
 	}
 }

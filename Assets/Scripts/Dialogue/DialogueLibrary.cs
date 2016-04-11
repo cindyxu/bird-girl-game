@@ -15,7 +15,6 @@ public class DialogueLibrary {
 
 	public DialogueLibrary() {
 		loadLibraryTxt ();
-		findDialogueBoxes ();
 	}
 
 	public DialogueBox GetDialogueBox(string speaker) {
@@ -26,7 +25,7 @@ public class DialogueLibrary {
 		return mDialogues [name];
 	}
 
-	private void findDialogueBoxes() {
+	public void FindDialogueBoxes() {
 		DialogueBox[] boxes = GameObject.FindObjectsOfType<DialogueBox> ();
 		foreach (DialogueBox box in boxes) {
 			mDialogueBoxes.Add (box.characterName, box);
