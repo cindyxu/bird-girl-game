@@ -5,7 +5,17 @@ public class PlayerInputFeeder : InputFeeder {
 
 	public PlayerInputFeeder(InputCatcher inputCatcher) : base(inputCatcher) {}
 
-	public override void FeedInput() {
+	public override void OnBeginInput () {
+		KeyBindingManager kmManager = GameState.keybindingManager;
+		if (kmManager.GetKey (ActionKey.LEFT)) {
+			mInputCatcher.OnLeftPress ();
+		}
+		if (kmManager.GetKey (ActionKey.RIGHT)) {
+			mInputCatcher.OnRightPress ();
+		}
+	}
+
+	public override void FeedInput () {
 		KeyBindingManager kmManager = GameState.keybindingManager;
 
 		if (kmManager.GetKeyDown (ActionKey.LEFT)) {

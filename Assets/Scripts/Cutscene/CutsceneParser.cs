@@ -22,14 +22,72 @@ public class CutsceneParser {
 				del = null; 
 				break;
 		}
-		return delegate(Cutscene.EventFinished callback) {
-			tweenParams["oncomplete"] = callback;
+		Cutscene.Event tweenEvent = null;
+		tweenEvent = delegate(Cutscene.EventFinished callback) {
+			Rigidbody2D rigidbody2D = target.GetComponent<Rigidbody2D> ();
+			RigidbodyConstraints2D prevConstraints = RigidbodyConstraints2D.None;
+			if (rigidbody2D != null && tween.Equals("MoveBy")) {
+				prevConstraints = rigidbody2D.constraints;
+				rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+			}
+			Action onComplete = delegate {
+				if (rigidbody2D != null && tween.Equals("MoveBy")) {
+					rigidbody2D.constraints = prevConstraints;
+				}
+				callback(tweenEvent);
+			};
+			tweenParams["oncomplete"] = onComplete;
+
 			del(target, tweenParams);
 		};
+		return tweenEvent;
 	}
 
 	public static Cutscene.Event BuildCutsceneEvent(string action, object[] eventParamObjs) {
 		switch (action) {
+
+			case "enter": 
+				GameObject enterTargetObj = (GameObject) eventParamObjs [0];
+				GameObject enterDoorObj = (GameObject) eventParamObjs [1];
+				DoorTrigger enterDoor = enterDoorObj.GetComponent<DoorTrigger> ();
+				if (enterDoor != null) {
+					return enterDoor.CreateEnterCutsceneEvent (enterTargetObj);
+				}
+				return null;
+
+			case "exit":
+				GameObject exitTargetObj = (GameObject) eventParamObjs [0];
+				GameObject exitDoorObj = (GameObject) eventParamObjs [1];
+				DoorTrigger exitDoor = exitDoorObj.GetComponent<DoorTrigger> ();
+				if (exitDoor != null) {
+					return exitDoor.CreateLeaveCutsceneEvent (exitTargetObj);
+				}
+				return null;
+
+			case "transport":
+				GameObject transportObj = (GameObject) eventParamObjs [0];
+				GameObject transportRoomObj = (GameObject) eventParamObjs [1];
+				string sortingLayer = (string) eventParamObjs [2];
+				RoomTraveller transportTraveller = transportObj.GetComponent<Inhabitant> ().GetRoomTraveller ();
+				Room transitionRoom = transportRoomObj.GetComponent<Room> ();
+				Cutscene.Event transportEvent = null;
+				transportEvent = delegate(Cutscene.EventFinished onCutsceneEnd) {
+					transportTraveller.TransportTo (transitionRoom, sortingLayer);
+					onCutsceneEnd(transportEvent);
+				};
+				return transportEvent;
+
+			case "teleport":
+				GameObject teleportObj = (GameObject) eventParamObjs [0];
+				float destX = (float) eventParamObjs [1];
+				float destY = (float) eventParamObjs [2];
+				Cutscene.Event teleportEvent = null;
+				teleportEvent = delegate(Cutscene.EventFinished onCutsceneEnd) {
+					teleportObj.transform.position = new Vector2(destX, destY);
+					onCutsceneEnd (teleportEvent);
+				};
+				return teleportEvent;
+
 			case "itween":
 				string tween = (string) eventParamObjs [0];
 				GameObject tweenTarget = (GameObject) eventParamObjs [1];
@@ -42,13 +100,13 @@ public class CutsceneParser {
 				return createITweenCutsceneEvent (tween, tweenTarget, tweenParams);
 
 			case "walk_to":
-				Inhabitant inhabitant = ((GameObject) eventParamObjs [0]).GetComponent<Inhabitant> ();
+				Inhabitant walkInhabitant = ((GameObject) eventParamObjs [0]).GetComponent<Inhabitant> ();
 
 				Vector2 dest = new Vector2 ((float) eventParamObjs [1], (float) eventParamObjs [2]);
 				Inhabitant.GetDest getDest = delegate { return dest; };
 				Cutscene.Event cutsceneEvent = null;
 				cutsceneEvent = delegate(Cutscene.EventFinished callback) {
-					inhabitant.RequestMoveTo("walk", getDest, delegate {
+					walkInhabitant.RequestMoveTo("walk", getDest, delegate {
 						callback (cutsceneEvent);
 					});
 				};

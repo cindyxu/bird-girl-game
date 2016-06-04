@@ -12,9 +12,10 @@ public class WalkLocomotion : Locomotion {
 
 	private InputCatcher mInputCatcher;
 
-	private float mWalkSpeed = 8;
-	private float mJumpSpeed = 12;
-	private float mMaxVelocity = 100;
+	private WalkParams mWalkParams;
+//	private float mWalkSpeed = 10;
+//	private float mJumpSpeed = 12;
+//	private float mMaxVelocity = 100;
 	private bool isGrounded = false;
 
 	public delegate void OnClimbLadder(Ladder ladder, int direction);
@@ -23,7 +24,8 @@ public class WalkLocomotion : Locomotion {
 	private delegate void MovementOverride();
 	private MovementOverride movementOverride;
 
-	public WalkLocomotion (GameObject gameObject, InputCatcher inputCatcher, Triggerer triggerer) {
+	public WalkLocomotion (GameObject gameObject, InputCatcher inputCatcher, 
+		RoomTraveller traveller, Triggerer triggerer, WalkParams walkParams) {
 		mGameObject = gameObject;
 		mRigidbody2D = mGameObject.GetComponent<Rigidbody2D> ();
 
@@ -33,39 +35,38 @@ public class WalkLocomotion : Locomotion {
 		mSortedEdgeCollidable = new SortedEdgeCollidable (gameObject);
 		mLadderClimber = new LadderClimber (gameObject);
 
+		traveller.onLeaveRoom += OnLeaveRoom;
 		mSortedEdgeCollidable.onSortedEdgeChanged += OnSortedEdgeChanged;
+
+		mWalkParams = walkParams;
 	}
 
 	public override void Enable () {
 		isGrounded = (mSortedEdgeCollidable.GetCurrentEdge () != null);
 	}
 
-	public override void Disable () {
-		Reset ();
-	}
-
-	public void Reset() {
+	public void OnLeaveRoom (RoomTraveller traveller, Room room) {
 		mLadderClimber.Reset ();
 		mTriggerer.Reset ();
 	}
 
 	public void SetSpeed(int speed) {
-		if (speed == 1) mWalkSpeed = 2;
-		else mWalkSpeed = 8;
+		if (speed == 1) mWalkParams.walkSpd = 2;
+		else mWalkParams.walkSpd = 8;
 	}
 
 	public override void HandleUpdate () {
 		Vector2 velocity = new Vector2 (0, mRigidbody2D.velocity.y);
 		if (mInputCatcher.GetLeft()) {
-			velocity.x -= mWalkSpeed;
+			velocity.x -= mWalkParams.walkSpd;
 		}
 		if (mInputCatcher.GetRight()) {
-			velocity.x += mWalkSpeed;
+			velocity.x += mWalkParams.walkSpd;
 		}
 		if (mInputCatcher.GetJumpPress() && isGrounded) {
-			velocity.y = mJumpSpeed;
+			velocity.y = mWalkParams.jumpSpd;
 		}
-		velocity.y = Mathf.Max (velocity.y, -mMaxVelocity);
+		velocity.y = Mathf.Max (velocity.y, -mWalkParams.maxVelocity);
 		mRigidbody2D.velocity = velocity;
 
 		if (movementOverride != null) {
@@ -104,7 +105,7 @@ public class WalkLocomotion : Locomotion {
 
 	public void LadderJump (int direction) {
 		movementOverride += delegate {
-			mRigidbody2D.velocity = new Vector2 (mWalkSpeed * direction, mJumpSpeed / 2f);
+			mRigidbody2D.velocity = new Vector2 (mWalkParams.walkSpd * direction, mWalkParams.jumpSpd / 2f);
 		};
 	}
 

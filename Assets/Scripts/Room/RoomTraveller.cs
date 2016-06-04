@@ -26,6 +26,7 @@ public class RoomTraveller {
 	}
 
 	public void SetupRooms() {
+		Debug.Log (mGameObject.name + " is starting in room " + mCurrentRoom);
 		foreach (Room room in mRooms) {
 			room.Exit (mGameObject);
 		}
@@ -43,12 +44,16 @@ public class RoomTraveller {
 	}
 
 	public void TransportTo (Room toRoom, string sortingLayer) {
-		Debug.Log ("Transport to " + toRoom);
-		Room prevRoom = mCurrentRoom;
-		if (prevRoom != null) {
-			prevRoom.Exit (mGameObject);
+		Debug.Log (mGameObject.name + " transport to " + toRoom);
+
+		if (toRoom == mCurrentRoom) {
+			mRenderer.sortingLayerName = sortingLayer;
+			return;
 		}
-		onLeaveRoom (this, prevRoom);
+
+		Room prevRoom = mCurrentRoom;
+		if (prevRoom != null) prevRoom.Exit (mGameObject);
+		if (onLeaveRoom != null) onLeaveRoom (this, prevRoom);
 
 		mCurrentRoom = toRoom;
 
@@ -58,11 +63,9 @@ public class RoomTraveller {
 			mCollider2D.enabled = false;
 			mCollider2D.enabled = true;
 
-			if (mRenderer != null) {
-				mRenderer.sortingLayerName = sortingLayer;
-			}
+			mRenderer.sortingLayerName = sortingLayer;
 		}
 
-		onEnterRoom (this, mCurrentRoom);
+		if (onEnterRoom != null) onEnterRoom (this, mCurrentRoom);
     }
 }

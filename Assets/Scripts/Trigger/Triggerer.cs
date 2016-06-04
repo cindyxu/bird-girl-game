@@ -25,15 +25,6 @@ public class Triggerer {
 		mActionTriggers.Clear ();
 	}
 
-	public void RemoveInvalidTriggers() {
-		for (int i = mActionTriggers.Count-1; i >= 0; i--) {
-			Collider2D triggerCollider2D = mActionTriggers[i].GetComponent<Collider2D> ();
-			if (!triggerCollider2D.enabled || !mCollider2D.bounds.Intersects(triggerCollider2D.bounds)) {
-				mActionTriggers.RemoveAt (i);
-			}
-		}
-	}
-
 	public void HandleTriggerEnter2D(Collider2D collider2D) {
 		Trigger trigger = collider2D.gameObject.GetComponent<Trigger> ();
 		if (trigger != null && !trigger.IsActionTrigger ()) {

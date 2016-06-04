@@ -5,6 +5,7 @@ using Fungus;
 
 public class Room : MonoBehaviour {
 
+	public Renderer backgroundRenderer;
 	private SortedEdge[] mSortedEdges;
 	private Ladder[] mLadders;
 	private LadderDescend[] mLadderTops;
@@ -34,7 +35,7 @@ public class Room : MonoBehaviour {
 			Physics2D.IgnoreCollision (objCollider2D, ladderTop.GetComponent<Collider2D> (), false);
 		}
 		foreach (Trigger trigger in mActionTriggers) {
-			trigger.enabled = true;
+			Physics2D.IgnoreCollision (objCollider2D, trigger.GetComponent<Collider2D> (), false);
 		}
 	}
 
@@ -50,18 +51,18 @@ public class Room : MonoBehaviour {
 			Physics2D.IgnoreCollision (objCollider2D, ladderTop.GetComponent<Collider2D> ());
 		}
 		foreach (Trigger trigger in mActionTriggers) {
-			trigger.enabled = false;
+			Physics2D.IgnoreCollision (objCollider2D, trigger.GetComponent<Collider2D> ());
 		}
 	}
 
-	public void Hide(float time = 0.03f) {
+	public void Hide(float time) {
 		iTween.FadeTo(gameObject, iTween.Hash(
 			"alpha", 0,
 			"time", time
 		));
 	}
 
-	public void Show(float time = 0.03f) {
+	public void Show(float time) {
 		iTween.FadeTo(gameObject, iTween.Hash(
 			"alpha", 1,
 			"time", time

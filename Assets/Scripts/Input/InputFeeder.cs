@@ -8,6 +8,7 @@ public abstract class InputFeeder {
 		mInputCatcher = inputCatcher;
 	}
 
+	public abstract void OnBeginInput();
 	public abstract void FeedInput();
 }
 

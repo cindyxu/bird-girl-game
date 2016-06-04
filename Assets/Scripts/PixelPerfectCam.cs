@@ -18,7 +18,9 @@ public class PixelPerfectCam : MonoBehaviour {
 	/**
 	 * A game object that the camera will follow the x and y position of.
 	 */
-	public GameObject followTarget;
+	private GameObject followTarget;
+
+	public Rect boundaryRect;
 
 	private Camera _camera;
 	private int _currentScreenWidth = 0;
@@ -27,7 +29,7 @@ public class PixelPerfectCam : MonoBehaviour {
 	private float _pixelLockedPPU = 32.0f;
 	private Vector2 _winSize;
 
-	protected void Start(){
+	protected void Start() {
 		_camera = this.GetComponent<Camera>();
 		if(!_camera){
 			Debug.LogWarning("No camera for pixel perfect cam to use");
@@ -35,6 +37,10 @@ public class PixelPerfectCam : MonoBehaviour {
 			_camera.orthographic = true;
 			ResizeCamToTargetSize();
 		}
+	}
+
+	public void SetFollowTarget(GameObject followTarget) {
+		this.followTarget = followTarget;
 	}
 
 	public void ResizeCamToTargetSize() {
@@ -60,7 +66,7 @@ public class PixelPerfectCam : MonoBehaviour {
 		_winSize = new Vector2(Screen.width, Screen.height);
 	}
 
-	public void Update(){
+	protected void Update () {
 		if(_winSize.x != Screen.width || _winSize.y != Screen.height){
 			ResizeCamToTargetSize();
 		}
@@ -68,7 +74,10 @@ public class PixelPerfectCam : MonoBehaviour {
 			Vector2 newPosition = new Vector2(followTarget.transform.position.x, followTarget.transform.position.y);
 			float nextX = Mathf.Round(_pixelLockedPPU * newPosition.x);
 			float nextY = Mathf.Round(_pixelLockedPPU * newPosition.y);
-			_camera.transform.position = new Vector3(nextX/_pixelLockedPPU, nextY/_pixelLockedPPU, _camera.transform.position.z);
+			_camera.transform.position = new Vector3(
+				Mathf.Clamp(boundaryRect.xMin, nextX/_pixelLockedPPU, boundaryRect.xMax),
+				Mathf.Clamp(boundaryRect.yMin, nextY/_pixelLockedPPU, boundaryRect.yMax),
+				_camera.transform.position.z);
 		}
 	}
 }

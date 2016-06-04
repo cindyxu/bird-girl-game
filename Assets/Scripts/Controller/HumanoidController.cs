@@ -8,55 +8,74 @@ public class HumanoidController : InhabitantController {
 
 	private readonly InputCatcher mInputCatcher;
 
-	private InputFeeder mCurrentInputFeeder;
+	private InputFeeder mBaseInputFeeder;
+	private InputFeeder mOverrideInputFeeder;
 
-	public HumanoidController(GameObject gameObject, Room startRoom) : base(gameObject, startRoom) {
+	public HumanoidController(GameObject gameObject, Room startRoom, WalkParams walkParams) : base(gameObject, startRoom) {
 		mInputCatcher = new InputCatcher ();
 
-		mWalkLocomotion = new WalkLocomotion (gameObject, mInputCatcher, pTriggerer);
+		mWalkLocomotion = new WalkLocomotion (gameObject, mInputCatcher, pRoomTraveller, pTriggerer, walkParams);
 		mWalkLocomotion.onClimbLadder += OnClimbLadder;
 
 		mLadderLocomotion = new LadderLocomotion (gameObject, mInputCatcher, pRoomTraveller);
 		mLadderLocomotion.onLadderEndReached += OnLadderEndReached;
 		mLadderLocomotion.onLadderDismount += OnLadderDismount;
 
-		mCurrentInputFeeder = new AiInputFeeder (gameObject, mInputCatcher);
-	}
-
-	public override void Reset() {
-		base.Reset ();
-		if (GetCurrentLocomotion () != mWalkLocomotion) {
-			StartLocomotion (mWalkLocomotion);
-		}
-		mWalkLocomotion.Reset ();
+		mBaseInputFeeder = new AiInputFeeder (gameObject, mInputCatcher);
 	}
 
 	public override bool RequestMoveTo(string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
 		switch (locomotion) {
 			case "walk":
 				mWalkLocomotion.SetSpeed (1);
-				InputFeeder lastFeeder = mCurrentInputFeeder;
 				AiInputFeeder followFeeder = new AiInputFeeder (pGameObject, mInputCatcher);
 				AiInputFeeder.OnReachDestination onReachDestination = delegate {
-					mWalkLocomotion.SetSpeed (2);
-					mCurrentInputFeeder = lastFeeder;
+					RequestFinishRequest ();
 					callback ();
 				};
 				followFeeder.SetDest (getDest, onReachDestination);
-				mCurrentInputFeeder = followFeeder;
+				SetOverrideInputFeeder (followFeeder);
 				return true;
 			default:
 				return false;
 		}
 	}
 
+	public override bool RequestFreeze() {
+		AiInputFeeder freezeFeeder = new AiInputFeeder (pGameObject, mInputCatcher);
+		mOverrideInputFeeder = freezeFeeder;
+		return true;
+	}
+
+	public override bool RequestFinishRequest() {
+		mWalkLocomotion.SetSpeed (2);
+		SetOverrideInputFeeder (null);
+		return true;
+	}
+
 	public override bool EnablePlayerInput(bool enable) {
-		if (enable && !(mCurrentInputFeeder is PlayerInputFeeder)) {
-			mCurrentInputFeeder = new PlayerInputFeeder (mInputCatcher);
-		} else if (!enable && !(mCurrentInputFeeder is AiInputFeeder)) {
-			mCurrentInputFeeder = new AiInputFeeder (pGameObject, mInputCatcher);
+		if (enable && !(mBaseInputFeeder is PlayerInputFeeder)) {
+			SetBaseInputFeeder(new PlayerInputFeeder (mInputCatcher));
+		} else if (!enable && !(mBaseInputFeeder is AiInputFeeder)) {
+			SetBaseInputFeeder(new AiInputFeeder (pGameObject, mInputCatcher));
 		}
 		return true;
+	}
+
+	private void SetBaseInputFeeder(InputFeeder inputFeeder) {
+		mBaseInputFeeder = inputFeeder;
+		if (mOverrideInputFeeder != null) {
+			mBaseInputFeeder.OnBeginInput ();
+		}
+	}
+
+	private void SetOverrideInputFeeder(InputFeeder inputFeeder) {
+		mOverrideInputFeeder = inputFeeder;
+		if (mOverrideInputFeeder != null) {
+			mBaseInputFeeder.OnBeginInput ();
+		} else {
+			mBaseInputFeeder.OnBeginInput ();
+		}
 	}
 
 	protected override Locomotion GetStartLocomotion() {
@@ -64,8 +83,12 @@ public class HumanoidController : InhabitantController {
 	}
 
 	protected override void FeedInput() {
-		mInputCatcher.ResetPresses ();
-		mCurrentInputFeeder.FeedInput ();
+		mInputCatcher.FlushPresses ();
+		if (mOverrideInputFeeder != null) {
+			mOverrideInputFeeder.FeedInput ();
+		} else {
+			mBaseInputFeeder.FeedInput ();
+		}
 	}
 
 	void OnClimbLadder(Ladder ladder, int direction) {

@@ -21,6 +21,9 @@ public class AiInputFeeder : InputFeeder {
 		mOnReachDestination = onReachDestination;
 	}
 
+	public override void OnBeginInput () {
+	}
+
 	public override void FeedInput () {
 		if (mGetDest == null) return;
 		Vector2 dest = mGetDest ();

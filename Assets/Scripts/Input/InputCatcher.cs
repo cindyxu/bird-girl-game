@@ -14,7 +14,7 @@ public class InputCatcher {
 	private bool mJumpPress;
 	private bool mActionPress;
 
-	public void ResetPresses() {
+	public void FlushPresses () {
 		mLeftPress = false;
 		mRightPress = false;
 		mUpPress = false;

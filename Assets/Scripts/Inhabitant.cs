@@ -10,17 +10,25 @@ public class Inhabitant : MonoBehaviour {
 
 	public delegate void OnCmdFinished();
 
+	public float walkSpd;
+	public float jumpSpd;
+	public float maxVelocity;
+
 	public delegate Vector2 GetDest();
 	public bool RequestMoveTo (string locomotion, GetDest getDest, Inhabitant.OnCmdFinished callback) {
 		return mInhabitantController.RequestMoveTo (locomotion, getDest, callback);
 	}
 
-	public bool EnablePlayerInput(bool enabled) {
-		return mInhabitantController.EnablePlayerInput (enabled);
+	public bool RequestFreeze () {
+		return mInhabitantController.RequestFreeze ();
 	}
 
-	public void Reset () {
-		mInhabitantController.Reset ();
+	public bool RequestFinishRequest () {
+		return mInhabitantController.RequestFinishRequest ();
+	}
+
+	public bool EnablePlayerInput(bool enabled) {
+		return mInhabitantController.EnablePlayerInput (enabled);
 	}
 
 	public RoomTraveller GetRoomTraveller() {
@@ -28,8 +36,9 @@ public class Inhabitant : MonoBehaviour {
 	}
 
 	void Awake() {
-		mInhabitantController = new HumanoidController (gameObject, startRoom);
 		mCollider2D = GetComponent<Collider2D> ();
+		WalkParams walkParams = new WalkParams (walkSpd, jumpSpd, maxVelocity);
+		mInhabitantController = new HumanoidController (gameObject, startRoom, walkParams);
 	}
 
 	void Start() {
@@ -46,6 +55,7 @@ public class Inhabitant : MonoBehaviour {
 
 	void Update() {
 		if (mInhabitantController != null) mInhabitantController.HandleUpdate ();
+		Debug.Log (GetComponent<Rigidbody2D> ().velocity.y);
 	}
 
 	void FixedUpdate() {

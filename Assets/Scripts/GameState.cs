@@ -1,21 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent (typeof (DialogueController))]
 public class GameState : MonoBehaviour {
 
 	public static CutsceneController cutsceneController = new CutsceneController ();
-	public static DialogueLibrary dialogueLibrary = new DialogueLibrary ();
-	public static CutsceneLibrary cutsceneLibrary = new CutsceneLibrary ();
+	public static DialogueLibrary dialogueLibrary;
+	public static CutsceneLibrary cutsceneLibrary;
 	public static KeyBindingManager keybindingManager = new KeyBindingManager ();
 	public static SceneController sceneController = new SceneController ();
 	private static PlayerRoomController mPlayerRoomController = new PlayerRoomController ();
 
 	public static DialogueController dialogueController;
+
 	public static GameState instance;
 	public static GameObject player;
+	public static CameraController cameraController;
 
-	public SimpleTarget startTarget;
+	public static Dictionary<string, int> flags;
 
 	void Awake() {
 		if (FindObjectsOfType (GetType ()).Length > 1) {
@@ -24,27 +27,27 @@ public class GameState : MonoBehaviour {
 		} else {
 			DontDestroyOnLoad (gameObject);
 			dialogueController = GetComponent<DialogueController> ();
+			cutsceneLibrary = new CutsceneLibrary ();
+			dialogueLibrary = new DialogueLibrary ();
 			dialogueLibrary.FindDialogueBoxes ();
 			instance = this;
-
-			if (player == null) {
-				player = Instantiate (Resources.Load ("Prefabs/Characters/Willowby"), 
-					startTarget.GetTargetPosition (new Bounds ()), Quaternion.identity) as GameObject;
-				player.GetComponent<Inhabitant> ().startRoom = startTarget.GetRoom ();
-				DontDestroyOnLoad (player);
-			}
 		}
 	}
 
-	void Start() {
+	public static void InitializeScene(GameObject player, CameraController cameraController) {
+		if (GameState.player != null) {
+			GameState.player.GetComponent<Inhabitant> ().EnablePlayerInput (false);
+		}
+
+		GameState.player = player;
 		player.GetComponent<Inhabitant> ().EnablePlayerInput (true);
-		mPlayerRoomController.SetRoomTraveller (player.GetComponent<Inhabitant> ().GetRoomTraveller ());
+		GameState.cameraController = cameraController;
+		cameraController.SetFollowTarget (player);
+		mPlayerRoomController.Init (player.GetComponent<Inhabitant> ().GetRoomTraveller (), cameraController);
 	}
 
-	void OnLevelWasLoaded() {
+	public static void HandlePrepared() {
 		sceneController.HandleLevelWasLoaded ();
-//		Camera.main.GetComponent<PixelPerfectCam> ().followTarget = player;
-
 //		cutsceneController.PlayCutscene (cutsceneLibrary.BuildCutscene ("intro"));
 	}
 
@@ -54,8 +57,5 @@ public class GameState : MonoBehaviour {
 		{
 			Debug.Break();
 		}
-	}
-
-	public static class Flags {
 	}
 }

@@ -4,12 +4,14 @@ using System.Collections;
 public abstract class DoorTrigger : Trigger, ITarget {
 	
 	protected Room pRoom;
-	protected string pSortingLayerName;
+
+	[IsSortingLayer]
+	public string sortingLayerName;
 
 	public override void Awake() {
 		base.Awake ();
 		pRoom = GetComponentInParent<Room> ();
-		pSortingLayerName = GetComponent<Renderer> ().sortingLayerName;
+		pCollider2D = GetComponent<Collider2D> ();
 	}
 
 	public override int GetPriority() {
@@ -21,7 +23,7 @@ public abstract class DoorTrigger : Trigger, ITarget {
 	}
 
 	public string GetSortingLayerName() {
-		return pSortingLayerName;
+		return sortingLayerName;
 	}
 
 	public Cutscene.Event CreateEnterCutsceneEvent(GameObject gameObject) {
@@ -33,8 +35,13 @@ public abstract class DoorTrigger : Trigger, ITarget {
 	}
 
 	public Vector2 GetTargetPosition(Bounds bounds) {
-		return new Vector2 (transform.position.x,
-			pCollider2D.bounds.min.y + bounds.extents.y);
+		if (pCollider2D.GetType().Equals(typeof(EdgeCollider2D))) {
+			return new Vector2 (transform.position.x + (transform.rotation * Vector2.up).x * bounds.extents.x, 
+				pCollider2D.bounds.min.y + bounds.extents.y);
+		} else {
+			return new Vector2 (transform.position.x,
+				pCollider2D.bounds.min.y + bounds.extents.y);
+		}
 	}
 
 	public override bool IsActionTrigger () {

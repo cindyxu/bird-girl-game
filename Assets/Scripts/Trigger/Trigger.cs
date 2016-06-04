@@ -10,14 +10,6 @@ public abstract class Trigger : MonoBehaviour {
 		pCollider2D = GetComponent<Collider2D> ();
 	}
 
-	void OnEnable() {
-		pCollider2D.enabled = true;
-	}
-
-	void OnDisable() {
-		pCollider2D.enabled = false;
-	}
-
 	public abstract int GetPriority ();
 	public abstract bool IsActionTrigger ();
 	public abstract bool Execute(GameObject gameObject);
