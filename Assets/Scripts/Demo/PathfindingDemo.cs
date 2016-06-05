@@ -9,7 +9,7 @@ public class PathfindingDemo : MonoBehaviour {
 	public float terminalV;
 	public float gravity;
 
-	public Collider2D walker;
+	public BoxCollider2D walker;
 	public UnityEngine.UI.Button startButton;
 	public UnityEngine.UI.Button stepButton;
 
@@ -24,18 +24,12 @@ public class PathfindingDemo : MonoBehaviour {
 		stepButton.onClick.AddListener (StepScan);
 
 		EdgeCollider2D[] edgeColliders = FindObjectsOfType<EdgeCollider2D> ();
-		mEdges = new List<Edge> ();
+		mEdges = RoomScanner.CreateEdges (edgeColliders);
 
-		foreach (EdgeCollider2D edgeCollider in edgeColliders) {
-			Bounds bounds = edgeCollider.bounds;
-			if (edgeCollider.transform.up.x < 0 || edgeCollider.transform.up.y > 0) {
-				mEdges.Add (new Edge (bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y));
-			} else {
-				mEdges.Add (new Edge (bounds.max.x, bounds.max.y, bounds.min.x, bounds.min.y));
-			}
-
-			edgeCollider.gameObject.AddComponent <LineRenderer> ();
-			LineRenderer lineRenderer = edgeCollider.GetComponent <LineRenderer> ();
+		foreach (EdgeCollider2D collider in edgeColliders) {
+			Bounds bounds = collider.bounds;
+			collider.gameObject.AddComponent <LineRenderer> ();
+			LineRenderer lineRenderer = collider.GetComponent <LineRenderer> ();
 			lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
 			lineRenderer.SetWidth (0.1f, 0.1f);
 			Color color = new Color (1, 1, 1, 0.1f);
@@ -49,10 +43,13 @@ public class PathfindingDemo : MonoBehaviour {
 
 	public void StartScan () {
 
-		Edge underEdge = findUnderEdge (mEdges, walker.bounds.min.x, walker.bounds.max.x, walker.bounds.max.y);
+		Edge underEdge = findUnderEdge (mEdges, 
+			walker.transform.position.x - walker.size.x/2f, 
+			walker.transform.position.x + walker.size.x/2f, 
+			walker.transform.position.y);
 		if (underEdge != null) {
-			mScan = new Scan (new Vector2 (walker.bounds.size.x, walker.bounds.size.y), walkSpd, -gravity, 
-				terminalV, underEdge, walker.bounds.center.x, jumpSpd, mEdges);
+			mScan = new Scan (new Vector2 (walker.size.x, walker.size.y), walkSpd, -gravity, 
+				terminalV, underEdge, walker.transform.position.x, jumpSpd, mEdges);
 		} else {
 			mScan = null;
 		}

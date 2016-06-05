@@ -21,7 +21,7 @@ public class Scan {
 		mGravity = gravity;
 		mTerminalV = terminalV;
 
-		Debug.Log ("x: " + xCenter + ", size: " + mSize);
+		Debug.Log ("x: " + xCenter + ", size: " + ((double) mSize.x) + ", " + ((double) mSize.y) + ", " + Mathf.Epsilon);
 
 		initializeQueue (startEdge, xCenter, vy, edges);
 	}
@@ -63,7 +63,7 @@ public class Scan {
 		foreach (Edge edge in edges) {
 			if (edge.y0 < yZenith || edge.y1 < yZenith) {
 				qualifiedEdges.Add(edge);
-				yMin = Mathf.Min (Mathf.Min (edge.y1, edge.y0), yMin);
+				yMin = Mathf.Min (edge.bottom, yMin);
 			}
 		}
 
@@ -74,7 +74,7 @@ public class Scan {
 		float xMax = xr + xBottomSpread;
 		for (int i = qualifiedEdges.Count - 1; i >= 0; i--) {
 			Edge edge = qualifiedEdges [i];
-			if (Mathf.Max (edge.x0, edge.x1) < xMin || Mathf.Min (edge.x0, edge.x1) > xMax) {
+			if (edge.top < xMin || edge.bottom > xMax) {
 				qualifiedEdges.RemoveAt (i);
 			}
 		}
@@ -109,10 +109,11 @@ public class Scan {
 	}
 
 	private void ProcessSegment(ScanStep parentStep, ScanCollideTracker tracker, float yo, float vyo, ScanCollideTracker.Segment segment) {
-		Debug.Log ("Process segment: xi: " + segment.xli + " to " + segment.xri + " ; xf: " + segment.xlf + " to " + segment.xrf + " ; edge: " + segment.horzBlock);
+		Debug.Log ("  Process segment: xi: " + segment.xli + " to " + segment.xri + 
+			" ; xf: " + segment.xlf + " to " + segment.xrf + " ; edge: " + segment.horzBlock);
 		ScanArea parentArea = parentStep.scanArea;
 		if (segment.horzBlock != null && segment.horzBlock.isUp) {
-			Debug.Log ("Result: hit something above");
+			Debug.Log ("  Result: hit something above");
 			// we make a faux area here
 			ScanLine spli = parentArea.start;
 			ScanLine splo = new ScanLine (segment.xli, segment.xri, parentArea.end.y, 0);
@@ -124,7 +125,7 @@ public class Scan {
 
 		} else {
 			if (segment.horzBlock != null && segment.horzBlock.isDown) {
-				Debug.Log ("Result: new patch");
+				Debug.Log ("  Result: new patch");
 				ScanLine lo = new ScanLine (segment.xli, segment.xri, parentArea.end.y, parentArea.end.vy); 
 				ScanArea area = new ScanArea (parentArea.parent, parentArea.start, lo);
 				addPatch (area, segment);
@@ -132,13 +133,13 @@ public class Scan {
 				ScanLine li = new ScanLine (segment.xli, segment.xri, parentArea.end.y, parentArea.end.vy); 
 				ScanLine lo = new ScanLine (segment.xlf, segment.xrf, yo, vyo);
 				ScanArea area = new ScanArea (parentArea, li, lo);
-				Debug.Log ("Result: continue");
+				Debug.Log ("  Result: continue");
 				if (yo > Mathf.NegativeInfinity) {
 					ScanStep step = new ScanStep ();
 					step.collideTracker = tracker;
 					step.scanArea = area;
 					mStepQueue.Enqueue (step);
-				} else Debug.Log ("infinity!");
+				} else Debug.Log ("  infinity!");
 			}
 		}
 	}
@@ -152,8 +153,10 @@ public class Scan {
 			ScanLine start = null;
 
 			if (area.start != null) {
-				float dx = Kinematics.GetAbsDeltaXFromDeltaY (area.start.vy, area.end.vy, area.end.y - area.start.y, mGravity, mTerminalV, mWalkSpd);
-				start = new ScanLine (Mathf.Max (area.start.xl, end.xl - dx), Mathf.Min (area.start.xr, end.xr + dx), area.start.y, area.start.vy);
+				float dx = Kinematics.GetAbsDeltaXFromDeltaY (
+					area.start.vy, area.end.vy, area.end.y - area.start.y, mGravity, mTerminalV, mWalkSpd);
+				start = new ScanLine (Mathf.Max (area.start.xl, end.xl - dx), 
+					Mathf.Min (area.start.xr, end.xr + dx), area.start.y, area.start.vy);
 			}
 
 			ScanArea curbArea = new ScanArea (null, start, end);
