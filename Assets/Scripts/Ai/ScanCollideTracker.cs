@@ -226,6 +226,7 @@ public class ScanCollideTracker {
 		int nwfi;
 		for (nwfi = mwfi; nwfi < mFallingEdges.Count; nwfi++) {
 			Edge edge = mFallingEdges[nwfi];
+			Debug.Log ("  argggh " + edge.top + ", " + nyb);
 			if (edge.top > nyb) {
 				if (edge.isVert) mSideWindow.Add (edge);
 				else mDownWindow.Add (edge);
@@ -286,22 +287,22 @@ public class ScanCollideTracker {
 		if (blockingSegments.Count == 0) segments.Add (new Segment (xl, xr, xl - dxMax, xr + dxMax));
 		else {
 			Segment first = blockingSegments [0];
-			if (first.xli > xl) segments.Insert (0, new Segment (xl, first.xli - Mathf.Epsilon, 
-				xl - dxMax, first.xli - Mathf.Epsilon + dxMax));
+			if (first.xli > xl) segments.Insert (0, new Segment (xl, first.xli, 
+				xl - dxMax, first.xli + dxMax));
 
 			for (int i = 0; i < blockingSegments.Count - 1; i++) {
 				Segment before = blockingSegments [i];
 				Segment after = blockingSegments [i + 1];
 				segments.Add (before);
 				if (before.xri < after.xli) {
-					segments.Add (new Segment (before.xri + Mathf.Epsilon, after.xli - Mathf.Epsilon, 
-						before.xri + Mathf.Epsilon - dxMax, after.xli - Mathf.Epsilon + dxMax));
+					segments.Add (new Segment (before.xri, after.xli, 
+						before.xri - dxMax, after.xli + dxMax));
 				}
 			}
 
 			Segment last = blockingSegments [blockingSegments.Count - 1];
 			segments.Add (last);
-			if (last.xri < xr) segments.Add (new Segment (last.xri + Mathf.Epsilon, xr, 
+			if (last.xri < xr) segments.Add (new Segment (last.xri, xr, 
 				last.xri + Mathf.Epsilon - dxMax, xr + dxMax));
 		}
 		return segments;
@@ -313,17 +314,17 @@ public class ScanCollideTracker {
 			Debug.Log ("  split " + (edge.isLeft ? "left" : "right") + " at div " + div);
 			for (int si = 0; si < sections.Count;) {
 				Segment section = sections [si];
-				if (section.xli < div) {
+				if (section.xli <= div) {
 					if (section.xri > div) {
 						Segment leftSection, rightSection;
 						if (section.horzBlock != null) {
-							leftSection = new Segment (section.xli, div - Mathf.Epsilon, section.horzBlock);
-							rightSection = new Segment (div, section.xri + Mathf.Epsilon, section.horzBlock);
+							leftSection = new Segment (section.xli, div, section.horzBlock);
+							rightSection = new Segment (div, section.xri, section.horzBlock);
 						} else {
-							leftSection = new Segment (section.xli, div - Mathf.Epsilon, section.xlf, 
-								div - Mathf.Epsilon + (edge.isLeft ? dxMax : 0));
-							rightSection = new Segment (div + Mathf.Epsilon, section.xri, 
-								div + Mathf.Epsilon - (edge.isLeft ? 0 : dxMax), section.xrf);
+							leftSection = new Segment (section.xli, div, section.xlf, 
+								div - (edge.isLeft ? dxMax : 0));
+							rightSection = new Segment (div, section.xri, 
+								div + (edge.isLeft ? 0 : dxMax), section.xrf);
 						}
 						sections.RemoveAt (si);
 						sections.Insert (si, rightSection);
@@ -342,9 +343,9 @@ public class ScanCollideTracker {
 				Segment segment = segments [ri];
 				if (segment.xlf > div) break;
 				if (edge.isRight && div >= segment.xri) {
-					segment.xrf = Mathf.Min (segment.xrf, div - Mathf.Epsilon);
+					segment.xrf = Mathf.Min (segment.xrf, div);
 				} else if (edge.isLeft && div <= segment.xli) {
-					segment.xlf = Mathf.Max (segment.xlf, div + Mathf.Epsilon);
+					segment.xlf = Mathf.Max (segment.xlf, div);
 				}
 			}
 		}

@@ -14,19 +14,19 @@ public class Scan {
 	private float mTerminalV;
 
 	public Scan(Vector2 size, float walkSpd, float gravity, float terminalV, 
-		Edge startEdge, float xCenter, float vy, List<Edge> edges) {
+		Edge startEdge, float x, float vy, List<Edge> edges) {
 
 		mSize = size;
 		mWalkSpd = walkSpd;
 		mGravity = gravity;
 		mTerminalV = terminalV;
 
-		Debug.Log ("x: " + xCenter + ", size: " + ((double) mSize.x) + ", " + ((double) mSize.y) + ", " + Mathf.Epsilon);
+		Debug.Log ("x: " + x + ", size: " + ((double) mSize.x) + ", " + ((double) mSize.y) + ", " + Mathf.Epsilon);
 
-		initializeQueue (startEdge, xCenter, vy, edges);
+		initializeQueue (startEdge, x, vy, edges);
 	}
 
-	private void initializeQueue(Edge startEdge, float xCenter, float vy, List<Edge> edges) {
+	private void initializeQueue(Edge startEdge, float x, float vy, List<Edge> edges) {
 		float y = startEdge.y0;
 		float exl = Mathf.Min (startEdge.x0, startEdge.x1) - mSize.x;
 		float exr = Mathf.Max (startEdge.x0, startEdge.x1);
@@ -40,7 +40,7 @@ public class Scan {
 		float xl = exl;
 		float xr = exr;
 		foreach (ScanCollideTracker.Segment segment in segments) {
-			if (segment.xli <= xCenter && segment.xri + mSize.x > xCenter) {
+			if (segment.xli <= x && segment.xri > x) {
 				xl = segment.xli;
 				xr = segment.xri;
 				break;
@@ -99,7 +99,8 @@ public class Scan {
 		float yo, vyo;
 		advanceCollisionWindow (tracker, el.xl, el.xr, el.y, el.vy, out yo, out vyo);
 		Debug.Log ("yo: " + yo + ", vyo: " + vyo);
-		float dx = Kinematics.GetAbsDeltaXFromDeltaY (parentArea.end.vy, vyo, yo - parentArea.end.y, mGravity, mTerminalV, mWalkSpd);
+		float dx = Kinematics.GetAbsDeltaXFromDeltaY (
+			parentArea.end.vy, vyo, yo - parentArea.end.y, mGravity, mTerminalV, mWalkSpd);
 		List<ScanCollideTracker.Segment> segments = tracker.GetSectionedLine (el.xl, el.xr, dx);
 	
 		foreach (ScanCollideTracker.Segment segment in segments) {
@@ -170,7 +171,8 @@ public class Scan {
 		mPatches.Add (patch);
 	}
 
-	private void advanceCollisionWindow(ScanCollideTracker tracker, float xl, float xr, float yi, float vyi, out float yo, out float vyo) {
+	private void advanceCollisionWindow(ScanCollideTracker tracker, 
+		float xl, float xr, float yi, float vyi, out float yo, out float vyo) {
 
 		yo = yi;
 

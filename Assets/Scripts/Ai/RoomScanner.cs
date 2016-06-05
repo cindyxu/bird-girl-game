@@ -10,7 +10,9 @@ public class RoomScanner {
 		foreach (Edge edge in edges) {
 			if (edge.isUp) {
 				Scan jumpScan = new Scan (collider2D.bounds.size, walkParams.walkSpd, rigidbody2D.mass, 
-					walkParams.maxVelocity, edge, edge.x0 + (edge.x1-edge.x0)/2f, walkParams.jumpSpd, edges);
+					walkParams.maxVelocity, edge, edge.x0, walkParams.jumpSpd, edges);
+				while (jumpScan.Step ()) ;
+
 			}
 		}
 	}
@@ -35,8 +37,8 @@ public class RoomScanner {
 			float py = collider.transform.position.y + collider.offset.y;
 			float minX = px - horz * collider.transform.lossyScale.x/2;
 			float maxX = px + horz * collider.transform.lossyScale.x/2;
-			float minY = py - vert * collider.transform.lossyScale.y/2;
-			float maxY = py + vert * collider.transform.lossyScale.y/2;
+			float minY = py - vert * collider.transform.lossyScale.x/2;
+			float maxY = py + vert * collider.transform.lossyScale.x/2;
 
 			if (platformEffector != null) {
 				if ((vert > 0 && collider.transform.up.x < 0) || (horz > 0 && collider.transform.up.y > 0)) {

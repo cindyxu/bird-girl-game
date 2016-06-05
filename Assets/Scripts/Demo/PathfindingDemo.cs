@@ -49,7 +49,7 @@ public class PathfindingDemo : MonoBehaviour {
 			walker.transform.position.y);
 		if (underEdge != null) {
 			mScan = new Scan (new Vector2 (walker.size.x, walker.size.y), walkSpd, -gravity, 
-				terminalV, underEdge, walker.transform.position.x, jumpSpd, mEdges);
+				terminalV, underEdge, walker.transform.position.x - walker.size.x/2f, jumpSpd, mEdges);
 		} else {
 			mScan = null;
 		}

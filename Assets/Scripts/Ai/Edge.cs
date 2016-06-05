@@ -9,7 +9,7 @@ public class Edge {
 		this.y0 = y0;
 		this.y1 = y1;
 
-		Debug.Log ("creating edge: " + ((double) this.x0) + ", " + ((double) this.x1) + ", " + ((double) this.y0) + ", " + ((double) this.y1));
+		Debug.Log ("creating edge: " + ((double) this.x0) + ", " + ((double) this.y0) + ", " + ((double) this.x1) + ", " + ((double) this.y1));
 
 		if (Mathf.Abs (y0 - y1) > Mathf.Abs (x0 - x1)) isVert = true;
 		else isHorz = true;
