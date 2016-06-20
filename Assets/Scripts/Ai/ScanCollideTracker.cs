@@ -13,19 +13,21 @@ public class ScanCollideTracker {
 	private List<float> mFallingPts;
 
 	private float myt, myb;
-	private float mWidth;
 	private int mwri;
 	private int mwfi;
 	private int mDir;
+	private float mWidth;
+	private float mEdgeThreshold;
 
 	private List<Edge> mSideWindow;
 	private List<Edge> mDownWindow;
 	private List<Edge> mUpWindow;
 
-	public ScanCollideTracker (List<Edge> edges, float yt, float yb, float width) {
-		mWidth = width;
+	public ScanCollideTracker (List<Edge> edges, float yt, float yb, float width, float edgeThreshold) {
 		myt = yt;
 		myb = yb;
+		mWidth = width;
+		mEdgeThreshold = edgeThreshold;
 
 		mRisingEdges = new List<Edge> ();
 		mRisingPts = new List<float> ();
@@ -53,12 +55,13 @@ public class ScanCollideTracker {
 		mRisingPts = parent.mRisingPts;
 		mFallingPts = parent.mFallingPts;
 
-		mWidth = parent.mWidth;
 		myt = parent.myt;
 		myb = parent.myb;
 		mwri = parent.mwri;
 		mwfi = parent.mwfi;
 		mDir = parent.mDir;
+		mWidth = parent.mWidth;
+		mEdgeThreshold = parent.mEdgeThreshold;
 
 		mSideWindow = new List<Edge> (parent.mSideWindow);
 		mDownWindow = new List<Edge> (parent.mDownWindow);
@@ -121,7 +124,9 @@ public class ScanCollideTracker {
 			Edge edge = mRisingEdges [mwri];
 			if (edge.bottom >= myt) {
 				break;
-			} else if (edge.isVert && edge.top > myb) {
+			}
+			// only need to do this once b/c same edges are in fallingEdges
+			else if (edge.isVert && edge.top > myb) {
 				mSideWindow.Add (edge);
 			}
 		}
@@ -136,31 +141,31 @@ public class ScanCollideTracker {
 
 		Debug.Log ("falling window at " + mwfi);
 
-		mSideWindow.Sort (sortHorizontal);
+		mSideWindow.Sort (Edge.SortByLeftAsc);
 	}
 
-	private float GetNextShift(float maxShift) {
-		if (maxShift > 0) {
+	private float GetNextShift(int dir, float maxShift) {
+		if (dir > 0) {
 			foreach (float f in mRisingPts) {
 				if (f > myb) {
 					return Mathf.Min (f - myb, maxShift);
 				}
 			}
 			return maxShift;
-		} else if (maxShift < 0) {
+		} else if (dir < 0) {
 			foreach (float f in mFallingPts) {
 				if (f < myb) {
-					return Mathf.Max (f - myb, maxShift);
+					return Mathf.Max (f - myb, -maxShift);
 				}
 			}
-			return maxShift;
+			return -maxShift;
 		}
 		return 0;
 	}
 
-	public float ShiftWindow(float maxShift) {
+	public float ShiftWindow(int dir, float maxShift) {
 
-		float shift = GetNextShift (maxShift);
+		float shift = GetNextShift (dir, maxShift);
 		if (shift == 0) return shift;
 
 		float nyt = myt + shift;
@@ -181,9 +186,9 @@ public class ScanCollideTracker {
 			retreatRisingWindowIndex (nyt, nyb);
 		}
 
-		mSideWindow.Sort (sortHorizontal);
-		mDownWindow.Sort (sortHorizontal);
-		mUpWindow.Sort (sortHorizontal);
+		mSideWindow.Sort (Edge.SortByLeftAsc);
+		mDownWindow.Sort (Edge.SortByLeftAsc);
+		mUpWindow.Sort (Edge.SortByLeftAsc);
 
 		myt = nyt;
 		myb = nyb;
@@ -192,10 +197,6 @@ public class ScanCollideTracker {
 		Debug.Log ("shifted window. up: " + mUpWindow.Count + ", down: " + mDownWindow.Count + ", side: " + mSideWindow.Count);
 
 		return shift;
-	}
-
-	private int sortHorizontal(Edge edge1, Edge edge2) {
-		return edge1.left.CompareTo (edge2.left);
 	}
 
 	private void accumulateRisingWindow(float nyt, float nyb) {
@@ -212,7 +213,6 @@ public class ScanCollideTracker {
 	}
 
 	private void retreatFallingWindowIndex(float nyt, float nyb) {
-		Debug.Log ("  retreat falling window starting at " + mwfi);
 		int nwfi;
 		for (nwfi = mwfi; nwfi > 0; nwfi--) {
 			Edge edge = mFallingEdges [nwfi-1];
@@ -226,7 +226,6 @@ public class ScanCollideTracker {
 		int nwfi;
 		for (nwfi = mwfi; nwfi < mFallingEdges.Count; nwfi++) {
 			Edge edge = mFallingEdges[nwfi];
-			Debug.Log ("  argggh " + edge.top + ", " + nyb);
 			if (edge.top > nyb) {
 				if (edge.isVert) mSideWindow.Add (edge);
 				else mDownWindow.Add (edge);
@@ -251,20 +250,20 @@ public class ScanCollideTracker {
 		List<Segment> blockingSegments = (mDir == 0 ? new List<Segment> () : 
 			getBlockingSegments (xl, xr, mDir > 0 ? mUpWindow : mDownWindow));
 		List<Segment> segments = fillInSegments (xl, xr, dxMax, blockingSegments);
+		expandBlockingSegments (segments, xl, xr);
 		splitSegmentsOnSideWindow (segments, dxMax);
 		clampSegments (segments, dxMax);
-		List<Segment> validSegments = segments.FindAll((Segment seg) => seg.xli <= seg.xri && seg.xlf <= seg.xrf);
-		return validSegments;
+
+		return segments;
 	}
 
 	private List<Segment> getBlockingSegments (float xl, float xr, List<Edge> horzWindow) {
 		List<Segment> sections = new List<Segment> ();
 		foreach (Edge edge in horzWindow) {
-			Debug.Log ("  block " + (edge.isDown ? "down" : "up") + " at " + edge.y0);
-			float exl = Mathf.Max (Mathf.Min (edge.x0, edge.x1) - mWidth, xl);
-			float exr = Mathf.Min (Mathf.Max (edge.x0, edge.x1), xr);
+			float exl = Mathf.Max (edge.left, xl);
+			float exr = Mathf.Min (edge.right, xr);
 
-			for (int i = 0; i <= sections.Count;) {
+			for (int i = 0; i <= sections.Count; i++) {
 				float sxl = (i-1 >= 0 ? sections[i-1].xri : xl);
 				float sxr = (i < sections.Count ? sections [i].xli : xr);
 				if (sxl >= sxr) continue;
@@ -273,8 +272,6 @@ public class ScanCollideTracker {
 				float esxr = Mathf.Min (exr, sxr);
 				if (esxl < esxr) {
 					sections.Insert (i, new Segment (esxl, esxr, edge));
-					i+=2;
-				} else {
 					i++;
 				}
 			}
@@ -303,29 +300,22 @@ public class ScanCollideTracker {
 			Segment last = blockingSegments [blockingSegments.Count - 1];
 			segments.Add (last);
 			if (last.xri < xr) segments.Add (new Segment (last.xri, xr, 
-				last.xri + Mathf.Epsilon - dxMax, xr + dxMax));
+				last.xri - dxMax, xr + dxMax));
 		}
 		return segments;
 	}
 
 	private void splitSegmentsOnSideWindow (List<Segment> sections, float dxMax) {
 		foreach (Edge edge in mSideWindow) {
-			float div = (edge.isLeft ? edge.x0 : edge.x0 - mWidth);
-			Debug.Log ("  split " + (edge.isLeft ? "left" : "right") + " at div " + div);
 			for (int si = 0; si < sections.Count;) {
 				Segment section = sections [si];
-				if (section.xli <= div) {
-					if (section.xri > div) {
+				if (section.xli < edge.left) {
+					if (section.horzBlock == null && section.xri > edge.left) {
 						Segment leftSection, rightSection;
-						if (section.horzBlock != null) {
-							leftSection = new Segment (section.xli, div, section.horzBlock);
-							rightSection = new Segment (div, section.xri, section.horzBlock);
-						} else {
-							leftSection = new Segment (section.xli, div, section.xlf, 
-								div - (edge.isLeft ? dxMax : 0));
-							rightSection = new Segment (div, section.xri, 
-								div + (edge.isLeft ? 0 : dxMax), section.xrf);
-						}
+						leftSection = new Segment (section.xli, edge.left, section.xlf, 
+							edge.left + (edge.isLeft ? dxMax : 0));
+						rightSection = new Segment (edge.left, section.xri, 
+							edge.left - (edge.isLeft ? 0 : dxMax), section.xrf);
 						sections.RemoveAt (si);
 						sections.Insert (si, rightSection);
 						sections.Insert (si, leftSection);
@@ -336,19 +326,39 @@ public class ScanCollideTracker {
 		}
 	}
 
+	private void expandBlockingSegments (List<Segment> segments, float xl, float xr) {
+		foreach (Segment segment in segments) {
+			if (segment.horzBlock != null) {
+				float extent = mWidth - mEdgeThreshold;
+				segment.xli = Mathf.Max (segment.xli - extent, xl);
+				segment.xri = Mathf.Min (segment.xri + extent, xr);
+				segment.xlf = Mathf.Max (segment.xlf - extent, xl - extent);
+				segment.xrf = Mathf.Max (segment.xrf + extent, xr + extent);
+			}
+		}
+	}
+
 	private void clampSegments (List<Segment> segments, float dxMax) {
 		foreach (Edge edge in mSideWindow) {
-			float div = (edge.isLeft ? edge.x0 : edge.x0 - mWidth);
 			for (int ri = 0; ri < segments.Count; ri++) {
 				Segment segment = segments [ri];
-				if (segment.xlf > div) break;
-				if (edge.isRight && div >= segment.xri) {
-					segment.xrf = Mathf.Min (segment.xrf, div);
-				} else if (edge.isLeft && div <= segment.xli) {
-					segment.xlf = Mathf.Max (segment.xlf, div);
+
+				if (segment.xlf > edge.left) break;
+				if (edge.isRight && edge.left >= segment.xri) {
+					segment.xrf = Mathf.Min (segment.xrf, edge.left);
+				} else if (edge.isLeft && edge.left <= segment.xli) {
+					segment.xlf = Mathf.Max (segment.xlf, edge.left);
 				}
 			}
 		}
+	}
+
+	public float GetTop() {
+		return myt;
+	}
+
+	public float GetBottom() {
+		return myb;
 	}
 
 	public class Segment {

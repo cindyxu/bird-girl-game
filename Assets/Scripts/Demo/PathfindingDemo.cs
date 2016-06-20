@@ -26,23 +26,18 @@ public class PathfindingDemo : MonoBehaviour {
 		EdgeCollider2D[] edgeColliders = FindObjectsOfType<EdgeCollider2D> ();
 		mEdges = RoomScanner.CreateEdges (edgeColliders);
 
-		foreach (EdgeCollider2D collider in edgeColliders) {
-			Bounds bounds = collider.bounds;
-			collider.gameObject.AddComponent <LineRenderer> ();
-			LineRenderer lineRenderer = collider.GetComponent <LineRenderer> ();
-			lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
-			lineRenderer.SetWidth (0.1f, 0.1f);
-			Color color = new Color (1, 1, 1, 0.1f);
-			lineRenderer.SetColors (color, color);
-			lineRenderer.SetVertexCount (2);
-			lineRenderer.SetPositions (new Vector3[] {
-				new Vector3 (bounds.min.x, bounds.min.y, 0), new Vector3 (bounds.max.x, bounds.max.y, 0)
-			});
+		foreach (Edge edge in mEdges) {
+			Debug.Log ("created edge: " + edge + " " +
+				(edge.isLeft ? "isLeft" : "") +
+				(edge.isRight ? "isRight" : "") +
+				(edge.isUp ? "isUp" : "") + 
+				(edge.isDown ? "isDown" : ""));
+
+			CreateEdge (edge, new Color (1, 1, 1, 0.1f));
 		}
 	}
 
 	public void StartScan () {
-
 		Edge underEdge = findUnderEdge (mEdges, 
 			walker.transform.position.x - walker.size.x/2f, 
 			walker.transform.position.x + walker.size.x/2f, 
@@ -86,6 +81,7 @@ public class PathfindingDemo : MonoBehaviour {
 			}
 		}
 		mDrawPatches.Clear ();
+
 		if (mScan != null) {
 			Scan.ScanStep[] steps = mScan.GetQueuedSteps ();
 			foreach (Scan.ScanStep step in steps) {
@@ -137,6 +133,21 @@ public class PathfindingDemo : MonoBehaviour {
 		return go;
 	}
 
+	private GameObject CreateEdge (Edge edge, Color color) {
+		GameObject go = new GameObject ("patch");
+		go.AddComponent<LineRenderer> ();
+		LineRenderer renderer = go.GetComponent<LineRenderer> ();
+		renderer.SetVertexCount (2);
+		renderer.SetPositions (new Vector3[] {
+			new Vector3 (edge.x0, edge.y0, 0), 
+			new Vector3 (edge.x1, edge.y1, 0)
+		});
+		renderer.material = new Material(Shader.Find("Particles/Additive"));
+		renderer.SetWidth (0.1f, 0.1f);
+		renderer.SetColors (color, color);
+		return go;
+	}
+
 	private GameObject CreateStepMesh (ScanArea area, int depth) {
 		GameObject go = new GameObject("step " + depth);
 		go.AddComponent<MeshRenderer> ();
@@ -149,14 +160,17 @@ public class PathfindingDemo : MonoBehaviour {
 			pts.Add (new Vector2 (area.end.xr, area.end.y));
 			pts.Add (new Vector2 (area.start.xr, area.start.y));
 			pts.Add (new Vector2 (area.start.xl, area.start.y));
-			material.color = new Color (1, 0.5f, 0, 0.5f);
 		} else {
 			pts.Add (new Vector2 (area.start.xl, area.start.y));
 			pts.Add (new Vector2 (area.start.xr, area.start.y));
 			pts.Add (new Vector2 (area.end.xr, area.end.y));
 			pts.Add (new Vector2 (area.end.xl, area.end.y));
-			material.color = new Color (0, 0.5f, 1, 0.5f);
 		}
+		float absv = Mathf.Abs (area.end.vy) * 0.1f;
+		float lerpShift = (Mathf.Pow (2, -absv) * (Mathf.Pow (2, absv+1) - 1) - 1) * Mathf.Sign(area.end.vy);
+		Color ncolor = Color.HSVToRGB (1 + lerpShift * 0.5f, 1, 1);
+		ncolor.a = 0.5f;
+		material.color = ncolor;
 		go.GetComponent<PolyDrawer> ().RawPoints = pts;
 		go.GetComponent<PolyDrawer> ().Mat = material;
 		return go;

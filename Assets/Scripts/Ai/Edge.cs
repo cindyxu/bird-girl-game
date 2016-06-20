@@ -3,13 +3,19 @@ using UnityEngine;
 
 public class Edge {
 
+	public static int SortByLeftAsc(Edge edge1, Edge edge2) {
+		return edge1.left.CompareTo (edge2.left);
+	}
+
+	public static int SortByBottomAsc(Edge edge1, Edge edge2) {
+		return edge1.bottom.CompareTo (edge2.bottom);
+	}
+
 	public Edge (float x0, float y0, float x1, float y1) {
 		this.x0 = x0;
 		this.x1 = x1;
 		this.y0 = y0;
 		this.y1 = y1;
-
-		Debug.Log ("creating edge: " + ((double) this.x0) + ", " + ((double) this.y0) + ", " + ((double) this.x1) + ", " + ((double) this.y1));
 
 		if (Mathf.Abs (y0 - y1) > Mathf.Abs (x0 - x1)) isVert = true;
 		else isHorz = true;
@@ -24,12 +30,32 @@ public class Edge {
 		bottom = Mathf.Min (this.y0, this.y1);
 		top = Mathf.Max (this.y0, this.y1);
 
-		Debug.Log ("isHorz: " + isHorz + 
-			", isVert: " + isVert + 
-			", isLeft: " + isLeft + 
-			", isRight: " + isRight + 
-			", isUp: " + isDown + 
-			", isDown: " + isUp);
+
+	}
+
+	public void SplitVert(float x, out Edge e0, out Edge e1) {
+		if (isDown) {
+			e0 = new Edge (x0, y0, x, y1);
+			e1 = new Edge (x, y0, x1, y1);
+		} else {
+			e0 = new Edge (x, y0, x1, y1);
+			e1 = new Edge (x0, y0, x, y1);
+		}
+	}
+
+	public void SplitHorz(float y, out Edge e0, out Edge e1) {
+		if (isRight) {
+			e0 = new Edge (x0, y0, x1, y);
+			e1 = new Edge (x0, y, x1, y1);
+		} else {
+			e0 = new Edge (x0, y, x1, y1);
+			e1 = new Edge (x0, y0, x1, y);
+		}
+	}
+
+	public override string ToString()
+	{
+		return "Edge: " + x0 + ", " + y0 + ", " + x1 + ", " + y1;
 	}
 
 	public float x0;

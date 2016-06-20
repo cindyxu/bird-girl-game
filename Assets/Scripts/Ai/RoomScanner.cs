@@ -7,17 +7,22 @@ public class RoomScanner {
 	void ScanRoom (Rigidbody2D rigidbody2D, Collider2D collider2D, WalkParams walkParams, Room room) {
 		EdgeCollider2D[] edgeColliders = room.GetComponentsInChildren <EdgeCollider2D> ();
 		List<Edge> edges = CreateEdges (edgeColliders);
+
 		foreach (Edge edge in edges) {
 			if (edge.isUp) {
 				Scan jumpScan = new Scan (collider2D.bounds.size, walkParams.walkSpd, rigidbody2D.mass, 
 					walkParams.maxVelocity, edge, edge.x0, walkParams.jumpSpd, edges);
 				while (jumpScan.Step ()) ;
-
 			}
 		}
 	}
 
 	public static List<Edge> CreateEdges (EdgeCollider2D[] edgeColliders) {
+		List<Edge> edges = createRawEdges (edgeColliders);
+		return EdgeSplitter.SplitEdges (edges);
+	}
+
+	private static List<Edge> createRawEdges (EdgeCollider2D[] edgeColliders) {
 		List<Edge> edges = new List<Edge> ();
 		foreach (EdgeCollider2D collider in edgeColliders) {
 			PlatformEffector2D platformEffector = collider.GetComponent<PlatformEffector2D> ();
@@ -35,10 +40,18 @@ public class RoomScanner {
 
 			float px = collider.transform.position.x + collider.offset.x;
 			float py = collider.transform.position.y + collider.offset.y;
-			float minX = px - horz * collider.transform.lossyScale.x/2;
-			float maxX = px + horz * collider.transform.lossyScale.x/2;
-			float minY = py - vert * collider.transform.lossyScale.x/2;
-			float maxY = py + vert * collider.transform.lossyScale.x/2;
+
+			float scale = 1;
+			Transform ctransform = collider.transform;
+			while (ctransform != null) {
+				scale *= ctransform.localScale.x;
+				ctransform = ctransform.parent;
+			}
+
+			float minX = px - horz * scale/2;
+			float maxX = px + horz * scale/2;
+			float minY = py - vert * scale/2;
+			float maxY = py + vert * scale/2;
 
 			if (platformEffector != null) {
 				if ((vert > 0 && collider.transform.up.x < 0) || (horz > 0 && collider.transform.up.y > 0)) {
