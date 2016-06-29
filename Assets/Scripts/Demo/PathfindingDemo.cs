@@ -4,27 +4,27 @@ using System.Collections.Generic;
 
 public class PathfindingDemo : MonoBehaviour {
 
-	public float jumpSpd;
-	public float walkSpd;
-	public float terminalV;
-	public float gravity;
+	[SerializeField]
+	public WalkerParams wp;
 
 	public BoxCollider2D walker;
+	public BoxCollider2D target;
 	public UnityEngine.UI.Button startButton;
+	public UnityEngine.UI.Button searchButton;
 	public UnityEngine.UI.Button stepButton;
 
 	private List<Edge> mEdges;
-	private Scan mScan;
-
-	private List<GameObject> mDrawSteps = new List<GameObject> ();
-	private List<GameObject> mDrawPatches = new List<GameObject> ();
+	private RenderScan mRenderScan;
+	private RenderSearch mRenderSearch;
+	private WalkerParams mWalkerParams;
 
 	void Awake () {
 		startButton.onClick.AddListener (StartScan);
-		stepButton.onClick.AddListener (StepScan);
+		searchButton.onClick.AddListener (StartSearch);
+		stepButton.onClick.AddListener (Step);
 
 		EdgeCollider2D[] edgeColliders = FindObjectsOfType<EdgeCollider2D> ();
-		mEdges = RoomScanner.CreateEdges (edgeColliders);
+		mEdges = EdgeBuilder.BuildEdges (edgeColliders);
 
 		foreach (Edge edge in mEdges) {
 			Debug.Log ("created edge: " + edge + " " +
@@ -33,22 +33,54 @@ public class PathfindingDemo : MonoBehaviour {
 				(edge.isUp ? "isUp" : "") + 
 				(edge.isDown ? "isDown" : ""));
 
-			CreateEdge (edge, new Color (1, 1, 1, 0.1f));
+			RenderUtils.CreateLine (edge.x0, edge.y0, edge.x1, edge.y1, new Color (1, 1, 1, 0.1f));
 		}
 	}
 
+	public void StartSearch () {
+		if (mRenderScan != null) mRenderScan.CleanUp ();
+		mRenderScan = null;
+		if (mRenderSearch != null) mRenderSearch.CleanUp ();
+
+		Edge startEdge = findUnderEdge (mEdges, 
+			walker.transform.position.x - walker.size.x/2f, 
+			walker.transform.position.x + walker.size.x/2f, 
+			walker.transform.position.y);
+
+		Edge endEdge = findUnderEdge (mEdges, 
+			target.transform.position.x - target.size.x/2f, 
+			target.transform.position.x + target.size.x/2f, 
+			target.transform.position.y);
+
+		mRenderSearch = new RenderSearch (walker, target, wp, startEdge, 
+			walker.transform.position.x - walker.size.x/2f, 
+			endEdge, target.transform.position.x - target.size.x/2f, mEdges);
+	}
+
 	public void StartScan () {
+		if (mRenderSearch != null) mRenderSearch.CleanUp ();
+		mRenderSearch = null;
+		if (mRenderScan != null) mRenderScan.CleanUp ();
+
 		Edge underEdge = findUnderEdge (mEdges, 
 			walker.transform.position.x - walker.size.x/2f, 
 			walker.transform.position.x + walker.size.x/2f, 
 			walker.transform.position.y);
 		if (underEdge != null) {
-			mScan = new Scan (new Vector2 (walker.size.x, walker.size.y), walkSpd, -gravity, 
-				terminalV, underEdge, walker.transform.position.x - walker.size.x/2f, jumpSpd, mEdges);
+			mRenderScan = new RenderScan (new JumpScan (wp, underEdge, 
+				walker.transform.position.x - walker.size.x/2f, wp.jumpSpd, mEdges));
+			mRenderScan.UpdateGraph ();
 		} else {
-			mScan = null;
+			mRenderScan = null;
 		}
-		UpdateGraph ();
+	}
+
+	public void Step () {
+		if (mRenderScan != null) {
+			mRenderScan.StepScan ();
+		} else if (mRenderSearch != null) {
+			mRenderSearch.StepSearch ();
+		}
 	}
 
 	private static Edge findUnderEdge (List<Edge> edges, float x0, float x1, float y) {
@@ -63,116 +95,4 @@ public class PathfindingDemo : MonoBehaviour {
 		return null;
 	}
 
-	public void StepScan () {
-		mScan.Step ();
-		UpdateGraph ();
-	}
-
-	private void UpdateGraph () {
-		foreach (GameObject go in mDrawSteps) {
-			if (go != null) {
-				Destroy (go.transform.root.gameObject);
-			}
-		}
-		mDrawSteps.Clear ();
-		foreach (GameObject go in mDrawPatches) {
-			if (go != null) {
-				Destroy (go.transform.root.gameObject);
-			}
-		}
-		mDrawPatches.Clear ();
-
-		if (mScan != null) {
-			Scan.ScanStep[] steps = mScan.GetQueuedSteps ();
-			foreach (Scan.ScanStep step in steps) {
-				ScanArea area = step.scanArea;
-				mDrawSteps.Add (RenderArea (area));
-			}
-			List<ScanPatch> patches = mScan.GetPatches ();
-			foreach (ScanPatch patch in patches) {
-				GameObject go = CreatePatchLine (patch);
-				GameObject areaChain = RenderArea (patch.scanArea);
-				if (areaChain != null) {
-					areaChain.transform.parent = go.transform;
-				}
-				mDrawPatches.Add (go);
-			}
-		}
-	}
-
-	private GameObject RenderArea(ScanArea area) {
-		GameObject parentMesh = null;
-		GameObject currMesh = null;
-
-		int depth = 0;
-		while (area != null) {
-			if (area.start != null) {
-				GameObject mesh = CreateStepMesh (area, depth);
-				if (parentMesh == null) parentMesh = mesh;
-				if (currMesh != null) mesh.transform.parent = currMesh.transform;
-				currMesh = mesh;
-			}
-			area = area.parent;
-			depth--;
-		}
-		return parentMesh;
-	}
-
-	private GameObject CreatePatchLine (ScanPatch patch) {
-		GameObject go = new GameObject ("patch");
-		go.AddComponent<LineRenderer> ();
-		LineRenderer renderer = go.GetComponent<LineRenderer> ();
-		renderer.SetVertexCount (2);
-		renderer.SetPositions (new Vector3[] {
-			new Vector3 (patch.scanArea.end.xl, patch.edge.y0, 0), 
-			new Vector3 (patch.scanArea.end.xr, patch.edge.y0, 0)
-		});
-		renderer.material = new Material(Shader.Find("Particles/Additive"));
-		renderer.SetWidth (0.1f, 0.1f);
-		renderer.SetColors (Color.yellow, Color.yellow);
-		return go;
-	}
-
-	private GameObject CreateEdge (Edge edge, Color color) {
-		GameObject go = new GameObject ("patch");
-		go.AddComponent<LineRenderer> ();
-		LineRenderer renderer = go.GetComponent<LineRenderer> ();
-		renderer.SetVertexCount (2);
-		renderer.SetPositions (new Vector3[] {
-			new Vector3 (edge.x0, edge.y0, 0), 
-			new Vector3 (edge.x1, edge.y1, 0)
-		});
-		renderer.material = new Material(Shader.Find("Particles/Additive"));
-		renderer.SetWidth (0.1f, 0.1f);
-		renderer.SetColors (color, color);
-		return go;
-	}
-
-	private GameObject CreateStepMesh (ScanArea area, int depth) {
-		GameObject go = new GameObject("step " + depth);
-		go.AddComponent<MeshRenderer> ();
-		go.AddComponent<MeshFilter> ();
-		go.AddComponent<PolyDrawer> ();
-		Material material = new Material(Shader.Find("Sprites/Default"));
-		List<Vector2> pts = new List<Vector2> ();
-		if (area.end.y > area.start.y) {
-			pts.Add (new Vector2 (area.end.xl, area.end.y));
-			pts.Add (new Vector2 (area.end.xr, area.end.y));
-			pts.Add (new Vector2 (area.start.xr, area.start.y));
-			pts.Add (new Vector2 (area.start.xl, area.start.y));
-		} else {
-			pts.Add (new Vector2 (area.start.xl, area.start.y));
-			pts.Add (new Vector2 (area.start.xr, area.start.y));
-			pts.Add (new Vector2 (area.end.xr, area.end.y));
-			pts.Add (new Vector2 (area.end.xl, area.end.y));
-		}
-		float absv = Mathf.Abs (area.end.vy) * 0.1f;
-		float lerpShift = (Mathf.Pow (2, -absv) * (Mathf.Pow (2, absv+1) - 1) - 1) * Mathf.Sign(area.end.vy);
-		Color ncolor = Color.HSVToRGB (1 + lerpShift * 0.5f, 1, 1);
-		ncolor.a = 0.5f;
-		material.color = ncolor;
-		go.GetComponent<PolyDrawer> ().RawPoints = pts;
-		go.GetComponent<PolyDrawer> ().Mat = material;
-		return go;
-	}
 }

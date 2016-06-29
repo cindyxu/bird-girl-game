@@ -11,7 +11,7 @@ public class SplitEdgesTest {
 		List<Edge> edges = new List<Edge> ();
 		Edge horzEdge = new Edge (0, 0, 1, 0);
 		edges.Add (horzEdge);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 		Assert.AreEqual (1, splitEdges.Count);
 		Assert.AreEqual (horzEdge, splitEdges [0]);
 	}
@@ -24,7 +24,7 @@ public class SplitEdgesTest {
 		Edge vertEdge = new Edge (1, 1, 1, 2);
 		edges.Add (horzEdge);
 		edges.Add (vertEdge);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (2, splitEdges.Count);
 	}
@@ -37,7 +37,7 @@ public class SplitEdgesTest {
 		Edge vertEdge = new Edge (1, 0, 1, 1);
 		edges.Add (horzEdge);
 		edges.Add (vertEdge);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (3, splitEdges.Count);
 		Assert.NotNull (splitEdges.Find ((Edge obj) => 
@@ -54,7 +54,7 @@ public class SplitEdgesTest {
 		Edge vertEdge = new Edge (1, 0, 1, 1);
 		edges.Add (horzEdge);
 		edges.Add (vertEdge);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (3, splitEdges.Count);
 		Assert.NotNull (splitEdges.Find ((Edge obj) => 
@@ -73,7 +73,7 @@ public class SplitEdgesTest {
 		edges.Add (horzEdge);
 		edges.Add (vertEdge0);
 		edges.Add (vertEdge1);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (5, splitEdges.Count);
 		Assert.NotNull (splitEdges.Find ((Edge obj) => 
@@ -94,7 +94,7 @@ public class SplitEdgesTest {
 		edges.Add (horzEdge);
 		edges.Add (vertEdge0);
 		edges.Add (vertEdge1);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (4, splitEdges.Count);
 		Assert.NotNull (splitEdges.Find ((Edge obj) => 
@@ -109,7 +109,7 @@ public class SplitEdgesTest {
 		List<Edge> edges = new List<Edge> ();
 		Edge vertEdge = new Edge (0, 0, 0, 1);
 		edges.Add (vertEdge);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 		Assert.AreEqual (1, splitEdges.Count);
 		Assert.AreEqual (vertEdge, splitEdges [0]);
 	}
@@ -122,7 +122,7 @@ public class SplitEdgesTest {
 		Edge vertEdge = new Edge (1, 1, 1, 2);
 		edges.Add (horzEdge);
 		edges.Add (vertEdge);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (2, splitEdges.Count);
 	}
@@ -135,7 +135,7 @@ public class SplitEdgesTest {
 		Edge horzEdge = new Edge (0, 1, 1, 1);
 		edges.Add (horzEdge);
 		edges.Add (vertEdge);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (3, splitEdges.Count);
 		Assert.NotNull (splitEdges.Find ((Edge obj) => 
@@ -152,7 +152,7 @@ public class SplitEdgesTest {
 		Edge horzEdge = new Edge (0, 1, 1, 1);
 		edges.Add (horzEdge);
 		edges.Add (vertEdge);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (3, splitEdges.Count);
 		Assert.NotNull (splitEdges.Find ((Edge obj) => 
@@ -171,7 +171,7 @@ public class SplitEdgesTest {
 		edges.Add (vertEdge);
 		edges.Add (horzEdge0);
 		edges.Add (horzEdge1);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (5, splitEdges.Count);
 		Assert.NotNull (splitEdges.Find ((Edge obj) => 
@@ -192,7 +192,7 @@ public class SplitEdgesTest {
 		edges.Add (vertEdge);
 		edges.Add (horzEdge0);
 		edges.Add (horzEdge1);
-		List<Edge> splitEdges = EdgeSplitter.SplitEdges (edges);
+		List<Edge> splitEdges = EdgeBuilder.splitEdges (edges);
 
 		Assert.AreEqual (4, splitEdges.Count);
 		Assert.NotNull (splitEdges.Find ((Edge obj) => 
