@@ -34,7 +34,8 @@ public class EdgeHeuristicRange<T> where T : IComparable {
 		for (int i = mBestHeuristics.Count - 1; i > 0; i--) {
 			Range left = mBestHeuristics [i-1];
 			Range right = mBestHeuristics [i];
-			if (left.hasValue && right.hasValue && left.t.CompareTo (right.t) == 0) {
+			if ((!left.hasValue && !right.hasValue) || 
+				(left.hasValue && right.hasValue && left.t.CompareTo (right.t) == 0)) {
 				left.xr = right.xr;
 				mBestHeuristics.RemoveAt (i);
 			}

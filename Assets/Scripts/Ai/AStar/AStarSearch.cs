@@ -23,7 +23,7 @@ public class AStarSearch {
 
 		mWp = wp;
 		mHeuristic = new WalkerHeuristic (wp);
-		mOpenQueue = new FastPriorityQueue<TravelNode> (edgePaths.Count * 2);
+		mOpenQueue = new FastPriorityQueue<TravelNode> (edgePaths.Count * edgePaths.Count / 2);
 		mEdgePaths = edgePaths;
 		mStart = start;
 		mDest = dest;
@@ -71,6 +71,7 @@ public class AStarSearch {
 
 	public bool Step (out List<EdgePath> result) {
 		Debug.Log ("A STAR STEP ********************************");
+		Debug.Log ("queue has " + mOpenQueue.Count + " items");
 		result = null;
 		if (mPathChain != null) {
 			Debug.Log ("already found path");
@@ -84,8 +85,14 @@ public class AStarSearch {
 
 		TravelNode bestNode = mOpenQueue.Dequeue ();
 		if (bestNode.edge == mDest) {
+
 			Debug.Log ("found best path!");
 			result = mPathChain = reconstructChain (bestNode);
+			string s = "";
+			foreach (EdgePath path in result) {
+				s += path.getEndEdge () + " ";
+			}
+			Debug.Log (s);
 			return false;
 		}
 		Debug.Log ("continue - current edge " + bestNode.edge);

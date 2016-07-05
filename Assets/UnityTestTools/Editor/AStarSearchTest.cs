@@ -199,8 +199,43 @@ public class AStarSearchTest {
 	}
 
 	[Test]
-	public void AStarSearch_reconstructPath_reconstructsBestPath () {
-		
+	public void AStarSearch_shortAboveAndLongBelow_picksShortPath () {
+		List<Edge> edges = new List<Edge> ();
+		Edge start = new Edge (0, 0, 1, 0);
+		Edge dest = new Edge (9, 0, 10, 0);
+		Edge short0 = new Edge (3, 0, 4, 0);
+		Edge short1 = new Edge (6, 0, 7, 0);
+		Edge long0 = new Edge (3, -10, 4, -10);
+		Edge long1 = new Edge (6, -10, 7, -10);
+		Edge long2 = new Edge (9, -10, 10, -10);
+		Edge long3 = new Edge (9, -8, 10, -8);
+		Edge long4 = new Edge (9, -6, 10, -6);
+		Edge long5 = new Edge (9, -4, 10, -4);
+		Edge long6 = new Edge (9, -2, 10, -2);
+		edges.Add (start);
+		edges.Add (short0);
+		edges.Add (short1);
+		edges.Add (dest);
+		edges.Add (long0);
+		edges.Add (long1);
+		edges.Add (long2);
+		edges.Add (long3);
+		edges.Add (long4);
+		edges.Add (long5);
+		edges.Add (long6);
+		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
+
+		AStarSearch search = new AStarSearch (paths, wp, 
+			start, 0.5f, dest, 0.5f);
+		List<EdgePath> result;
+		while (search.Step (out result)) ;
+
+		Assert.AreEqual (start, result [0].getStartEdge ());
+		Assert.AreEqual (short0, result [0].getEndEdge ());
+		Assert.AreEqual (short0, result [1].getStartEdge ());
+		Assert.AreEqual (short1, result [1].getEndEdge ());
+		Assert.AreEqual (short1, result [2].getStartEdge ());
+		Assert.AreEqual (dest, result [2].getEndEdge ());
 	}
 
 }

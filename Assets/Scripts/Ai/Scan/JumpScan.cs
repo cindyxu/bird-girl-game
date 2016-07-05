@@ -72,9 +72,10 @@ public class JumpScan {
 		float xBottomSpread = Kinematics.GetAbsDeltaXFromDeltaY (vyi, Math.Sign (vyMin), yMin - yi, mWp.gravity, mWp.terminalV, mWp.walkSpd);
 		float xMin = xl - xBottomSpread;
 		float xMax = xr + xBottomSpread;
+//		Debug.Log ("x range: " + xMin + ", " + xMax);
 		for (int i = qualifiedEdges.Count - 1; i >= 0; i--) {
 			Edge edge = qualifiedEdges [i];
-			if (edge.top < xMin || edge.bottom > xMax) {
+			if (edge.right < xMin || edge.left > xMax) {
 				qualifiedEdges.RemoveAt (i);
 			}
 		}
@@ -129,7 +130,7 @@ public class JumpScan {
 //					Debug.Log ("  Result: new patch");
 					JumpScanLine lo = new JumpScanLine (segment.xli, segment.xri, parentArea.end.y, parentArea.end.vy); 
 					JumpScanArea area = new JumpScanArea (parentArea.parent, parentArea.start, lo);
-					addPatch (area, segment.horzBlock);
+					addPath (area, segment.horzBlock);
 				}
 			} else {
 				JumpScanLine li = new JumpScanLine (segment.xli, segment.xri, parentArea.end.y, parentArea.end.vy); 
@@ -165,9 +166,9 @@ public class JumpScan {
 		return new JumpScanArea (pArea, start, childStart);
 	}
 
-	private void addPatch (JumpScanArea area, Edge landEdge) {
-		JumpScanArea patchArea = recreateAreaChain (area, null);
-		JumpPath path = new JumpPath (mStartEdge, landEdge, patchArea, mWp.gravity, mWp.walkSpd);
+	private void addPath (JumpScanArea area, Edge landEdge) {
+		JumpScanArea pathArea = recreateAreaChain (area, null);
+		JumpPath path = new JumpPath (mStartEdge, landEdge, pathArea, mWp.gravity, mWp.walkSpd);
 		mPaths.Add (path);
 	}
 
