@@ -198,4 +198,9 @@ public class AStarSearchTest {
 		Assert.AreEqual (bestNode.edge, down);
 	}
 
+	[Test]
+	public void AStarSearch_reconstructPath_reconstructsBestPath () {
+		
+	}
+
 }
