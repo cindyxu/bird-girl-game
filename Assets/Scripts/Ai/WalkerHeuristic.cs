@@ -16,12 +16,15 @@ public class WalkerHeuristic {
 		return walkDist / mWp.walkSpd;
 	}
 
-	public float EstTotalTime (Edge edge, float exl, float exr, Edge destEdge, float dex, float tentativeG) {
-		float xtg = destEdge.left + dex;
+	public float EstTotalTime (Edge edge, float exl, float exr, Edge destEdge, float destX, float tentativeG) {
 
 		float jumpHeight = Kinematics.GetDeltaYFromVyFinal (mWp.jumpSpd, 0, mWp.gravity);
 		float dy = destEdge.bottom - edge.bottom;
-		float adx = Mathf.Abs (Mathf.Min(xtg - exl, xtg - exr));
+
+		float adx;
+		if (destX + mWp.size.x < exl) adx = exl - (destX + mWp.size.x);
+		else if (destX > exr) adx = destX - exr;
+		else adx = 0;
 
 		float estTime = 0;
 		if (edge != destEdge) {

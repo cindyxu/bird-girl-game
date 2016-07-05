@@ -10,16 +10,16 @@ public class AStarSearch {
 
 	private readonly Dictionary<Edge, List<EdgePath>> mEdgePaths;
 	private readonly Edge mStart;
-	private readonly float mStartOffsetX;
+	private readonly float mStartX;
 	private readonly Edge mDest;
-	private readonly float mDestOffsetX;
+	private readonly float mDestX;
 
 	private readonly WalkerParams mWp;
 	private readonly WalkerHeuristic mHeuristic;
 	private List<EdgePath> mPathChain;
 
 	public AStarSearch (Dictionary <Edge, List<EdgePath>> edgePaths, WalkerParams wp, 
-		Edge start, float startOffsetX, Edge dest, float destOffsetX) {
+		Edge start, float startX, Edge dest, float destX) {
 
 		mWp = wp;
 		mHeuristic = new WalkerHeuristic (wp);
@@ -27,16 +27,16 @@ public class AStarSearch {
 		mEdgePaths = edgePaths;
 		mStart = start;
 		mDest = dest;
-		mDestOffsetX = destOffsetX;
+		mDestX = destX;
 
 		startSearch ();
 	}
 
 	private void startSearch () {
-		TravelNode startNode = new TravelNode (null, mStart, mStart.left + mStartOffsetX, 
-			mStart.left + mStartOffsetX + mWp.size.x, 0);
+		TravelNode startNode = new TravelNode (null, mStart, mStartX, 
+			mStartX + mWp.size.x, 0);
 		mOpenQueue.Enqueue (startNode, mHeuristic.EstTotalTime (mStart, startNode.xlf, 
-			startNode.xrf, mDest, mDestOffsetX, 0));
+			startNode.xrf, mDest, mDestX, 0));
 	}
 
 	public IEnumerator<TravelNode> getQueueEnumerator () {
@@ -150,7 +150,7 @@ public class AStarSearch {
 		}
 		TravelNode node = new TravelNode (neighborPath, neighborPath.getEndEdge (), xlf, xrf, tentativeG);
 
-		float f = mHeuristic.EstTotalTime (neighborPath.getEndEdge (), xlf, xrf, mDest, mDestOffsetX, tentativeG);
+		float f = mHeuristic.EstTotalTime (neighborPath.getEndEdge (), xlf, xrf, mDest, mDestX, tentativeG);
 		Debug.Log ("  new node! " + f);
 		mOpenQueue.Enqueue (node, f);
 	}

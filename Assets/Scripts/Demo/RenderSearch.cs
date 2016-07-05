@@ -11,8 +11,8 @@ public class RenderSearch {
 		Edge destEdge, float destX, List<Edge> edges) {
 		Dictionary<Edge, List<EdgePath>> paths = 
 			GraphBuilder.BuildGraph (wp, edges);
-		mSearch = new AStarSearch (paths, wp, startEdge, startX - startEdge.left, 
-			destEdge, destX - destEdge.left); 
+		mSearch = new AStarSearch (paths, wp, startEdge, startX, 
+			destEdge, destX); 
 	}
 
 	public void StepSearch () {

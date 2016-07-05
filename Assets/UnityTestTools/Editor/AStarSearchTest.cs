@@ -18,7 +18,7 @@ public class AStarSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
 		AStarSearch search = new AStarSearch (paths, wp, 
-			start, 0.5f, dest, 0.5f);
+			start, 0, dest, 2);
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -38,7 +38,7 @@ public class AStarSearchTest {
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, dest, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, dest, 6);
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -61,7 +61,7 @@ public class AStarSearchTest {
 
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, dest, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, dest, 3);
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -79,7 +79,7 @@ public class AStarSearchTest {
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, dest, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, dest, 6);
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -96,7 +96,7 @@ public class AStarSearchTest {
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, dest, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, dest, 0);
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -114,7 +114,7 @@ public class AStarSearchTest {
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, dest, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, dest, 0);
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -134,7 +134,7 @@ public class AStarSearchTest {
 		edges.Add (right);
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, left, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, left, -3);
 		List<EdgePath> result;
 		search.Step (out result) ;
 		TravelNode bestNode = search.peekQueue ();
@@ -153,7 +153,7 @@ public class AStarSearchTest {
 		edges.Add (right);
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, right, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, right, 3);
 		List<EdgePath> result;
 		search.Step (out result) ;
 		TravelNode bestNode = search.peekQueue ();
@@ -172,7 +172,7 @@ public class AStarSearchTest {
 		edges.Add (down);
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, up, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, up, 0);
 		List<EdgePath> result;
 		search.Step (out result) ;
 		TravelNode bestNode = search.peekQueue ();
@@ -191,7 +191,7 @@ public class AStarSearchTest {
 		edges.Add (down);
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
-		AStarSearch search = new AStarSearch (paths, wp, start, 0.5f, down, 0.5f);
+		AStarSearch search = new AStarSearch (paths, wp, start, 0, down, 0);
 		List<EdgePath> result;
 		search.Step (out result) ;
 		TravelNode bestNode = search.peekQueue ();
@@ -200,7 +200,7 @@ public class AStarSearchTest {
 
 	[Test]
 	public void AStarSearch_shortAboveAndLongBelow_picksShortPath () {
-		List<Edge> edges = new List<Edge> ();
+
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge dest = new Edge (9, 0, 10, 0);
 		Edge short0 = new Edge (3, 0, 4, 0);
@@ -212,10 +212,9 @@ public class AStarSearchTest {
 		Edge long4 = new Edge (9, -6, 10, -6);
 		Edge long5 = new Edge (9, -4, 10, -4);
 		Edge long6 = new Edge (9, -2, 10, -2);
+
+		List<Edge> edges = new List<Edge> ();
 		edges.Add (start);
-		edges.Add (short0);
-		edges.Add (short1);
-		edges.Add (dest);
 		edges.Add (long0);
 		edges.Add (long1);
 		edges.Add (long2);
@@ -223,10 +222,14 @@ public class AStarSearchTest {
 		edges.Add (long4);
 		edges.Add (long5);
 		edges.Add (long6);
+		edges.Add (short0);
+		edges.Add (short1);
+		edges.Add (dest);
+
 		Dictionary<Edge, List<EdgePath>> paths = GraphBuilder.BuildGraph (wp, edges);
 
 		AStarSearch search = new AStarSearch (paths, wp, 
-			start, 0.5f, dest, 0.5f);
+			start, 0, dest, 9);
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
