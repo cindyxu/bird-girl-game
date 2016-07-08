@@ -5,20 +5,20 @@ public class JumpPath : EdgePath {
 
 	private readonly Edge mStartEdge;
 	private readonly Edge mEndEdge;
-	private readonly JumpScanArea mScanArea;
+	private readonly JumpScanArea mLeafArea;
 	private float mTravelTime;
 	private float mMovement;
 
-	public JumpPath (Edge startEdge, Edge endEdge, JumpScanArea scanArea, float gravity, float walkSpd) {
+	public JumpPath (WalkerParams wp, Edge startEdge, Edge endEdge, JumpScanArea leafArea) {
 		mStartEdge = startEdge;
 		mEndEdge = endEdge;
-		mScanArea = scanArea;
-		mTravelTime = Kinematics.GetDeltaTimeFromVyFinal (scanArea.root.end.vy, scanArea.end.vy, gravity);
-		mMovement = mTravelTime * walkSpd;
+		mLeafArea = leafArea;
+		mTravelTime = Kinematics.GetDeltaTimeFromVyFinal (leafArea.root.end.vy, leafArea.end.vy, wp.gravity);
+		mMovement = mTravelTime * wp.walkSpd;
 	}
 
 	public JumpScanArea getScanArea () {
-		return mScanArea;
+		return mLeafArea;
 	}
 
 	public Edge getStartEdge () {
@@ -38,13 +38,13 @@ public class JumpPath : EdgePath {
 	}
 
 	public void getStartRange (out float xli, out float xri) {
-		xli = mScanArea.root.end.xl;
-		xri = mScanArea.root.end.xr;
+		xli = mLeafArea.root.end.xl;
+		xri = mLeafArea.root.end.xr;
 	}
 
 	public void getEndRange (out float xlf, out float xrf) {
-		xlf = mScanArea.end.xl;
-		xrf = mScanArea.end.xr;
+		xlf = mLeafArea.end.xl;
+		xrf = mLeafArea.end.xr;
 	}
 }
 

@@ -6,6 +6,7 @@ public class Inhabitant : MonoBehaviour {
 	public Room startRoom;
 
 	private Collider2D mCollider2D;
+	private Rigidbody2D mRigidbody2D;
 	private InhabitantController mInhabitantController;
 
 	public delegate void OnCmdFinished();
@@ -14,7 +15,7 @@ public class Inhabitant : MonoBehaviour {
 	public float jumpSpd;
 	public float maxVelocity;
 
-	public delegate Vector2 GetDest();
+	public delegate void GetDest (out Vector2 pos, out Room room);
 	public bool RequestMoveTo (string locomotion, GetDest getDest, Inhabitant.OnCmdFinished callback) {
 		return mInhabitantController.RequestMoveTo (locomotion, getDest, callback);
 	}
@@ -37,16 +38,18 @@ public class Inhabitant : MonoBehaviour {
 
 	void Awake() {
 		mCollider2D = GetComponent<Collider2D> ();
-		WalkParams walkParams = new WalkParams (walkSpd, jumpSpd, maxVelocity);
-		mInhabitantController = new HumanoidController (gameObject, startRoom, walkParams);
+		mRigidbody2D = GetComponent<Rigidbody2D> ();
+		WalkerParams walkerParams = new WalkerParams (mCollider2D.bounds.size, walkSpd, jumpSpd, 
+			mRigidbody2D.mass * mRigidbody2D.gravityScale, maxVelocity);
+		mInhabitantController = new HumanoidController (gameObject, startRoom, walkerParams);
 	}
 
 	void Start() {
-		IgnoreCollisions ();
+		IgnoreCollisionsWithOthers ();
 		if (mInhabitantController != null) mInhabitantController.HandleStart ();
 	}
 
-	private void IgnoreCollisions() {
+	private void IgnoreCollisionsWithOthers() {
 		Inhabitant[] inhabitants = GameObject.FindObjectsOfType<Inhabitant> ();
 		foreach (Inhabitant inhabitant in inhabitants) {
 			Physics2D.IgnoreCollision (inhabitant.GetComponent<Collider2D> (), mCollider2D);
@@ -55,7 +58,6 @@ public class Inhabitant : MonoBehaviour {
 
 	void Update() {
 		if (mInhabitantController != null) mInhabitantController.HandleUpdate ();
-		Debug.Log (GetComponent<Rigidbody2D> ().velocity.y);
 	}
 
 	void FixedUpdate() {

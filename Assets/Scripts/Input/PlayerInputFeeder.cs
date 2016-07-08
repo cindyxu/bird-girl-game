@@ -3,55 +3,57 @@ using System.Collections;
 
 public class PlayerInputFeeder : InputFeeder {
 
-	public PlayerInputFeeder(InputCatcher inputCatcher) : base(inputCatcher) {}
-
-	public override void OnBeginInput () {
+	public override void OnBeginInput (InputCatcher catcher) {
 		KeyBindingManager kmManager = GameState.keybindingManager;
 		if (kmManager.GetKey (ActionKey.LEFT)) {
-			mInputCatcher.OnLeftPress ();
+			catcher.OnLeftPress ();
 		}
 		if (kmManager.GetKey (ActionKey.RIGHT)) {
-			mInputCatcher.OnRightPress ();
+			catcher.OnRightPress ();
 		}
 	}
 
-	public override void FeedInput () {
+	public override void OnEndInput (InputCatcher catcher) {
+	}
+
+	public override void FeedInput (InputCatcher catcher) {
 		KeyBindingManager kmManager = GameState.keybindingManager;
 
 		if (kmManager.GetKeyDown (ActionKey.LEFT)) {
-			mInputCatcher.OnLeftPress ();
+			catcher.OnLeftPress ();
 		}
 		if (kmManager.GetKeyUp (ActionKey.LEFT)) {
-			mInputCatcher.OnLeftRelease ();
+			catcher.OnLeftRelease ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.RIGHT)) {
-			mInputCatcher.OnRightPress ();
+			catcher.OnRightPress ();
 		} 
 		if (kmManager.GetKeyUp (ActionKey.RIGHT)) {
-			mInputCatcher.OnRightRelease ();
+			catcher.OnRightRelease ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.UP)) {
-			mInputCatcher.OnUpPress ();
+			catcher.OnUpPress ();
 		}
 		if (kmManager.GetKeyUp (ActionKey.UP)) {
-			mInputCatcher.OnUpRelease ();
+			catcher.OnUpRelease ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.DOWN)) {
-			mInputCatcher.OnDownPress ();
+			catcher.OnDownPress ();
 		} 
+
 		if (kmManager.GetKeyUp (ActionKey.DOWN)) {
-			mInputCatcher.OnDownRelease ();
+			catcher.OnDownRelease ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.JUMP)) {
-			mInputCatcher.OnJumpPress ();
+			catcher.OnJumpPress ();
 		}
 
 		if (kmManager.GetKeyDown (ActionKey.ACTION)) {
-			mInputCatcher.OnActionPress ();
+			catcher.OnActionPress ();
 		}
 	}
 }

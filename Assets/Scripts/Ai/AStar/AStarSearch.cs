@@ -26,6 +26,7 @@ public class AStarSearch {
 		mOpenQueue = new FastPriorityQueue<TravelNode> (edgePaths.Count * edgePaths.Count / 2);
 		mEdgePaths = edgePaths;
 		mStart = start;
+		mStartX = startX;
 		mDest = dest;
 		mDestX = destX;
 

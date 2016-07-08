@@ -103,7 +103,11 @@ public class CutsceneParser {
 				Inhabitant walkInhabitant = ((GameObject) eventParamObjs [0]).GetComponent<Inhabitant> ();
 
 				Vector2 dest = new Vector2 ((float) eventParamObjs [1], (float) eventParamObjs [2]);
-				Inhabitant.GetDest getDest = delegate { return dest; };
+				Room room = ((GameObject) eventParamObjs [3]).GetComponent <Room> ();
+				Inhabitant.GetDest getDest = (out Vector2 outDest, out Room outRoom) => {
+					outDest = dest;
+					outRoom = room;
+				};
 				Cutscene.Event cutsceneEvent = null;
 				cutsceneEvent = delegate(Cutscene.EventFinished callback) {
 					walkInhabitant.RequestMoveTo("walk", getDest, delegate {

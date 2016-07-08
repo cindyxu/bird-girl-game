@@ -29,8 +29,6 @@ public class Edge {
 		right = Mathf.Max (this.x0, this.x1);
 		bottom = Mathf.Min (this.y0, this.y1);
 		top = Mathf.Max (this.y0, this.y1);
-
-
 	}
 
 	public void SplitVert(float x, out Edge e0, out Edge e1) {

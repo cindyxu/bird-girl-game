@@ -168,7 +168,7 @@ public class JumpScan {
 
 	private void addPath (JumpScanArea area, Edge landEdge) {
 		JumpScanArea pathArea = recreateAreaChain (area, null);
-		JumpPath path = new JumpPath (mStartEdge, landEdge, pathArea, mWp.gravity, mWp.walkSpd);
+		JumpPath path = new JumpPath (mWp, mStartEdge, landEdge, pathArea);
 		mPaths.Add (path);
 	}
 

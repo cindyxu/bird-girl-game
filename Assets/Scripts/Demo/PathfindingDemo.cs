@@ -42,12 +42,12 @@ public class PathfindingDemo : MonoBehaviour {
 		mRenderScan = null;
 		if (mRenderSearch != null) mRenderSearch.CleanUp ();
 
-		Edge startEdge = findUnderEdge (mEdges, 
+		Edge startEdge = EdgeUtil.FindUnderEdge (mEdges, 
 			walker.transform.position.x - walker.size.x/2f, 
 			walker.transform.position.x + walker.size.x/2f, 
 			walker.transform.position.y);
 
-		Edge endEdge = findUnderEdge (mEdges, 
+		Edge endEdge = EdgeUtil.FindUnderEdge (mEdges, 
 			target.transform.position.x - target.size.x/2f, 
 			target.transform.position.x + target.size.x/2f, 
 			target.transform.position.y);
@@ -62,7 +62,7 @@ public class PathfindingDemo : MonoBehaviour {
 		mRenderSearch = null;
 		if (mRenderScan != null) mRenderScan.CleanUp ();
 
-		Edge underEdge = findUnderEdge (mEdges, 
+		Edge underEdge = EdgeUtil.FindUnderEdge (mEdges, 
 			walker.transform.position.x - walker.size.x/2f, 
 			walker.transform.position.x + walker.size.x/2f, 
 			walker.transform.position.y);
@@ -81,18 +81,6 @@ public class PathfindingDemo : MonoBehaviour {
 		} else if (mRenderSearch != null) {
 			mRenderSearch.StepSearch ();
 		}
-	}
-
-	private static Edge findUnderEdge (List<Edge> edges, float x0, float x1, float y) {
-		List<Edge> downEdges = edges.FindAll ((Edge edge) => edge.isDown && edge.y0 <= y);
-		// descending
-		downEdges.Sort ((Edge edge0, Edge edge1) => edge1.y0.CompareTo (edge0.y0));
-		foreach (Edge edge in downEdges) {
-			if (edge.x0 <= x1 && edge.x1 >= x0) {
-				return edge;
-			}
-		}
-		return null;
 	}
 
 }

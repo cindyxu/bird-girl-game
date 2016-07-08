@@ -15,11 +15,11 @@ public abstract class InhabitantController {
 		pTriggerer = new Triggerer (gameObject);
 	}
 
-	protected abstract Locomotion GetStartLocomotion();
+	protected abstract Locomotion GetStartLocomotion ();
 
-	protected virtual void FeedInput() {}
+	protected virtual void Act () {}
 
-	public RoomTraveller GetRoomTraveller() {
+	public RoomTraveller GetRoomTraveller () {
 		return pRoomTraveller;
 	}
 
@@ -62,7 +62,7 @@ public abstract class InhabitantController {
 	}
 
 	public void HandleUpdate () {
-		FeedInput ();
+		Act ();
 		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleUpdate ();
 	}
 

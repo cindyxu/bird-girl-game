@@ -1,14 +1,8 @@
 ﻿using System;
 
 public abstract class InputFeeder {
-
-	protected InputCatcher mInputCatcher;
-
-	public InputFeeder (InputCatcher inputCatcher) {
-		mInputCatcher = inputCatcher;
-	}
-
-	public abstract void OnBeginInput();
-	public abstract void FeedInput();
+	public abstract void OnBeginInput (InputCatcher catcher);
+	public abstract void OnEndInput (InputCatcher catcher);
+	public abstract void FeedInput (InputCatcher catcher);
 }
 

@@ -12,20 +12,23 @@ public class WalkLocomotion : Locomotion {
 
 	private InputCatcher mInputCatcher;
 
-	private WalkParams mWalkParams;
-//	private float mWalkSpeed = 10;
-//	private float mJumpSpeed = 12;
-//	private float mMaxVelocity = 100;
-	private bool isGrounded = false;
+	private WalkerParams mWalkerParams;
+	private bool mIsGrounded = false;
 
-	public delegate void OnClimbLadder(Ladder ladder, int direction);
+	public delegate void OnClimbLadder (Ladder ladder, int direction);
 	public event OnClimbLadder onClimbLadder;
+
+	public delegate void OnGrounded ();
+	public event OnGrounded onGrounded;
+
+	public delegate void OnJump ();
+	public event OnJump onJump;
 
 	private delegate void MovementOverride();
 	private MovementOverride movementOverride;
 
 	public WalkLocomotion (GameObject gameObject, InputCatcher inputCatcher, 
-		RoomTraveller traveller, Triggerer triggerer, WalkParams walkParams) {
+		RoomTraveller traveller, Triggerer triggerer, WalkerParams walkerParams) {
 		mGameObject = gameObject;
 		mRigidbody2D = mGameObject.GetComponent<Rigidbody2D> ();
 
@@ -38,11 +41,11 @@ public class WalkLocomotion : Locomotion {
 		traveller.onLeaveRoom += OnLeaveRoom;
 		mSortedEdgeCollidable.onSortedEdgeChanged += OnSortedEdgeChanged;
 
-		mWalkParams = walkParams;
+		mWalkerParams = walkerParams;
 	}
 
 	public override void Enable () {
-		isGrounded = (mSortedEdgeCollidable.GetCurrentEdge () != null);
+		mIsGrounded = (mSortedEdgeCollidable.GetCurrentEdge () != null);
 	}
 
 	public void OnLeaveRoom (RoomTraveller traveller, Room room) {
@@ -51,22 +54,23 @@ public class WalkLocomotion : Locomotion {
 	}
 
 	public void SetSpeed(int speed) {
-		if (speed == 1) mWalkParams.walkSpd = 2;
-		else mWalkParams.walkSpd = 8;
+		if (speed == 1) mWalkerParams.walkSpd = 2;
+		else mWalkerParams.walkSpd = 8;
 	}
 
 	public override void HandleUpdate () {
 		Vector2 velocity = new Vector2 (0, mRigidbody2D.velocity.y);
-		if (mInputCatcher.GetLeft()) {
-			velocity.x -= mWalkParams.walkSpd;
+		if (mInputCatcher.GetLeft ()) {
+			velocity.x -= mWalkerParams.walkSpd;
 		}
 		if (mInputCatcher.GetRight()) {
-			velocity.x += mWalkParams.walkSpd;
+			velocity.x += mWalkerParams.walkSpd;
 		}
-		if (mInputCatcher.GetJumpPress() && isGrounded) {
-			velocity.y = mWalkParams.jumpSpd;
+		if (mInputCatcher.GetJumpPress () && mIsGrounded) {
+			velocity.y = mWalkerParams.jumpSpd;
+			if (onJump != null) onJump ();
 		}
-		velocity.y = Mathf.Max (velocity.y, -mWalkParams.maxVelocity);
+		velocity.y = Mathf.Max (velocity.y, mWalkerParams.terminalV);
 		mRigidbody2D.velocity = velocity;
 
 		if (movementOverride != null) {
@@ -74,16 +78,20 @@ public class WalkLocomotion : Locomotion {
 		}
 		movementOverride = null;
 
-		if (mInputCatcher.GetActionPress() && mTriggerer.TryTrigger ()) {
-			return;
+		if (mInputCatcher.GetActionPress()) {
+			if (mTriggerer.TryTrigger ()) {
+				return;
+			}
 		} 
 		if (mInputCatcher.GetUp()) {
 			Ladder ascendLadder = mLadderClimber.GetAscendLadder ();
 			if (ascendLadder != null) onClimbLadder (ascendLadder, 1);
 		}
-		if (mInputCatcher.GetDownPress() && isGrounded) {
-			Ladder descendLadder = mLadderClimber.GetDescendLadder ();
-			if (descendLadder != null) onClimbLadder (descendLadder, -1);
+		if (mInputCatcher.GetDownPress()) {
+			if (mIsGrounded) {
+				Ladder descendLadder = mLadderClimber.GetDescendLadder ();
+				if (descendLadder != null) onClimbLadder (descendLadder, -1);
+			}
 		}
 	}
 
@@ -105,12 +113,14 @@ public class WalkLocomotion : Locomotion {
 
 	public void LadderJump (int direction) {
 		movementOverride += delegate {
-			mRigidbody2D.velocity = new Vector2 (mWalkParams.walkSpd * direction, mWalkParams.jumpSpd / 2f);
+			mRigidbody2D.velocity = new Vector2 (mWalkerParams.walkSpd * direction, mWalkerParams.jumpSpd / 2f);
 		};
 	}
 
 	void OnSortedEdgeChanged (SortedEdge sortedEdge) {
-		isGrounded = (sortedEdge != null);
+		bool isGrounded = (sortedEdge != null);
+		if (isGrounded && !mIsGrounded && onGrounded != null) onGrounded ();
+		mIsGrounded = isGrounded;
 	}
 }
 
