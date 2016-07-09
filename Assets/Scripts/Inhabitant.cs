@@ -5,86 +5,116 @@ public class Inhabitant : MonoBehaviour {
 
 	public Room startRoom;
 
+	private Locomotion mCurrentLocomotion;
+
+	private RoomTraveller mRoomTraveller;
+	private Triggerer mTriggerer;
+	private IController mController;
+
 	private Collider2D mCollider2D;
-	private Rigidbody2D mRigidbody2D;
-	private InhabitantController mInhabitantController;
 
 	public delegate void OnCmdFinished();
-
-	public float walkSpd;
-	public float jumpSpd;
-	public float maxVelocity;
-
 	public delegate void GetDest (out Vector2 pos, out Room room);
-	public bool RequestMoveTo (string locomotion, GetDest getDest, Inhabitant.OnCmdFinished callback) {
-		return mInhabitantController.RequestMoveTo (locomotion, getDest, callback);
+
+	public RoomTraveller GetRoomTraveller () {
+		return mRoomTraveller;
+	}
+
+	public Triggerer GetTriggerer () {
+		return mTriggerer;
+	}
+
+	protected Locomotion GetCurrentLocomotion () {
+		return mCurrentLocomotion;
+	}
+
+	// todo move these into a servant class
+	public bool RequestMoveTo (string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
+		return mController.RequestMoveTo (locomotion, getDest, callback);
 	}
 
 	public bool RequestFreeze () {
-		return mInhabitantController.RequestFreeze ();
+		return mController.RequestFreeze ();
 	}
 
 	public bool RequestFinishRequest () {
-		return mInhabitantController.RequestFinishRequest ();
+		return mController.RequestFinishRequest ();
 	}
 
-	public bool EnablePlayerInput(bool enabled) {
-		return mInhabitantController.EnablePlayerInput (enabled);
+	public bool EnablePlayerInput (bool enable) {
+		return mController.EnablePlayerInput (enable);
 	}
 
-	public RoomTraveller GetRoomTraveller() {
-		return mInhabitantController.GetRoomTraveller();
-	}
-
-	void Awake() {
+	void Awake () {
 		mCollider2D = GetComponent<Collider2D> ();
-		mRigidbody2D = GetComponent<Rigidbody2D> ();
-		WalkerParams walkerParams = new WalkerParams (mCollider2D.bounds.size, walkSpd, jumpSpd, 
-			mRigidbody2D.mass * mRigidbody2D.gravityScale, maxVelocity);
-		mInhabitantController = new HumanoidController (gameObject, startRoom, walkerParams);
+		mRoomTraveller = new RoomTraveller (gameObject, startRoom);
+		mTriggerer = new Triggerer (gameObject);
+		mController = CreateController ();
 	}
 
-	void Start() {
+	public virtual IController CreateController () {
+		return null;
+	}
+
+	void Start () {
 		IgnoreCollisionsWithOthers ();
-		if (mInhabitantController != null) mInhabitantController.HandleStart ();
+		mRoomTraveller.SetupRooms ();
+		StartLocomotion (mController.GetStartLocomotion ());
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleStart ();
 	}
 
-	private void IgnoreCollisionsWithOthers() {
+	private void IgnoreCollisionsWithOthers () {
 		Inhabitant[] inhabitants = GameObject.FindObjectsOfType<Inhabitant> ();
 		foreach (Inhabitant inhabitant in inhabitants) {
 			Physics2D.IgnoreCollision (inhabitant.GetComponent<Collider2D> (), mCollider2D);
 		}
 	}
 
+	public void StartLocomotion (Locomotion locomotion) {
+		if (mCurrentLocomotion != null) {
+			mCurrentLocomotion.Disable ();
+		}
+		mCurrentLocomotion = locomotion;
+		if (locomotion != null) {
+			mCurrentLocomotion.Enable ();
+		}
+		GetComponent<Collider2D> ().enabled = false;
+		GetComponent<Collider2D> ().enabled = true;
+	}
+
 	void Update() {
-		if (mInhabitantController != null) mInhabitantController.HandleUpdate ();
+		mController.Act ();
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleUpdate ();
 	}
 
 	void FixedUpdate() {
-		if (mInhabitantController != null) mInhabitantController.HandleFixedUpdate ();
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleFixedUpdate ();
 	}
 
 	void OnCollisionEnter2D(Collision2D collision) {
-		if (mInhabitantController != null) mInhabitantController.HandleCollisionEnter2D(collision);
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleCollisionEnter2D(collision);
 	}
 
 	void OnCollisionExit2D(Collision2D collision) {
-		if (mInhabitantController != null) mInhabitantController.HandleCollisionExit2D(collision);
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleCollisionExit2D(collision);
 	}
 
 	void OnCollisionStay2D(Collision2D collision) {
-		if (mInhabitantController != null) mInhabitantController.HandleCollisionStay2D(collision);
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleCollisionStay2D(collision);
 	}
 
 	void OnTriggerEnter2D(Collider2D other) {
-		if (mInhabitantController != null) mInhabitantController.HandleTriggerEnter2D(other);
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleTriggerEnter2D(other);
+		mTriggerer.HandleTriggerEnter2D (other);
 	}
 
 	void OnTriggerExit2D(Collider2D other) {
-		if (mInhabitantController != null) mInhabitantController.HandleTriggerExit2D(other);
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleTriggerExit2D(other);
+		mTriggerer.HandleTriggerExit2D (other);
 	}
 
 	void OnTriggerStay2D(Collider2D other) {
-		if (mInhabitantController != null) mInhabitantController.HandleTriggerStay2D(other);
+		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleTriggerStay2D(other);
+		mTriggerer.HandleTriggerStay2D (other);
 	}
 }

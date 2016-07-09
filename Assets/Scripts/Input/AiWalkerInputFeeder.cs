@@ -29,7 +29,8 @@ public class AiWalkerInputFeeder : InputFeeder {
 	public override void FeedInput (InputCatcher catcher) {
 		if (mPathPlanner != null) {
 			Debug.Log ("next input");
-			mPathPlanner.OnUpdate (mObservable.GetPosition ().x, mObservable.GetPosition ().y, mObservable.GetVelocity ().y);
+			mPathPlanner.OnUpdate (mObservable.GetPosition ().x, mObservable.GetPosition ().y, 
+				mObservable.GetVelocity ().y);
 			if (mPathPlanner.FeedInput (catcher)) {
 				Debug.Log ("reached goal!");
 				if (mOnReachDestination != null) {

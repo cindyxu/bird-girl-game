@@ -39,7 +39,7 @@ public class LadderLocomotion : Locomotion {
 
 		Room room = mCurrentLadder.GetComponentInParent<Room> ();
 		if (room != mRoomTraveller.GetCurrentRoom ()) {
-			mRoomTraveller.TransportTo (room, mCurrentLadder.GetComponent<Renderer> ().sortingLayerName);
+			mRoomTraveller.TransportTo (room, mCurrentLadder.GetSortingLayerName ());
 		}
 
 		mCurrentLadder.EnableClimbing (mCollider2D, true);
@@ -103,7 +103,7 @@ public class LadderLocomotion : Locomotion {
 		mRigidbody2D.velocity = velocity;
 	}
 
-	private void OnClimbToTop() {
+	private void OnClimbToTop () {
 		Vector3 position = mGameObject.transform.position;
 		position.y = mCurrentLadder.GetComponent<Collider2D> ().bounds.max.y 
 			+ mCollider2D.bounds.extents.y - mCollider2D.offset.y;
@@ -113,9 +113,9 @@ public class LadderLocomotion : Locomotion {
 		velocity.y = 0;
 		mRigidbody2D.velocity = velocity;
 
-		Room destRoom = mCurrentLadder.descend.GetComponentInParent<Room> ();
+		Room destRoom = mCurrentLadder.GetDestRoom ();
 		if (destRoom != mRoomTraveller.GetCurrentRoom ()) {
-			mRoomTraveller.TransportTo (destRoom, mCurrentLadder.descend.sortingLayerName);
+			mRoomTraveller.TransportTo (destRoom, mCurrentLadder.GetDestSortingLayerName ());
 		}
 
 		onLadderEndReached (1);

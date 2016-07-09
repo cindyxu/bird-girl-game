@@ -21,6 +21,8 @@ public class AStarSearch {
 	public AStarSearch (Dictionary <Edge, List<EdgePath>> edgePaths, WalkerParams wp, 
 		Edge start, float startX, Edge dest, float destX) {
 
+		Debug.Log ("starting Astar: from " + start + " to " + dest);
+
 		mWp = wp;
 		mHeuristic = new WalkerHeuristic (wp);
 		mOpenQueue = new FastPriorityQueue<TravelNode> (edgePaths.Count * edgePaths.Count / 2);

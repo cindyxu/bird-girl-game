@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public static class EdgeUtil {
 
 	public static Edge FindUnderEdge (List<Edge> edges, float x0, float x1, float y) {
-		List<Edge> downEdges = edges.FindAll ((Edge edge) => edge.isDown && edge.y0 <= y);
+		List<Edge> downEdges = edges.FindAll ((Edge edge) => edge.isDown && (edge.y0 <= y));
 		// descending
 		downEdges.Sort ((Edge edge0, Edge edge1) => edge1.y0.CompareTo (edge0.y0));
 		foreach (Edge edge in downEdges) {

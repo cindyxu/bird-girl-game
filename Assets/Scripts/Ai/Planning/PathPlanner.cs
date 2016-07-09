@@ -23,8 +23,15 @@ public class PathPlanner {
 		}
 		List<Edge> edges = EdgeBuilder.BuildEdges (edgeColliders);
 
-		Edge startEdge = EdgeUtil.FindUnderEdge (edges, 
-			px - wp.size.x/2, px + wp.size.x/2, py - wp.size.y/2);
+		Edge startEdge;
+		RaycastHit2D hit = Physics2D.Raycast (new Vector2 (px, py), Vector2.down);
+		if (hit.collider != null) {
+			startEdge = EdgeUtil.FindUnderEdge (edges, 
+				px - wp.size.x / 2, px + wp.size.x / 2, hit.point.y);
+		} else {
+			startEdge = EdgeUtil.FindUnderEdge (edges, 
+				px - wp.size.x / 2, px + wp.size.x / 2, py - wp.size.y / 2);
+		}
 		Edge destEdge = EdgeUtil.FindUnderEdge (edges, 
 			pos.x - wp.size.x/2, pos.x + wp.size.x/2, pos.y - wp.size.y/2);
 

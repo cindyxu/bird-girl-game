@@ -17,6 +17,22 @@ public class Ladder : MonoBehaviour {
 		mCollider2D = GetComponent<Collider2D> ();
 	}
 
+	public Room GetRoom () {
+		return GetComponentInParent<Room> ();
+	}
+
+	public String GetSortingLayerName () {
+		return GetComponent <Renderer> ().sortingLayerName;
+	}
+
+	public Room GetDestRoom () {
+		return descend.GetComponentInParent<Room> ();
+	}
+
+	public String GetDestSortingLayerName () {
+		return descend.sortingLayerName;
+	}
+
 	public void EnableClimbable(Collider2D targetCollider, bool climbable) {
 		Physics2D.IgnoreCollision (targetCollider, mCollider2D, !climbable);
 		if (!climbable) {
