@@ -36,11 +36,11 @@ public class GameState : MonoBehaviour {
 
 	public static void InitializeScene(GameObject player, CameraController cameraController) {
 		if (GameState.player != null) {
-			GameState.player.GetComponent<Inhabitant> ().EnablePlayerInput (false);
+			GameState.player.GetComponent<Inhabitant> ().RequestEnablePlayerInput (false);
 		}
 
 		GameState.player = player;
-		player.GetComponent<Inhabitant> ().EnablePlayerInput (true);
+		player.GetComponent<Inhabitant> ().RequestEnablePlayerInput (true);
 		GameState.cameraController = cameraController;
 		cameraController.SetFollowTarget (player);
 		mPlayerRoomController.Init (player.GetComponent<Inhabitant> ().GetRoomTraveller (), cameraController);

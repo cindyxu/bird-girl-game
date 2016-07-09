@@ -28,17 +28,10 @@ public class EdgeBuilder {
 			float px = collider.transform.position.x + collider.offset.x;
 			float py = collider.transform.position.y + collider.offset.y;
 
-			float scale = 1;
-			Transform ctransform = collider.transform;
-			while (ctransform != null) {
-				scale *= ctransform.localScale.x;
-				ctransform = ctransform.parent;
-			}
-
-			float minX = px - horz * scale/2;
-			float maxX = px + horz * scale/2;
-			float minY = py - vert * scale/2;
-			float maxY = py + vert * scale/2;
+			float minX = px - horz * collider.bounds.extents.x;
+			float maxX = px + horz * collider.bounds.extents.x;
+			float minY = py - vert * collider.bounds.extents.y;
+			float maxY = py + vert * collider.bounds.extents.y;
 
 			if (platformEffector != null) {
 				if ((vert > 0 && collider.transform.up.x < 0) || (horz > 0 && collider.transform.up.y > 0)) {

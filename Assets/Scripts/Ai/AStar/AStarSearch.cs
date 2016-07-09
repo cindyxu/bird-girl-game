@@ -99,6 +99,13 @@ public class AStarSearch {
 			return false;
 		}
 		Debug.Log ("continue - current edge " + bestNode.edge);
+		foreach (Edge key in mEdgePaths.Keys) {
+			Debug.Log ("why " + key + ", " + bestNode.edge.Equals (key));
+		}
+		if (!mEdgePaths.ContainsKey (bestNode.edge)) {
+			Debug.Log ("no paths from edge!");
+			return true;
+		}
 		List<EdgePath> neighborPaths = mEdgePaths [bestNode.edge];
 		Debug.Log (neighborPaths.Count + " paths");
 		foreach (EdgePath neighborPath in neighborPaths) {

@@ -21,7 +21,10 @@ public class PathPlanner {
 		for (int i = 0; i < sortedEdges.Length; i++) {
 			edgeColliders [i] = sortedEdges [i].GetComponent<EdgeCollider2D> ();
 		}
-		List<Edge> edges = EdgeBuilder.BuildEdges (edgeColliders);
+
+		List<Edge> edges;
+		Dictionary<Edge, List<EdgePath>> edgePaths;
+		ScanRoom (room, out edges, out edgePaths);
 
 		Edge startEdge;
 		RaycastHit2D hit = Physics2D.Raycast (new Vector2 (px, py), Vector2.down);
@@ -33,11 +36,9 @@ public class PathPlanner {
 				px - wp.size.x / 2, px + wp.size.x / 2, py - wp.size.y / 2);
 		}
 		Edge destEdge = EdgeUtil.FindUnderEdge (edges, 
-			pos.x - wp.size.x/2, pos.x + wp.size.x/2, pos.y - wp.size.y/2);
+			pos.x - wp.size.x/2, pos.x + wp.size.x/2, pos.y);
 
 		if (startEdge != destEdge) {
-			Dictionary<Edge, List<EdgePath>> edgePaths;
-			ScanRoom (room, out edges, out edgePaths);
 
 			AStarSearch search = new AStarSearch (edgePaths, wp, startEdge, 
 				                     (float) (px - wp.size.x / 2), destEdge, (float) (pos.x - wp.size.x / 2));

@@ -9,8 +9,8 @@ public class GraphBuilder {
 		foreach (Edge edge in edges) {
 			if (edge.isDown) {
 
-				Debug.Log ("scanning for " + edge);
 				JumpScan walkerScan = new JumpScan (wp, edge, edge.x0, wp.jumpSpd, edges);
+				Debug.Log ("scanning for " + edge);
 
 				while (walkerScan.Step ()) ;
 				List<JumpPath> jumpPaths = walkerScan.GetPaths ();

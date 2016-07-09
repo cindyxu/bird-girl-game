@@ -41,7 +41,7 @@ public class Inhabitant : MonoBehaviour {
 		return mController.RequestFinishRequest ();
 	}
 
-	public bool EnablePlayerInput (bool enable) {
+	public bool RequestEnablePlayerInput (bool enable) {
 		return mController.EnablePlayerInput (enable);
 	}
 
@@ -83,7 +83,9 @@ public class Inhabitant : MonoBehaviour {
 	}
 
 	void Update() {
-		mController.Act ();
+		if (mController != null) {
+			mController.Act ();
+		}
 		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleUpdate ();
 	}
 

@@ -20,7 +20,8 @@ public class LadderLocomotion : Locomotion {
 	public delegate void OnLadderDismount(int direction);
 	public event OnLadderDismount onLadderDismount;
 
-	public LadderLocomotion(GameObject gameObject, InputCatcher inputCatcher, RoomTraveller roomTraveller) {
+	public LadderLocomotion(GameObject gameObject, InputCatcher inputCatcher, 
+		RoomTraveller roomTraveller) {
 		mGameObject = gameObject;
 		mInputCatcher = inputCatcher;
 		mRoomTraveller = roomTraveller;
