@@ -7,12 +7,10 @@ public class LadderClimber {
 	private List<Collider2D> mBodyColliders = new List<Collider2D> ();
 	private List<Collider2D> mTopColliders = new List<Collider2D> ();
 
-	private readonly GameObject mGameObject;
-	private readonly Collider2D mCollider2D;
+	private readonly InhabitantFacade mFacade;
 
-	public LadderClimber (GameObject gameObject) {
-		mGameObject = gameObject;
-		mCollider2D = gameObject.GetComponent<Collider2D> ();
+	public LadderClimber (InhabitantFacade facade) {
+		mFacade = facade;
 	}
 
 	public void Reset () {
@@ -23,7 +21,7 @@ public class LadderClimber {
 	public Ladder GetAscendLadder() {
 		foreach (Collider2D collider2D in mBodyColliders) {
 			Ladder ascendLadder = collider2D.GetComponent<Ladder> ();
-			float distToTop = collider2D.bounds.max.y - mCollider2D.bounds.min.y;
+			float distToTop = collider2D.bounds.max.y - mFacade.GetBounds ().min.y;
 			if (distToTop > 0) {
 				return ascendLadder;
 			}
@@ -68,7 +66,7 @@ public class LadderClimber {
 	}
 
 	int CompareLadderColliders(Collider2D collider1, Collider2D collider2) {
-		return (collider1.bounds.ClosestPoint (mGameObject.transform.position).x - mGameObject.transform.position.x)
-			.CompareTo(collider2.bounds.ClosestPoint (mGameObject.transform.position).x - mGameObject.transform.position.x);
+		return (collider1.bounds.ClosestPoint (mFacade.GetPosition ()).x - mFacade.GetPosition ().x)
+			.CompareTo(collider2.bounds.ClosestPoint (mFacade.GetPosition ()).x - mFacade.GetPosition ().x);
 	}
 }

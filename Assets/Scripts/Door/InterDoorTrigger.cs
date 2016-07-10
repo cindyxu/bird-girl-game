@@ -35,7 +35,7 @@ public class InterDoorTrigger : DoorTrigger {
 	private void BeginEnterDoor(GameObject player) {
 		InterDoorTrigger destinationDoor = GameObject.Find (destinationDoorName).GetComponent<InterDoorTrigger> ();
 
-		RoomTraveller traveller = player.GetComponent<Inhabitant> ().GetRoomTraveller ();
+		RoomTraveller traveller = player.GetComponent<Inhabitant> ().GetFacade ().GetRoomTraveller ();
 		traveller.TransportTo (destinationDoor.GetRoom (), destinationDoor.GetSortingLayerName ());
 
 		Cutscene.Event enterDoorEvt = destinationDoor.CreateEnterCutsceneEvent (player);

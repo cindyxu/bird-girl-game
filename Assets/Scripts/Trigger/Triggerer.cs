@@ -7,8 +7,13 @@ public class Triggerer {
 	private List<Trigger> mActionTriggers = new List<Trigger> ();
 	private readonly Collider2D mCollider2D;
 
-	public Triggerer (GameObject gameObject) {
+	public Triggerer (GameObject gameObject, RoomTraveller traveller) {
 		mCollider2D = gameObject.GetComponent<Collider2D> ();
+		traveller.onLeaveRoom += OnLeaveRoom;
+	}
+
+	void OnLeaveRoom (RoomTraveller traveller, Room room) {
+		Reset ();
 	}
 
 	// Update is called once per frame

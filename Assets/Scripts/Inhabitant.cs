@@ -10,19 +10,12 @@ public class Inhabitant : MonoBehaviour {
 	private RoomTraveller mRoomTraveller;
 	private Triggerer mTriggerer;
 	private IController mController;
+	private InhabitantFacade mFacade;
 
 	private Collider2D mCollider2D;
 
 	public delegate void OnCmdFinished();
 	public delegate void GetDest (out Vector2 pos, out Room room);
-
-	public RoomTraveller GetRoomTraveller () {
-		return mRoomTraveller;
-	}
-
-	public Triggerer GetTriggerer () {
-		return mTriggerer;
-	}
 
 	protected Locomotion GetCurrentLocomotion () {
 		return mCurrentLocomotion;
@@ -48,12 +41,18 @@ public class Inhabitant : MonoBehaviour {
 	void Awake () {
 		mCollider2D = GetComponent<Collider2D> ();
 		mRoomTraveller = new RoomTraveller (gameObject, startRoom);
-		mTriggerer = new Triggerer (gameObject);
+		mTriggerer = new Triggerer (gameObject, mRoomTraveller);
+		mFacade = new InhabitantFacade (gameObject, mRoomTraveller, mTriggerer);
+
 		mController = CreateController ();
 	}
 
 	public virtual IController CreateController () {
 		return null;
+	}
+
+	public InhabitantFacade GetFacade () {
+		return mFacade;
 	}
 
 	void Start () {

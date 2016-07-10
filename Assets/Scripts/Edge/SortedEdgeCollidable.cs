@@ -6,14 +6,12 @@ public class SortedEdgeCollidable {
 	public delegate void OnSortedEdgeChanged(SortedEdge sortedEdge);
 	public OnSortedEdgeChanged onSortedEdgeChanged = (sortedEdge) => {};
 
-	private GameObject mGameObject;
-	private Renderer mRenderer;
+	private InhabitantFacade mFacade;
 	private SortedEdge mCurrentEdge;
 
 	// Use this for initialization
-	public SortedEdgeCollidable(GameObject gameObject) {
-		mGameObject = gameObject;
-		mRenderer = gameObject.GetComponent<Renderer> ();
+	public SortedEdgeCollidable(InhabitantFacade facade) {
+		mFacade = facade;
 	}
 
 	public void HandleCollisionEnter2D (Collision2D collision) {
@@ -42,10 +40,10 @@ public class SortedEdgeCollidable {
 	private void SetCurrentSurface (SortedEdge sortedEdge) {
 		mCurrentEdge = sortedEdge;
 		if (sortedEdge != null) {
-			mRenderer.sortingLayerName = sortedEdge.sortingLayerName;
-			mGameObject.layer = sortedEdge.gameObject.layer;
+			mFacade.SetSortingLayerName (sortedEdge.sortingLayerName);
+			mFacade.SetLayer (sortedEdge.gameObject.layer);
 		} else {
-			mGameObject.layer = LayerMask.NameToLayer ("Default");
+			mFacade.SetLayer (LayerMask.NameToLayer ("Default"));
 		}
 		onSortedEdgeChanged (mCurrentEdge);
 	}

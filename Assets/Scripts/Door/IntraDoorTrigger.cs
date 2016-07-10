@@ -15,7 +15,7 @@ public class IntraDoorTrigger : DoorTrigger {
 		Cutscene.Event leaveDoorEvt = CreateLeaveCutsceneEvent (target);
 		Cutscene.Event transitionEvt = null;
 		transitionEvt = delegate(Cutscene.EventFinished callback) {
-			RoomTraveller traveller = inhabitant.GetRoomTraveller ();
+			RoomTraveller traveller = inhabitant.GetFacade ().GetRoomTraveller ();
 			traveller.TransportTo(destination.GetRoom(), destination.GetSortingLayerName ());
 			callback(transitionEvt);
 		};

@@ -68,7 +68,8 @@ public class CutsceneParser {
 				GameObject transportObj = (GameObject) eventParamObjs [0];
 				GameObject transportRoomObj = (GameObject) eventParamObjs [1];
 				string sortingLayer = (string) eventParamObjs [2];
-				RoomTraveller transportTraveller = transportObj.GetComponent<Inhabitant> ().GetRoomTraveller ();
+				RoomTraveller transportTraveller = transportObj.GetComponent<Inhabitant> ()
+					.GetFacade ().GetRoomTraveller ();
 				Room transitionRoom = transportRoomObj.GetComponent<Room> ();
 				Cutscene.Event transportEvent = null;
 				transportEvent = delegate(Cutscene.EventFinished onCutsceneEnd) {

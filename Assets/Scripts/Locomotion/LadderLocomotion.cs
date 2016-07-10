@@ -2,15 +2,12 @@
 using System.Collections;
 
 public class LadderLocomotion : Locomotion {
-	private GameObject mGameObject;
-	private Rigidbody2D mRigidbody2D;
-	private Collider2D mCollider2D;
+	private InhabitantFacade mFacade;
 	private RoomTraveller mRoomTraveller;
 	private InputCatcher mInputCatcher;
 
 	private float mClimbSpeed = 5;
 	private float mSlideSpeed = 5;
-	private float mGravityScale;
 
 	private Ladder mCurrentLadder;
 
@@ -20,15 +17,10 @@ public class LadderLocomotion : Locomotion {
 	public delegate void OnLadderDismount(int direction);
 	public event OnLadderDismount onLadderDismount;
 
-	public LadderLocomotion(GameObject gameObject, InputCatcher inputCatcher, 
-		RoomTraveller roomTraveller) {
-		mGameObject = gameObject;
+	public LadderLocomotion (InhabitantFacade facade, InputCatcher inputCatcher) {
+		mFacade = facade;
 		mInputCatcher = inputCatcher;
-		mRoomTraveller = roomTraveller;
-
-		mRigidbody2D = mGameObject.GetComponent<Rigidbody2D> ();
-		mCollider2D = mGameObject.GetComponent<Collider2D> ();
-		mGravityScale = mRigidbody2D.gravityScale;
+		mRoomTraveller = mFacade.GetRoomTraveller ();
 	}
 
 	public void SetLadder(Ladder ladder) {
@@ -36,32 +28,35 @@ public class LadderLocomotion : Locomotion {
 	}
 
 	public override void Enable() {
-		mRigidbody2D.gravityScale = 0;
+		mFacade.SetWeightMult (0);
 
 		Room room = mCurrentLadder.GetComponentInParent<Room> ();
 		if (room != mRoomTraveller.GetCurrentRoom ()) {
 			mRoomTraveller.TransportTo (room, mCurrentLadder.GetSortingLayerName ());
 		}
 
-		mCurrentLadder.EnableClimbing (mCollider2D, true);
+		mFacade.EnableClimbing (mCurrentLadder, true);
 
-		Vector3 position = mGameObject.transform.position;
+		Vector3 position = mFacade.GetPosition ();
 		Bounds ladderBounds = mCurrentLadder.GetComponent<Collider2D> ().bounds;
 
+		Bounds bounds = mFacade.GetBounds ();
+		Vector2 offset = mFacade.GetOffset ();
+
 		position.x = Mathf.Clamp (position.x, 
-			ladderBounds.min.x + mCollider2D.bounds.extents.x - mCollider2D.offset.x,
-			ladderBounds.max.x - mCollider2D.bounds.extents.x - mCollider2D.offset.x);
+			ladderBounds.min.x + bounds.extents.x - offset.x,
+			ladderBounds.max.x - bounds.extents.x - offset.x);
 
 		position.y = Mathf.Clamp (position.y, 
-			ladderBounds.min.y + mCollider2D.bounds.extents.y - mCollider2D.offset.y,
-			ladderBounds.max.y - mCollider2D.bounds.extents.y - mCollider2D.offset.y);
+			ladderBounds.min.y + bounds.extents.y - offset.y,
+			ladderBounds.max.y - bounds.extents.y - offset.y);
 		
-		mGameObject.transform.position = position;
+		mFacade.SetPosition (position);
 	}
 
 	public override void Disable() {
-		mRigidbody2D.gravityScale = mGravityScale;
-		mCurrentLadder.EnableClimbing (mCollider2D, false);
+		mFacade.SetWeightMult (1);
+		mFacade.EnableClimbing (mCurrentLadder, false);
 	}
 
 	public override void HandleTriggerStay2D(Collider2D other) {
@@ -101,18 +96,18 @@ public class LadderLocomotion : Locomotion {
 			velocity.y = -mClimbSpeed;
 		}
 
-		mRigidbody2D.velocity = velocity;
+		mFacade.SetVelocity (velocity);
 	}
 
 	private void OnClimbToTop () {
-		Vector3 position = mGameObject.transform.position;
+		Vector3 position = mFacade.GetPosition ();
 		position.y = mCurrentLadder.GetComponent<Collider2D> ().bounds.max.y 
-			+ mCollider2D.bounds.extents.y - mCollider2D.offset.y;
-		mGameObject.transform.position = position;
+			+ mFacade.GetBounds ().extents.y - mFacade.GetOffset ().y;
+		mFacade.SetPosition (position);
 
-		Vector2 velocity = mRigidbody2D.velocity;
+		Vector2 velocity = mFacade.GetVelocity ();
 		velocity.y = 0;
-		mRigidbody2D.velocity = velocity;
+		mFacade.SetVelocity (velocity);
 
 		Room destRoom = mCurrentLadder.GetDestRoom ();
 		if (destRoom != mRoomTraveller.GetCurrentRoom ()) {

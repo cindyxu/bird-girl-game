@@ -43,7 +43,8 @@ public class GameState : MonoBehaviour {
 		player.GetComponent<Inhabitant> ().RequestEnablePlayerInput (true);
 		GameState.cameraController = cameraController;
 		cameraController.SetFollowTarget (player);
-		mPlayerRoomController.Init (player.GetComponent<Inhabitant> ().GetRoomTraveller (), cameraController);
+		mPlayerRoomController.Init (player.GetComponent<Inhabitant> ()
+			.GetFacade ().GetRoomTraveller (), cameraController);
 	}
 
 	public static void HandlePrepared() {

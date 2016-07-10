@@ -3,16 +3,13 @@ using System.Collections;
 
 public class WalkLocomotion : Locomotion {
 
-	private GameObject mGameObject;
-	private Rigidbody2D mRigidbody2D;
+	private readonly InhabitantFacade mFacade;
+	private readonly InputCatcher mInputCatcher;
+	private readonly WalkerParams mWalkerParams;
 
 	private LadderClimber mLadderClimber;
 	private SortedEdgeCollidable mSortedEdgeCollidable;
-	private Triggerer mTriggerer;
 
-	private InputCatcher mInputCatcher;
-
-	private WalkerParams mWalkerParams;
 	private bool mIsGrounded = false;
 
 	public delegate void OnClimbLadder (Ladder ladder, int direction);
@@ -24,21 +21,17 @@ public class WalkLocomotion : Locomotion {
 	public delegate void OnJump ();
 	public event OnJump onJump;
 
-	private delegate void MovementOverride();
+	private delegate void MovementOverride ();
 	private MovementOverride movementOverride;
 
-	public WalkLocomotion (GameObject gameObject, InputCatcher inputCatcher, 
-		RoomTraveller traveller, Triggerer triggerer, WalkerParams walkerParams) {
-		mGameObject = gameObject;
-		mRigidbody2D = mGameObject.GetComponent<Rigidbody2D> ();
-
+	public WalkLocomotion (InhabitantFacade facade, InputCatcher inputCatcher, WalkerParams walkerParams) {
+		mFacade = facade;
 		mInputCatcher = inputCatcher;
-		mTriggerer = triggerer;
 
-		mSortedEdgeCollidable = new SortedEdgeCollidable (gameObject);
-		mLadderClimber = new LadderClimber (gameObject);
+		mSortedEdgeCollidable = new SortedEdgeCollidable (facade);
+		mLadderClimber = new LadderClimber (facade);
 
-		traveller.onLeaveRoom += OnLeaveRoom;
+		facade.GetRoomTraveller ().onLeaveRoom += OnLeaveRoom;
 		mSortedEdgeCollidable.onSortedEdgeChanged += OnSortedEdgeChanged;
 
 		mWalkerParams = walkerParams;
@@ -50,16 +43,10 @@ public class WalkLocomotion : Locomotion {
 
 	public void OnLeaveRoom (RoomTraveller traveller, Room room) {
 		mLadderClimber.Reset ();
-		mTriggerer.Reset ();
-	}
-
-	public void SetSpeed(int speed) {
-		if (speed == 1) mWalkerParams.walkSpd = 2;
-		else mWalkerParams.walkSpd = 8;
 	}
 
 	public override void HandleUpdate () {
-		Vector2 velocity = new Vector2 (0, mRigidbody2D.velocity.y);
+		Vector2 velocity = new Vector2 (0, mFacade.GetVelocity ().y);
 		if (mInputCatcher.GetLeft ()) {
 			velocity.x -= mWalkerParams.walkSpd;
 		}
@@ -71,7 +58,7 @@ public class WalkLocomotion : Locomotion {
 			if (onJump != null) onJump ();
 		}
 		velocity.y = Mathf.Max (velocity.y, mWalkerParams.terminalV);
-		mRigidbody2D.velocity = velocity;
+		mFacade.SetVelocity (velocity);
 
 		if (movementOverride != null) {
 			movementOverride ();
@@ -79,7 +66,7 @@ public class WalkLocomotion : Locomotion {
 		movementOverride = null;
 
 		if (mInputCatcher.GetActionPress()) {
-			if (mTriggerer.TryTrigger ()) {
+			if (mFacade.GetTriggerer ().TryTrigger ()) {
 				return;
 			}
 		} 
@@ -113,7 +100,7 @@ public class WalkLocomotion : Locomotion {
 
 	public void LadderJump (int direction) {
 		movementOverride += delegate {
-			mRigidbody2D.velocity = new Vector2 (mWalkerParams.walkSpd * direction, mWalkerParams.jumpSpd / 2f);
+			mFacade.SetVelocity (new Vector2 (mWalkerParams.walkSpd * direction, mWalkerParams.jumpSpd / 2f));
 		};
 	}
 
