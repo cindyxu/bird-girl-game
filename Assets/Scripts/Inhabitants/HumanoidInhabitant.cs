@@ -13,7 +13,7 @@ public class HumanoidInhabitant : Inhabitant {
 		Rigidbody2D rigidbody2D = GetComponent <Rigidbody2D> ();
 
 		WalkerParams walkerParams = new WalkerParams (collider2D.bounds.size, walkSpd, jumpSpd, 
-			-rigidbody2D.mass * rigidbody2D.gravityScale, maxVelocity);
+			rigidbody2D.mass * rigidbody2D.gravityScale * Physics2D.gravity.y, maxVelocity);
 		
 		return new HumanoidController (this, walkerParams);
 	}

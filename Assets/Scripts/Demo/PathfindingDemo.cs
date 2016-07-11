@@ -4,11 +4,12 @@ using System.Collections.Generic;
 
 public class PathfindingDemo : MonoBehaviour {
 
-	[SerializeField]
-	public WalkerParams wp;
+	public float walkSpd;
+	public float jumpSpd;
+	public float terminalV;
 
-	public BoxCollider2D walker;
-	public BoxCollider2D target;
+	public GameObject walker;
+	public BoxCollider2D targetCollider;
 	public UnityEngine.UI.Button startButton;
 	public UnityEngine.UI.Button searchButton;
 	public UnityEngine.UI.Button stepButton;
@@ -16,7 +17,7 @@ public class PathfindingDemo : MonoBehaviour {
 	private List<Edge> mEdges;
 	private RenderScan mRenderScan;
 	private RenderSearch mRenderSearch;
-	private WalkerParams mWalkerParams;
+	private WalkerParams mWp;
 
 	void Awake () {
 		startButton.onClick.AddListener (StartScan);
@@ -25,6 +26,9 @@ public class PathfindingDemo : MonoBehaviour {
 
 		EdgeCollider2D[] edgeColliders = FindObjectsOfType<EdgeCollider2D> ();
 		mEdges = EdgeBuilder.BuildEdges (edgeColliders);
+		mWp = new WalkerParams (walker.GetComponent<BoxCollider2D> ().size, walkSpd, jumpSpd, 
+			walker.GetComponent <Rigidbody2D> ().gravityScale * Physics2D.gravity.y,
+			terminalV);
 
 		foreach (Edge edge in mEdges) {
 			Debug.Log ("created edge: " + edge + " " +
@@ -42,19 +46,20 @@ public class PathfindingDemo : MonoBehaviour {
 		mRenderScan = null;
 		if (mRenderSearch != null) mRenderSearch.CleanUp ();
 
+		BoxCollider2D walkerCollider = walker.GetComponent <BoxCollider2D> ();
 		Edge startEdge = EdgeUtil.FindUnderEdge (mEdges, 
-			walker.transform.position.x - walker.size.x/2f, 
-			walker.transform.position.x + walker.size.x/2f, 
+			walker.transform.position.x - walkerCollider.size.x/2f, 
+			walker.transform.position.x + walkerCollider.size.x/2f, 
 			walker.transform.position.y);
 
 		Edge endEdge = EdgeUtil.FindUnderEdge (mEdges, 
-			target.transform.position.x - target.size.x/2f, 
-			target.transform.position.x + target.size.x/2f, 
-			target.transform.position.y);
+			targetCollider.transform.position.x - targetCollider.size.x/2f, 
+			targetCollider.transform.position.x + targetCollider.size.x/2f, 
+			targetCollider.transform.position.y);
 
-		mRenderSearch = new RenderSearch (walker, target, wp, startEdge, 
-			walker.transform.position.x - walker.size.x/2f, 
-			endEdge, target.transform.position.x - target.size.x/2f, mEdges);
+		mRenderSearch = new RenderSearch (walkerCollider, targetCollider, mWp, startEdge, 
+			walker.transform.position.x - walkerCollider.size.x/2f, 
+			endEdge, targetCollider.transform.position.x - targetCollider.size.x/2f, mEdges);
 	}
 
 	public void StartScan () {
@@ -62,13 +67,14 @@ public class PathfindingDemo : MonoBehaviour {
 		mRenderSearch = null;
 		if (mRenderScan != null) mRenderScan.CleanUp ();
 
+		BoxCollider2D walkerCollider = walker.GetComponent <BoxCollider2D> ();
 		Edge underEdge = EdgeUtil.FindUnderEdge (mEdges, 
-			walker.transform.position.x - walker.size.x/2f, 
-			walker.transform.position.x + walker.size.x/2f, 
+			walker.transform.position.x - walkerCollider.size.x/2f, 
+			walker.transform.position.x + walkerCollider.size.x/2f, 
 			walker.transform.position.y);
 		if (underEdge != null) {
-			mRenderScan = new RenderScan (new JumpScan (wp, underEdge, 
-				walker.transform.position.x - walker.size.x/2f, wp.jumpSpd, mEdges));
+			mRenderScan = new RenderScan (new JumpScan (mWp, underEdge, 
+				walker.transform.position.x - walkerCollider.size.x/2f, mWp.jumpSpd, mEdges));
 			mRenderScan.UpdateGraph ();
 		} else {
 			mRenderScan = null;

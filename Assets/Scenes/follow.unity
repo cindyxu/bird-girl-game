@@ -144,7 +144,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 406970, guid: 1ae3cbf2896526a45bd2b2c09e7022d3, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -3
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 406970, guid: 1ae3cbf2896526a45bd2b2c09e7022d3, type: 2}
       propertyPath: m_LocalPosition.y
@@ -357,7 +357,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startRoom: {fileID: 849631220}
   walkSpd: 8
-  jumpSpd: 10
+  jumpSpd: 14
   maxVelocity: -100
 --- !u!212 &1576054342
 SpriteRenderer:
@@ -396,7 +396,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1576054340}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.5, y: -1.5, z: 0}
+  m_LocalPosition: {x: -5.5, y: -1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []

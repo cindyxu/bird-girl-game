@@ -1216,14 +1216,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5748e0a4857c3a4fbb6b4b84dfd5491, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wp:
-    size: {x: 1, y: 1}
-    walkSpd: 5
-    jumpSpd: 18
-    gravity: -50
-    terminalV: -100
-  walker: {fileID: 1871783272}
-  target: {fileID: 22365904}
+  walkSpd: 8
+  jumpSpd: 14
+  terminalV: -100
+  walker: {fileID: 1871783271}
+  targetCollider: {fileID: 22365904}
   startButton: {fileID: 2025884160}
   searchButton: {fileID: 1734239403}
   stepButton: {fileID: 669465583}
@@ -1313,7 +1310,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 5
   m_IsKinematic: 0
   m_Interpolate: 0
   m_SleepingMode: 1

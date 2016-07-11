@@ -28,10 +28,10 @@ public class WalkLocomotion : Locomotion {
 		mFacade = facade;
 		mInputCatcher = inputCatcher;
 
-		mSortedEdgeCollidable = new SortedEdgeCollidable (facade);
-		mLadderClimber = new LadderClimber (facade);
+		mSortedEdgeCollidable = new SortedEdgeCollidable (mFacade);
+		mLadderClimber = new LadderClimber (mFacade);
 
-		facade.GetRoomTraveller ().onLeaveRoom += OnLeaveRoom;
+		mFacade.GetRoomTraveller ().onLeaveRoom += OnLeaveRoom;
 		mSortedEdgeCollidable.onSortedEdgeChanged += OnSortedEdgeChanged;
 
 		mWalkerParams = walkerParams;

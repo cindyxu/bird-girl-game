@@ -11,6 +11,7 @@ public class WalkPlanner {
 	public WalkPlanner (float xli, float xri) {
 		mXli = xli;
 		mXri = xri;
+		Debug.Log ("new walk planner " + xli + ", " + xri);
 	}
 
 	public void OnUpdate (float x) {
@@ -18,6 +19,7 @@ public class WalkPlanner {
 	}
 
 	public int GetMoveDir () {
+		Debug.Log ("x is " + mX);
 		if (mX < mXli) return 1;
 		if (mX + mWp.size.x >= mXri) return -1;
 		return 0;

@@ -2520,7 +2520,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startRoom: {fileID: 518904788}
   walkSpd: 8
-  jumpSpd: 10
+  jumpSpd: 12
   maxVelocity: -100
 --- !u!4 &580455308 stripped
 Transform:
@@ -4417,7 +4417,7 @@ Transform:
   - {fileID: 1021445607}
   - {fileID: 2094717452}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
 --- !u!1 &981742484
 GameObject:
   m_ObjectHideFlags: 0

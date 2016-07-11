@@ -100,7 +100,6 @@ public class AStarSearch {
 		}
 		Debug.Log ("continue - current edge " + bestNode.edge);
 		foreach (Edge key in mEdgePaths.Keys) {
-			Debug.Log ("why " + key + ", " + bestNode.edge.Equals (key));
 		}
 		if (!mEdgePaths.ContainsKey (bestNode.edge)) {
 			Debug.Log ("no paths from edge!");
@@ -119,8 +118,9 @@ public class AStarSearch {
 
 		float nxli, nxri;
 		neighborPath.getStartRange (out nxli, out nxri);
-		tnxli = Mathf.Min (Mathf.Max (pxlf, nxli), nxri);
-		tnxri = Mathf.Min (Mathf.Max (pxrf, nxli), nxri);
+
+		tnxli = Mathf.Min (Mathf.Max (pxlf, nxli), nxri - mWp.size.x);
+		tnxri = Mathf.Min (Mathf.Max (pxrf, nxli + mWp.size.x), nxri);
 	}
 
 	private void getTaperedEndRange (EdgePath neighborPath, float xli, float xri, 
@@ -151,7 +151,6 @@ public class AStarSearch {
 			mBestHeuristics[neighborPath] = new EdgeHeuristicRange<TravelNode> (exrf - exlf);
 		}
 		EdgeHeuristicRange<TravelNode> heuristic = mBestHeuristics [neighborPath];
-
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (xlf - exlf, xrf - exlf, parentNode, out writeRange, out newRange);
 		if (!newRange) {

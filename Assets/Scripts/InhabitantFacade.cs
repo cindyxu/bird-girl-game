@@ -74,12 +74,16 @@ public class InhabitantFacade {
 		if (mRigidbody2D != null) mRigidbody2D.AddForce (force);
 	}
 
-	public virtual String GetSortingLayerName () {
+	public virtual string GetSortingLayerName () {
 		return mRenderer.sortingLayerName;
 	}
 
-	public virtual void SetSortingLayerName (String name) {
+	public virtual void SetSortingLayerName (string name) {
 		mRenderer.sortingLayerName = name;
+	}
+
+	public virtual int GetLayer () {
+		return mGameObject.layer;
 	}
 
 	public virtual void SetLayer (int layer) {
