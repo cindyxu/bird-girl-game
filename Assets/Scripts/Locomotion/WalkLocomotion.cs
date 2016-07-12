@@ -82,6 +82,17 @@ public class WalkLocomotion : Locomotion {
 		}
 	}
 
+	public override void HandleFixedUpdate () {
+		Vector2 velocity = new Vector2 (0, mFacade.GetVelocity ().y);
+		if (mInputCatcher.GetLeft ()) {
+			velocity.x -= mWalkerParams.walkSpd;
+		}
+		if (mInputCatcher.GetRight()) {
+			velocity.x += mWalkerParams.walkSpd;
+		}
+		mFacade.SetVelocity (velocity);
+	}
+
 	public override void HandleCollisionEnter2D (Collision2D collision) {
 		mSortedEdgeCollidable.HandleCollisionEnter2D (collision);
 	}

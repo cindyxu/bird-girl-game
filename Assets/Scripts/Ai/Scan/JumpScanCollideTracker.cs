@@ -83,7 +83,7 @@ public class JumpScanCollideTracker {
 				}
 			}
 		}
-//		Debug.Log ("initialized edges: rising: " + mRisingEdges.Count + ", falling: " + mFallingEdges.Count);
+//		Log.D ("initialized edges: rising: " + mRisingEdges.Count + ", falling: " + mFallingEdges.Count);
 	}
 
 	private void PopulatePts () {
@@ -130,7 +130,7 @@ public class JumpScanCollideTracker {
 				mSideWindow.Add (edge);
 			}
 		}
-//		Debug.Log ("rising window at " + mwri);
+//		Log.D ("rising window at " + mwri);
 
 		for (; mwfi < mFallingEdges.Count; mwfi++) {
 			Edge edge = mFallingEdges [mwfi];
@@ -139,7 +139,7 @@ public class JumpScanCollideTracker {
 			}
 		}
 
-//		Debug.Log ("falling window at " + mwfi);
+//		Log.D ("falling window at " + mwfi);
 
 		mSideWindow.Sort (Edge.SortByLeftAsc);
 	}
@@ -194,7 +194,7 @@ public class JumpScanCollideTracker {
 		myb = nyb;
 		mDir = (shift > 0 ? 1 : -1);
 
-//		Debug.Log ("shifted window. up: " + mUpWindow.Count + ", down: " + mDownWindow.Count + ", side: " + mSideWindow.Count);
+//		Log.D ("shifted window. up: " + mUpWindow.Count + ", down: " + mDownWindow.Count + ", side: " + mSideWindow.Count);
 
 		return shift;
 	}
@@ -208,7 +208,7 @@ public class JumpScanCollideTracker {
 				else mUpWindow.Add (edge);
 			} else break;
 		}
-//		Debug.Log ("  accumulate rising window from " + mwri + " to " + nwri);
+//		Log.D ("  accumulate rising window from " + mwri + " to " + nwri);
 		mwri = nwri;
 	}
 
@@ -218,7 +218,7 @@ public class JumpScanCollideTracker {
 			Edge edge = mFallingEdges [nwfi-1];
 			if (edge.top > nyb) break;
 		}
-//		Debug.Log ("  retreat falling window now from " + mwfi + " to " + nwfi);
+//		Log.D ("  retreat falling window now from " + mwfi + " to " + nwfi);
 		mwfi = nwfi;
 	}
 
@@ -231,7 +231,7 @@ public class JumpScanCollideTracker {
 				else mDownWindow.Add (edge);
 			} else break;
 		}
-//		Debug.Log ("  accumulate falling window from " + mwfi + " to " + nwfi);
+//		Log.D ("  accumulate falling window from " + mwfi + " to " + nwfi);
 		mwfi = nwfi;
 	}
 
@@ -241,12 +241,12 @@ public class JumpScanCollideTracker {
 			Edge edge = mRisingEdges [nwri-1];
 			if (edge.bottom < nyt) break;
 		}
-//		Debug.Log ("  retreat rising window from " + mwri + " to " + nwri);
+//		Log.D ("  retreat rising window from " + mwri + " to " + nwri);
 		mwri = nwri;
 	}
 
 	public List<Segment> GetSectionedLine (float xl, float xr, float dxMax) {
-//		Debug.Log ("section line: up: " + mUpWindow.Count + " ; down: " + mDownWindow.Count + " ; side: " + mSideWindow.Count);
+//		Log.D ("section line: up: " + mUpWindow.Count + " ; down: " + mDownWindow.Count + " ; side: " + mSideWindow.Count);
 		List<Segment> blockingSegments = (mDir == 0 ? new List<Segment> () : 
 			getBlockingSegments (xl, xr, mDir > 0 ? mUpWindow : mDownWindow));
 		List<Segment> segments = fillInSegments (xl, xr, dxMax, blockingSegments);

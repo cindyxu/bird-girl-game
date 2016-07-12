@@ -30,9 +30,16 @@ public class ChainPlanner {
 	}
 
 	public void OnUpdate (float x, float y, float vy) {
+
+//		Debug.Log ("dx is " + (mX - x) + ", should be = " + mWp.walkSpd * Time.deltaTime);
+		float yy = Kinematics.GetDeltaYFromVyFinal (mVy, vy, mWp.gravity);
+//		Debug.Log ("dy is " + (y - mY) + ", should be = " + yy);
+		Debug.Log ("vy = " + vy);
+
 		mX = x;
 		mY = y;
 		mVy = vy;
+
 		if (mWalkPlanner != null) {
 			mWalkPlanner.OnUpdate (mX);
 		} else if (mJumpPlanner != null) {
@@ -43,7 +50,6 @@ public class ChainPlanner {
 	public bool FeedInput (InputCatcher inputCatcher) {
 		if (mWalkPlanner != null) {
 			int dir = mWalkPlanner.GetMoveDir ();
-			Debug.Log ("walking it " + dir);
 			inputMoveDir (inputCatcher, dir);
 			if (dir == 0) {
 				if (mPathIdx < mChain.Count) {
@@ -53,7 +59,6 @@ public class ChainPlanner {
 				} else return true;
 			}
 		} else if (mJumpPlanner != null) {
-			Debug.Log ("jumping it");
 			inputMoveDir (inputCatcher, mJumpPlanner.GetMoveDir ());
 		}
 		return false;

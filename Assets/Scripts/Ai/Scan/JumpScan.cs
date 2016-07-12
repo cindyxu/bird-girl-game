@@ -19,7 +19,7 @@ public class JumpScan {
 		mStartEdge = startEdge;
 		mWp = wp;
 
-//		Debug.Log ("x: " + x + ", size: " + ((double) wp.size.x) + ", " + ((double) wp.size.y));
+//		Log.D ("x: " + x + ", size: " + ((double) wp.size.x) + ", " + ((double) wp.size.y));
 
 		initializeQueue (startEdge, x, vy, edges);
 	}
@@ -29,7 +29,7 @@ public class JumpScan {
 		float exl = Mathf.Min (startEdge.x0, startEdge.x1) - mWp.size.x + EDGE_THRESHOLD;
 		float exr = Mathf.Max (startEdge.x0, startEdge.x1) + mWp.size.x - EDGE_THRESHOLD;
 		List<Edge> qualifiedEdges = getQualifiedEdges (exl, exr + mWp.size.x, y, vy, edges);
-//		Debug.Log ("found " + qualifiedEdges.Count + " qualified edges");
+//		Log.D ("found " + qualifiedEdges.Count + " qualified edges");
 
 		ScanStep step = new ScanStep ();
 		step.collideTracker = new JumpScanCollideTracker (qualifiedEdges, y + mWp.size.y, y, mWp.size.x, EDGE_THRESHOLD);
@@ -57,7 +57,7 @@ public class JumpScan {
 
 		float yZenith = yi + Kinematics.GetDeltaYFromVyFinal (vyi, 0, mWp.gravity);
 		float yMin = Mathf.Infinity;
-//		Debug.Log ("xl: " + xl + ", xr: " + xr + ", yi: " + yi + ", vyi: " + vyi + ", gravity: " + mWp.gravity + ", zenith: " + yZenith);
+//		Log.D ("xl: " + xl + ", xr: " + xr + ", yi: " + yi + ", vyi: " + vyi + ", gravity: " + mWp.gravity + ", zenith: " + yZenith);
 
 		List<Edge> qualifiedEdges = new List<Edge> ();
 		foreach (Edge edge in edges) {
@@ -72,7 +72,7 @@ public class JumpScan {
 		float xBottomSpread = Kinematics.GetAbsDeltaXFromDeltaY (vyi, Math.Sign (vyMin), yMin - yi, mWp.gravity, mWp.terminalV, mWp.walkSpd);
 		float xMin = xl - xBottomSpread;
 		float xMax = xr + xBottomSpread;
-//		Debug.Log ("x range: " + xMin + ", " + xMax);
+//		Log.D ("x range: " + xMin + ", " + xMax);
 		for (int i = qualifiedEdges.Count - 1; i >= 0; i--) {
 			Edge edge = qualifiedEdges [i];
 			if (edge.right < xMin || edge.left > xMax) {
@@ -83,18 +83,18 @@ public class JumpScan {
 	}
 
 	public bool Step () {
-//		Debug.Log ("STEP *********************************");
+//		Log.D ("STEP *********************************");
 		if (mStepQueue.Count == 0) return false;
 		ScanStep parentStep = mStepQueue.Dequeue ();
 		JumpScanArea parentArea = parentStep.scanArea;
 
 		JumpScanLine el = parentArea.end;
-//		Debug.Log ("Next line at x: " + el.xl + " to " + el.xr + " ; y: " + el.y + " ; vy: " + el.vy);
+//		Log.D ("Next line at x: " + el.xl + " to " + el.xr + " ; y: " + el.y + " ; vy: " + el.vy);
 
 		JumpScanCollideTracker tracker = new JumpScanCollideTracker (parentStep.collideTracker);
 		float yo, vyo;
 		advanceCollisionWindow (tracker, el.xl, el.xr, el.y, el.vy, out yo, out vyo);
-//		Debug.Log ("yo: " + yo + ", vyo: " + vyo);
+//		Log.D ("yo: " + yo + ", vyo: " + vyo);
 		float dx = Kinematics.GetAbsDeltaXFromDeltaY (
 			parentArea.end.vy, Math.Sign (vyo), yo - parentArea.end.y, mWp.gravity, mWp.terminalV, mWp.walkSpd);
 		List<JumpScanCollideTracker.Segment> segments = tracker.GetSectionedLine (el.xl, el.xr, dx);
@@ -106,15 +106,15 @@ public class JumpScan {
 	}
 
 	private void ProcessSegment(ScanStep parentStep, JumpScanCollideTracker tracker, float yo, float vyo, JumpScanCollideTracker.Segment segment) {
-//		Debug.Log ("  Process segment: xi: " + segment.xli + " to " + segment.xri + 
+//		Log.D ("  Process segment: xi: " + segment.xli + " to " + segment.xri + 
 //			" ; xf: " + segment.xlf + " to " + segment.xrf + " ; edge: " + segment.horzBlock);
 		if (segment.xri < segment.xli + mWp.size.x || segment.xrf < segment.xlf + mWp.size.x) {
-//			Debug.Log ("  Result: too small. discarding");
+//			Log.D ("  Result: too small. discarding");
 			return;
 		}
 		JumpScanArea parentArea = parentStep.scanArea;
 		if (segment.horzBlock != null && segment.horzBlock.isUp) {
-//			Debug.Log ("  Result: hit something above");
+//			Log.D ("  Result: hit something above");
 			// we make a faux area here
 			JumpScanLine spli = parentArea.start;
 			JumpScanLine splo = new JumpScanLine (segment.xli, segment.xri, parentArea.end.y, 0);
@@ -127,7 +127,7 @@ public class JumpScan {
 		} else {
 			if (segment.horzBlock != null && segment.horzBlock.isDown) {
 				if (segment.horzBlock != mStartEdge) {
-//					Debug.Log ("  Result: new patch");
+//					Log.D ("  Result: new patch");
 					JumpScanLine lo = new JumpScanLine (segment.xli, segment.xri, parentArea.end.y, parentArea.end.vy); 
 					JumpScanArea area = new JumpScanArea (parentArea.parent, parentArea.start, lo);
 					addPath (area, segment.horzBlock);
@@ -136,14 +136,14 @@ public class JumpScan {
 				JumpScanLine li = new JumpScanLine (segment.xli, segment.xri, parentArea.end.y, parentArea.end.vy); 
 				JumpScanLine lo = new JumpScanLine (segment.xlf, segment.xrf, yo, vyo);
 				JumpScanArea area = new JumpScanArea (parentArea, li, lo);
-//				Debug.Log ("  Result: continue");
+//				Log.D ("  Result: continue");
 				if (yo > Mathf.NegativeInfinity) {
 					ScanStep step = new ScanStep ();
 					step.collideTracker = tracker;
 					step.scanArea = area;
 					mStepQueue.Enqueue (step);
 				} 
-//				else Debug.Log ("  infinity!");
+//				else Log.D ("  infinity!");
 			}
 		}
 	}

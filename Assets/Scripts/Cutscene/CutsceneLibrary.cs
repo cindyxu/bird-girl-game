@@ -45,7 +45,7 @@ public class CutsceneLibrary {
 				cutsceneCt++;
 			}
 		}
-		Debug.Log ("Added " + cutsceneCt + " cutscenes");
+		Log.D ("Added " + cutsceneCt + " cutscenes", Log.CUTSCENE);
 	}
 
 	private void addCutscene(string name, string[] lines) {
