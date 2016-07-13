@@ -32,7 +32,7 @@ public class ChainPlanner {
 	public void OnUpdate (float x, float y, float vy) {
 
 //		Debug.Log ("dx is " + (mX - x) + ", should be = " + mWp.walkSpd * Time.deltaTime);
-		float yy = Kinematics.GetDeltaYFromVyFinal (mVy, vy, mWp.gravity);
+		float yy = mWp.trajectory.GetDeltaYFromVyFinal (mVy, vy);
 //		Debug.Log ("dy is " + (y - mY) + ", should be = " + yy);
 		Debug.Log ("vy = " + vy);
 

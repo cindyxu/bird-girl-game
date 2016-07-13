@@ -18,7 +18,7 @@ public class WalkerHeuristic {
 
 	public float EstTotalTime (Edge edge, float exl, float exr, Edge destEdge, float destX, float tentativeG) {
 
-		float jumpHeight = Kinematics.GetDeltaYFromVyFinal (mWp.jumpSpd, 0, mWp.gravity);
+		float jumpHeight = mWp.trajectory.GetDeltaYFromVyFinal (mWp.jumpSpd, 0);
 		float dy = destEdge.bottom - edge.bottom;
 
 		float adx;
@@ -31,15 +31,15 @@ public class WalkerHeuristic {
 			if (dy > 0) {
 				while (dy > 0) {
 					float jumpDy = Mathf.Min (dy, jumpHeight);
-					float jumpTime = Kinematics.GetDeltaTimeFromDeltaY (mWp.jumpSpd, -1, jumpDy, mWp.gravity, mWp.terminalV);
-					float walkDist = Kinematics.GetAbsDeltaXFromDeltaY (mWp.jumpSpd, -1, jumpDy, mWp.gravity, mWp.terminalV, mWp.walkSpd);
+					float jumpTime = mWp.trajectory.GetDeltaTimeFromDeltaY (mWp.jumpSpd, -1, jumpDy);
+					float walkDist = mWp.trajectory.GetAbsDeltaXFromDeltaY (mWp.jumpSpd, -1, jumpDy);
 					dy -= jumpHeight;
 					estTime += jumpTime;
 					adx = Mathf.Max (adx - walkDist, 0);
 				}
 			} else {
-				float jumpTime = Kinematics.GetDeltaTimeFromDeltaY (mWp.jumpSpd, -1, dy, mWp.gravity, mWp.terminalV);
-				float walkDist = Kinematics.GetAbsDeltaXFromDeltaY (mWp.jumpSpd, -1, dy, mWp.gravity, mWp.terminalV, mWp.walkSpd);
+				float jumpTime = mWp.trajectory.GetDeltaTimeFromDeltaY (mWp.jumpSpd, -1, dy);
+				float walkDist = mWp.trajectory.GetAbsDeltaXFromDeltaY (mWp.jumpSpd, -1, dy);
 				estTime += jumpTime;
 				adx = Mathf.Max (adx - walkDist, 0);			
 			}

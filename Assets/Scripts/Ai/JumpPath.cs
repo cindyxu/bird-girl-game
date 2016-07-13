@@ -13,7 +13,7 @@ public class JumpPath : EdgePath {
 		mStartEdge = startEdge;
 		mEndEdge = endEdge;
 		mLeafArea = leafArea;
-		mTravelTime = Kinematics.GetDeltaTimeFromVyFinal (leafArea.root.end.vy, leafArea.end.vy, wp.gravity);
+		mTravelTime = wp.trajectory.GetDeltaTimeFromVyFinal (leafArea.root.end.vy, leafArea.end.vy);
 		mMovement = mTravelTime * wp.walkSpd;
 	}
 

@@ -55,7 +55,7 @@ public class JumpScan {
 	// gets edges within the maximum x-distance of the furthest y
 	private List<Edge> getQualifiedEdges(float xl, float xr, float yi, float vyi, List<Edge> edges) {
 
-		float yZenith = yi + Kinematics.GetDeltaYFromVyFinal (vyi, 0, mWp.gravity);
+		float yZenith = yi + mWp.trajectory.GetDeltaYFromVyFinal (vyi, 0);
 		float yMin = Mathf.Infinity;
 //		Log.D ("xl: " + xl + ", xr: " + xr + ", yi: " + yi + ", vyi: " + vyi + ", gravity: " + mWp.gravity + ", zenith: " + yZenith);
 
@@ -67,9 +67,9 @@ public class JumpScan {
 			}
 		}
 
-		float vyMin = Kinematics.GetVyFinalFromDeltaY (vyi, 1, yMin - yi, mWp.gravity, mWp.terminalV);
+		float vyMin = mWp.trajectory.GetVyFinalFromDeltaY (vyi, 1, yMin - yi);
 		if (vyMin > 0) vyMin = Mathf.Max (-vyMin, mWp.terminalV);
-		float xBottomSpread = Kinematics.GetAbsDeltaXFromDeltaY (vyi, Math.Sign (vyMin), yMin - yi, mWp.gravity, mWp.terminalV, mWp.walkSpd);
+		float xBottomSpread = mWp.trajectory.GetAbsDeltaXFromDeltaY (vyi, Math.Sign (vyMin), yMin - yi);
 		float xMin = xl - xBottomSpread;
 		float xMax = xr + xBottomSpread;
 //		Log.D ("x range: " + xMin + ", " + xMax);
@@ -95,8 +95,8 @@ public class JumpScan {
 		float yo, vyo;
 		advanceCollisionWindow (tracker, el.xl, el.xr, el.y, el.vy, out yo, out vyo);
 //		Log.D ("yo: " + yo + ", vyo: " + vyo);
-		float dx = Kinematics.GetAbsDeltaXFromDeltaY (
-			parentArea.end.vy, Math.Sign (vyo), yo - parentArea.end.y, mWp.gravity, mWp.terminalV, mWp.walkSpd);
+		float dx = mWp.trajectory.GetAbsDeltaXFromDeltaY (
+			parentArea.end.vy, Math.Sign (vyo), yo - parentArea.end.y);
 		List<JumpScanCollideTracker.Segment> segments = tracker.GetSectionedLine (el.xl, el.xr, dx);
 	
 		foreach (JumpScanCollideTracker.Segment segment in segments) {
@@ -156,9 +156,8 @@ public class JumpScan {
 			return new JumpScanArea (null, start, childStart);
 		}
 
-		float dx = Kinematics.GetAbsDeltaXFromDeltaY (
-			currArea.start.vy, Math.Sign (currArea.end.vy), currArea.end.y - currArea.start.y, 
-			mWp.gravity, mWp.terminalV, mWp.walkSpd);
+		float dx = mWp.trajectory.GetAbsDeltaXFromDeltaY (
+			currArea.start.vy, Math.Sign (currArea.end.vy), currArea.end.y - currArea.start.y);
 		start = new JumpScanLine (Mathf.Max (currArea.start.xl, childStart.xl - dx), 
 			Mathf.Min (currArea.start.xr, childStart.xr + dx), currArea.start.y, currArea.start.vy);
 
@@ -179,17 +178,17 @@ public class JumpScan {
 
 		// going UP
 		if (vyi > 0) {
-			float yZenith = yi + Kinematics.GetDeltaYFromVyFinal (vyi, 0, mWp.gravity);
+			float yZenith = yi + mWp.trajectory.GetDeltaYFromVyFinal (vyi, 0);
 			yo = yi + tracker.ShiftWindow (1, yZenith - yi);
 			if (yo == yZenith) {
 				vyo = 0;
 			} else {
-				vyo = Kinematics.GetVyFinalFromDeltaY (vyi, 1, yo - yi, mWp.gravity, mWp.terminalV);
+				vyo = mWp.trajectory.GetVyFinalFromDeltaY (vyi, 1, yo - yi);
 			}
 
 		} else {
 			yo = yi + tracker.ShiftWindow (-1, Mathf.Infinity);
-			vyo = Kinematics.GetVyFinalFromDeltaY (vyi, -1, yo - yi, mWp.gravity, mWp.terminalV);
+			vyo = mWp.trajectory.GetVyFinalFromDeltaY (vyi, -1, yo - yi);
 		}
 	}
 

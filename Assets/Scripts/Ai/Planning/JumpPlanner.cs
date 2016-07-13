@@ -22,7 +22,7 @@ public class JumpPlanner {
 	}
 
 	public void OnUpdate (float x, float y, float vy) {
-		updateScanIdx (y);
+		updateScanIdx (vy);
 
 		JumpScanArea mScanArea = mScanAreas [mAidx];
 
@@ -46,18 +46,18 @@ public class JumpPlanner {
 		return mDir;
 	}
 
-	private void updateScanIdx (float y) {
+	private void updateScanIdx (float vy) {
 		JumpScanArea mScanArea = mScanAreas [mAidx];
-		float sy = (mScanArea.start != null ? mScanArea.start.y : mJumpPath.getStartEdge ().y0);
-		float ey = mScanArea.end.y;
-		Log.D (y);
-		while ((ey >= sy && y >= ey) ||
-			(ey < sy && y < sy)) {
+		float svy = (mScanArea.start != null ? mScanArea.start.vy : mWp.jumpSpd);
+		float evy = mScanArea.end.vy;
+		Log.D (vy);
+		while ((evy >= svy && vy >= evy) ||
+			(evy < svy && vy < svy)) {
 			mAidx++;
 //			Log.D ("jump idx = " + mAidx + " / " + mScanAreas.Count, Log.AI_PLAN);
 			mScanArea = mScanAreas [mAidx];
-			sy = (mScanArea.start != null ? mScanArea.start.y : mJumpPath.getStartEdge ().y0);
-			ey = mScanArea.end.y;
+			svy = (mScanArea.start != null ? mScanArea.start.y : mJumpPath.getStartEdge ().y0);
+			evy = mScanArea.end.y;
 //			Log.D (sy + ", " + ey);
 		}
 	}
