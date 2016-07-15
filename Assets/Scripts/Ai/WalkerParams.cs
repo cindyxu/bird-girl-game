@@ -18,6 +18,6 @@ public struct WalkerParams {
 		this.gravity = gravity;
 		this.terminalV = terminalV;
 
-		this.trajectory = new Kinematics.Trajectory (gravity, terminalV, walkSpd);
+		this.trajectory = new Kinematics.Trajectory (jumpSpd, gravity, terminalV, walkSpd);
 	}
 }

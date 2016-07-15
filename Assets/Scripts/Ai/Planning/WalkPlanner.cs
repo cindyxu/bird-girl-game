@@ -8,7 +8,8 @@ public class WalkPlanner {
 	private WalkerParams mWp;
 	private float mX;
 
-	public WalkPlanner (float xli, float xri) {
+	public WalkPlanner (WalkerParams wp, float xli, float xri) {
+		mWp = wp;
 		mXli = xli;
 		mXri = xri;
 	}

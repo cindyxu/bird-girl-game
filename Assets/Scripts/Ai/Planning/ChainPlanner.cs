@@ -30,12 +30,6 @@ public class ChainPlanner {
 	}
 
 	public void OnUpdate (float x, float y, float vy) {
-
-//		Debug.Log ("dx is " + (mX - x) + ", should be = " + mWp.walkSpd * Time.deltaTime);
-		float yy = mWp.trajectory.GetDeltaYFromVyFinal (mVy, vy);
-//		Debug.Log ("dy is " + (y - mY) + ", should be = " + yy);
-		Debug.Log ("vy = " + vy);
-
 		mX = x;
 		mY = y;
 		mVy = vy;
@@ -77,26 +71,28 @@ public class ChainPlanner {
 			inputCatcher.OnLeftPress ();
 		} else if (dir > 0 && !inputCatcher.GetRight ()) {
 			inputCatcher.OnRightPress ();
-		} else {
+		} else if (dir == 0) {
 			if (inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
 			if (inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
 		}
 	}
 
 	private void resolveWalkPlanner () {
+		Log.D ("walking it", Log.AI_PLAN);
 		if (mPathIdx < mChain.Count) {
 			EdgePath nextPath = mChain [mPathIdx];
 			float xli, xri;
 			nextPath.getStartRange (out xli, out xri);
-			mWalkPlanner = new WalkPlanner (xli, xri);
+			mWalkPlanner = new WalkPlanner (mWp, xli, xri);
 		} else {
-			mWalkPlanner = new WalkPlanner (mXlf, mXrf);
+			mWalkPlanner = new WalkPlanner (mWp, mXlf, mXrf);
 		}
 	}
 
 	private void resolveEdgePlanner () {
 		EdgePath edgePath = mChain [mPathIdx];
 		if (edgePath is JumpPath) {
+			Log.D ("jumping it", Log.AI_PLAN);
 			mJumpPlanner = new JumpPlanner ((JumpPath) edgePath, mWp);
 		}
 	}

@@ -70,7 +70,8 @@ public class AiWalkerInputFeeder : InputFeeder {
 	void OnClimbLadder ()
 	{}
 
-	void OnGrounded ()
-	{}
+	void OnGrounded () {
+		if (mPathPlanner != null) mPathPlanner.OnGrounded ();
+	}
 
 }

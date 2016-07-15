@@ -46,10 +46,8 @@ public class KinematicsDemo : MonoBehaviour {
 		Debug.Log ("projectedVel: " + mVyProj + ", actualVel: " + velocity.y);
 
 		mYProj += mVyProj * Time.fixedDeltaTime;
-		float y = transform.position.y;
-		Debug.Log ("projectedY: " + mYProj + ", actualY: " + y);
+		Debug.Log ("projectedY: " + mYProj + ", actualY: " + transform.position.y);
 
-		float x = transform.position.x;
 		mXProj += xSpd * Time.fixedDeltaTime;
 		Debug.Log ("projectedX: " + mXProj + ", actualX: " + transform.position.x);
 	}

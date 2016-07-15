@@ -67,8 +67,7 @@ public class JumpScan {
 			}
 		}
 
-		float vyMin = mWp.trajectory.GetVyFinalFromDeltaY (vyi, 1, yMin - yi);
-		if (vyMin > 0) vyMin = Mathf.Max (-vyMin, mWp.terminalV);
+		float vyMin = mWp.trajectory.GetVyFinalFromDeltaY (vyi, -1, yMin - yi);
 		float xBottomSpread = mWp.trajectory.GetAbsDeltaXFromDeltaY (vyi, Math.Sign (vyMin), yMin - yi);
 		float xMin = xl - xBottomSpread;
 		float xMax = xr + xBottomSpread;
@@ -83,7 +82,7 @@ public class JumpScan {
 	}
 
 	public bool Step () {
-//		Log.D ("STEP *********************************");
+		//		Log.D ("STEP *********************************", Log.AI_SCAN);
 		if (mStepQueue.Count == 0) return false;
 		ScanStep parentStep = mStepQueue.Dequeue ();
 		JumpScanArea parentArea = parentStep.scanArea;

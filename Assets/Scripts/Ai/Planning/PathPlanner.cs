@@ -54,6 +54,10 @@ public class PathPlanner {
 		mChainPlanner.OnUpdate (x, y, vy);
 	}
 
+	public void OnGrounded () {
+		mChainPlanner.OnGrounded ();
+	}
+
 	public bool FeedInput (InputCatcher inputCatcher) {
 		return mChainPlanner.FeedInput (inputCatcher);
 	}

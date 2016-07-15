@@ -136,6 +136,10 @@ public class AStarSearch {
 		float xli, xri;
 		getTaperedStartRange (parentNode.xlf, parentNode.xrf, neighborPath, out xli, out xri);
 
+		float exli, exri;
+		neighborPath.getStartRange (out exli, out exri);
+		Log.D ("tapered start range: " + xli + ", " + xri, Log.AI_SEARCH);
+
 		float walkTime = mHeuristic.GetWalkTime (parentNode.xlf, parentNode.xrf, xli, xri);
 		float tentativeG = parentNode.g + walkTime + neighborPath.getTravelTime ();
 
@@ -144,6 +148,7 @@ public class AStarSearch {
 
 		float exlf, exrf;
 		neighborPath.getEndRange (out exlf, out exrf);
+		Log.D ("tapered end range: " + xlf + ", " + xrf, Log.AI_SEARCH);
 
 		if (!mBestHeuristics.ContainsKey (neighborPath)) {
 			mBestHeuristics[neighborPath] = new EdgeHeuristicRange<TravelNode> (exrf - exlf);

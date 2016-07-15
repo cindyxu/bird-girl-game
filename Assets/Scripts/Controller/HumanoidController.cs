@@ -83,12 +83,15 @@ public class HumanoidController : IController {
 	void OnClimbLadder (Ladder ladder, int direction) {
 		mLadderLocomotion.SetLadder (ladder);
 		mInhabitant.StartLocomotion (mLadderLocomotion);
+		mObservable.onClimbLadder ();
 	}
 
 	void OnJump () {
+		mObservable.onJump ();
 	}
 
 	void OnGrounded () {
+		mObservable.onGrounded ();
 	}
 
 	void OnLadderEndReached (int direction) {
@@ -103,10 +106,10 @@ public class HumanoidController : IController {
 	public class Observable {
 		
 		public delegate void OnJump ();
-		public event OnJump onJump;
+		public OnJump onJump;
 		public delegate void OnGrounded ();
-		public event OnJump onGrounded;
+		public OnJump onGrounded;
 		public delegate void OnClimbLadder ();
-		public event OnJump onClimbLadder;
+		public OnJump onClimbLadder;
 	}
 }

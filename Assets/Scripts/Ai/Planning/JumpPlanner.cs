@@ -5,7 +5,6 @@ public class JumpPlanner {
 
 	public const float MOVE_THRESHOLD = 0.2f;
 
-	private JumpPath mJumpPath;
 	private List<JumpScanArea> mScanAreas = new List<JumpScanArea> ();
 	private int mAidx;
 	private WalkerParams mWp;
@@ -13,7 +12,6 @@ public class JumpPlanner {
 
 	public JumpPlanner (JumpPath jumpPath, WalkerParams wp) {
 		mWp = wp;
-		mJumpPath = jumpPath;
 		JumpScanArea scanArea = jumpPath.getScanArea ();
 		while (scanArea != null) {
 			mScanAreas.Insert (0, scanArea);
@@ -36,10 +34,9 @@ public class JumpPlanner {
 //
 //		float rightLim = mScanArea.end.xl + xMovement;
 //		if (x + mWp.size.x > rightLim - MOVE_THRESHOLD) mDir = 1;
-
 		float center = (mScanArea.end.xl + mScanArea.end.xr) / 2f;
 		if (x + mWp.size.x/2 < center) mDir = 1;
-		if (x + mWp.size.x/2 > center) mDir = -1;
+		else if (x + mWp.size.x/2 > center) mDir = -1;
 	}
 
 	public int GetMoveDir () {
@@ -48,17 +45,13 @@ public class JumpPlanner {
 
 	private void updateScanIdx (float vy) {
 		JumpScanArea mScanArea = mScanAreas [mAidx];
-		float svy = (mScanArea.start != null ? mScanArea.start.vy : mWp.jumpSpd);
 		float evy = mScanArea.end.vy;
-		Log.D (vy);
-		while ((evy >= svy && vy >= evy) ||
-			(evy < svy && vy < svy)) {
+//		Log.D ("vy = " + vy, Log.AI_PLAN);
+		while (vy < evy) {
 			mAidx++;
-//			Log.D ("jump idx = " + mAidx + " / " + mScanAreas.Count, Log.AI_PLAN);
 			mScanArea = mScanAreas [mAidx];
-			svy = (mScanArea.start != null ? mScanArea.start.y : mJumpPath.getStartEdge ().y0);
-			evy = mScanArea.end.y;
-//			Log.D (sy + ", " + ey);
+			evy = mScanArea.end.vy;
+			Log.D ("jump idx = " + mAidx + " / " + mScanAreas.Count + ", evy = "  + evy, Log.AI_PLAN);
 		}
 	}
 }
