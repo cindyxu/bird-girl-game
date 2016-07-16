@@ -67,18 +67,20 @@ public class ChainPlanner {
 	}
 
 	private void inputMoveDir (InputCatcher inputCatcher, int dir) {
+		if (dir >= 0 && inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
+		if (dir <= 0 && inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
 		if (dir < 0 && !inputCatcher.GetLeft ()) {
+//			Log.logger.Log ("left press");
 			inputCatcher.OnLeftPress ();
-		} else if (dir > 0 && !inputCatcher.GetRight ()) {
+		} 
+		if (dir > 0 && !inputCatcher.GetRight ()) {
+//			Log.logger.Log ("right press");
 			inputCatcher.OnRightPress ();
-		} else if (dir == 0) {
-			if (inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
-			if (inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
 		}
 	}
 
 	private void resolveWalkPlanner () {
-		Log.D ("walking it", Log.AI_PLAN);
+		Log.logger.Log (Log.AI_PLAN, "walking it");
 		if (mPathIdx < mChain.Count) {
 			EdgePath nextPath = mChain [mPathIdx];
 			float xli, xri;
@@ -92,7 +94,7 @@ public class ChainPlanner {
 	private void resolveEdgePlanner () {
 		EdgePath edgePath = mChain [mPathIdx];
 		if (edgePath is JumpPath) {
-			Log.D ("jumping it", Log.AI_PLAN);
+			Log.logger.Log (Log.AI_PLAN, "jumping it");
 			mJumpPlanner = new JumpPlanner ((JumpPath) edgePath, mWp);
 		}
 	}

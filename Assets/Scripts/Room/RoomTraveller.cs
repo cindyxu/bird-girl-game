@@ -26,7 +26,7 @@ public class RoomTraveller {
 	}
 
 	public void SetupRooms() {
-		Log.D (mGameObject.name + " is starting in room " + mCurrentRoom, Log.ROOM);
+		Log.logger.Log (Log.ROOM, mGameObject.name + " is starting in room " + mCurrentRoom);
 		foreach (Room room in mRooms) {
 			room.Exit (mGameObject);
 		}
@@ -44,7 +44,7 @@ public class RoomTraveller {
 	}
 
 	public void TransportTo (Room toRoom, string sortingLayer) {
-		Log.D (mGameObject.name + " transport to " + toRoom);
+		Debug.Log (mGameObject.name + " transport to " + toRoom);
 
 		if (toRoom == mCurrentRoom) {
 			mRenderer.sortingLayerName = sortingLayer;

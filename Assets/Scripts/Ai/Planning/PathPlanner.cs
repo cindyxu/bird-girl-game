@@ -14,7 +14,8 @@ public class PathPlanner {
 		// pretend we're in the right room for now
 		Vector2 pos;
 		Room room;
-		getDest (out pos, out room);
+		float minDist;
+		getDest (out room, out pos, out minDist);
 
 		SortedEdge[] sortedEdges = room.GetSortedEdges ();
 		EdgeCollider2D[] edgeColliders = new EdgeCollider2D[sortedEdges.Length];
@@ -38,15 +39,18 @@ public class PathPlanner {
 		Edge destEdge = EdgeUtil.FindUnderEdge (edges, 
 			pos.x - wp.size.x/2, pos.x + wp.size.x/2, pos.y);
 
+		float xlf = Mathf.Max (destEdge.left, pos.x - wp.size.x / 2 - minDist);
+		float xrf = Mathf.Min (destEdge.right, pos.x + wp.size.x / 2 + minDist);
+
 		if (startEdge != destEdge) {
 
 			AStarSearch search = new AStarSearch (edgePaths, wp, startEdge, 
 				                     (float) (px - wp.size.x / 2), destEdge, (float) (pos.x - wp.size.x / 2));
 			List<EdgePath> result;
 			while (search.Step (out result)) ;
-			mChainPlanner = new ChainPlanner (mWp, result, px - wp.size.x/2, px + wp.size.x/2);
+			mChainPlanner = new ChainPlanner (mWp, result, xlf, xrf);
 		} else {
-			mChainPlanner = new ChainPlanner (mWp, new List<EdgePath> (), px - wp.size.x/2, px + wp.size.x/2);
+			mChainPlanner = new ChainPlanner (mWp, new List<EdgePath> (), xlf, xrf);
 		}
 	}
 

@@ -42,7 +42,7 @@ public class DialogueLibrary {
 			lines.AddRange (asset.text.Split (new string[] {"\n", "\r\n"}, System.StringSplitOptions.RemoveEmptyEntries));
 			parseDialogueTxt (lines);
 		}
-		Log.D ("Added " + info.Length + " dialogues", Log.DIALOGUE);
+		Log.logger.Log (Log.DIALOGUE, "Added " + info.Length + " dialogues");
 	}
 
 	private void parseDialogueTxt(List<string> lines) {
@@ -73,6 +73,6 @@ public class DialogueLibrary {
 				mDialogues.Add (key, Dialogue.CreateFromJSON(node[key].AsArray));
 			}
 		}
-		Log.D ("Added " + info.Length + " dialogues", Log.DIALOGUE);
+		Log.logger.Log (Log.DIALOGUE, "Added " + info.Length + " dialogues");
 	}
 }

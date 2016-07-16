@@ -10,12 +10,13 @@ public class FollowDemo : MonoBehaviour {
 	void Update () {
 		if (Input.GetMouseButtonDown (0)) {
 			Vector3 movePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-			Log.D ("clicked at " + movePos.x + ", " + movePos.y);
-			walker.RequestMoveTo ("walk", delegate(out Vector2 pos, out Room room) {
+			Debug.Log ("clicked at " + movePos.x + ", " + movePos.y);
+			walker.RequestMoveTo ("walk", delegate (out Room room, out Vector2 pos, out float dist) {
 				pos = movePos;
 				room = this.room;
+				dist = 0.5f;
 			}, delegate {
-				Log.D ("reached destination!");
+				Debug.Log ("reached destination!");
 			});
 		};
 	}

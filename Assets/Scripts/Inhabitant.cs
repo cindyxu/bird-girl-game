@@ -15,7 +15,7 @@ public class Inhabitant : MonoBehaviour {
 	private Collider2D mCollider2D;
 
 	public delegate void OnCmdFinished();
-	public delegate void GetDest (out Vector2 pos, out Room room);
+	public delegate void GetDest (out Room room, out Vector2 pos, out float minDist);
 
 	protected Locomotion GetCurrentLocomotion () {
 		return mCurrentLocomotion;

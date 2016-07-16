@@ -19,11 +19,11 @@ public class Room : MonoBehaviour {
 		mActionTriggers = GetComponentsInChildren<Trigger> ();
 	}
 
-	public SortedEdge[] GetSortedEdges() {
+	public SortedEdge[] GetSortedEdges () {
 		return mSortedEdges;
 	}
 
-	public void Enter(GameObject obj) {
+	public void Enter (GameObject obj) {
 		Collider2D objCollider2D = obj.GetComponent<Collider2D> ();
 		foreach (SortedEdge surface in mSortedEdges) {
 			Physics2D.IgnoreCollision (objCollider2D, surface.GetComponent<Collider2D> (), false);
@@ -39,7 +39,7 @@ public class Room : MonoBehaviour {
 		}
 	}
 
-	public void Exit(GameObject obj) {
+	public void Exit (GameObject obj) {
 		Collider2D objCollider2D = obj.GetComponent<Collider2D> ();
 		foreach (SortedEdge surface in mSortedEdges) {
 			Physics2D.IgnoreCollision (objCollider2D, surface.GetComponent<Collider2D> ());
@@ -55,14 +55,14 @@ public class Room : MonoBehaviour {
 		}
 	}
 
-	public void Hide(float time) {
+	public void Hide (float time) {
 		iTween.FadeTo(gameObject, iTween.Hash(
 			"alpha", 0,
 			"time", time
 		));
 	}
 
-	public void Show(float time) {
+	public void Show (float time) {
 		iTween.FadeTo(gameObject, iTween.Hash(
 			"alpha", 1,
 			"time", time

@@ -9,7 +9,7 @@ public class SpyInhabitantFacade : InhabitantFacade {
 	private Vector2 mOffset = Vector2.zero;
 	private Vector2 mForce = Vector2.zero;
 	private Bounds mBounds = new Bounds ();
-	private float mWeightMult = 1.0f;
+//	private float mWeightMult = 1.0f;
 	private string mSortingLayerName = null;
 	private int mLayer = -1;
 
@@ -33,7 +33,7 @@ public class SpyInhabitantFacade : InhabitantFacade {
 	}
 
 	public override void SetWeightMult (float mult) {
-		mWeightMult = mult;
+//		mWeightMult = mult;
 	}
 
 	public override Vector2 GetSize () {

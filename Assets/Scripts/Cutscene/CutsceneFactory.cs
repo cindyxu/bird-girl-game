@@ -37,7 +37,7 @@ public class CutsceneFactory {
 		foreach (KeyValuePair<string, BuildEvent> pair in mBuildEvents) {
 			string name = pair.Key;
 			BuildEvent buildEvent = pair.Value;
-			Log.D ("event " + name, Log.CUTSCENE);
+			Log.logger.Log (Log.CUTSCENE, "event " + name);
 			events [name] = buildEvent (cutsceneParams);
 		}
 
@@ -48,7 +48,7 @@ public class CutsceneFactory {
 			bool success = mAfterEvents.TryGetValue (pair.Key, out parentNames);
 			if (success) {
 				Cutscene.Event[] parents = new Cutscene.Event[parentNames.Length];
-				Log.D (pair.Key + " parents " + string.Join(",", parentNames), Log.CUTSCENE);
+				Log.logger.Log (Log.CUTSCENE, pair.Key + " parents " + string.Join(",", parentNames));
 				for (int i = 0; i < parents.Length; i++) {
 					parents [i] = events [parentNames [i]];
 				}

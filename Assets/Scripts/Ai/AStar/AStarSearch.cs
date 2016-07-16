@@ -22,7 +22,7 @@ public class AStarSearch {
 	public AStarSearch (Dictionary <Edge, List<EdgePath>> edgePaths, WalkerParams wp, 
 		Edge start, float startX, Edge dest, float destX) {
 
-		Log.D ("starting Astar: from " + start + " to " + dest, Log.AI_SEARCH);
+		Log.logger.Log (Log.AI_SEARCH, "<b>starting Astar: from " + start + " to " + dest + ",</b>");
 
 		mWp = wp;
 		mHeuristic = new WalkerHeuristic (wp);
@@ -74,37 +74,37 @@ public class AStarSearch {
 	}
 
 	public bool Step (out List<EdgePath> result) {
-		Log.D ("A STAR STEP ********************************", Log.AI_SEARCH);
-		Log.D ("queue has " + mOpenQueue.Count + " items", Log.AI_SEARCH);
+		Log.logger.Log (Log.AI_SEARCH, "A STAR STEP ********************************");
+		Log.logger.Log (Log.AI_SEARCH, "queue has " + mOpenQueue.Count + " items");
 		result = null;
 		if (mPathChain != null) {
-			Log.D ("already found path", Log.AI_SEARCH);
+			Log.logger.Log (Log.AI_SEARCH, "already found path");
 			result = mPathChain;
 			return false;
 		}
 		if (mOpenQueue.Count == 0) {
-			Log.D ("no paths left", Log.AI_SEARCH);
+			Log.logger.Log (Log.AI_SEARCH, "<b>no paths left</b>");
 			return false;
 		}
 
 		TravelNode bestNode = mOpenQueue.Dequeue ();
 		if (bestNode.edge == mDest) {
-			Log.D ("found best path!", Log.AI_SEARCH);
+			Log.logger.Log (Log.AI_SEARCH, "<b>found best path!</b>");
 			result = mPathChain = reconstructChain (bestNode);
 			string s = "";
 			foreach (EdgePath path in result) {
 				s += path.getEndEdge () + " ";
 			}
-			Log.D (s, Log.AI_SEARCH);
+			Log.logger.Log (Log.AI_SEARCH, s);
 			return false;
 		}
-		Log.D ("continue - current edge " + bestNode.edge, Log.AI_SEARCH);
+		Log.logger.Log (Log.AI_SEARCH, "continue - current edge " + bestNode.edge);
 		if (!mEdgePaths.ContainsKey (bestNode.edge)) {
-			Log.D ("no paths from edge!", Log.AI_SEARCH);
+			Log.logger.Log (Log.AI_SEARCH, "no paths from edge!");
 			return true;
 		}
 		List<EdgePath> neighborPaths = mEdgePaths [bestNode.edge];
-		Log.D (neighborPaths.Count + " paths", Log.AI_SEARCH);
+		Log.logger.Log (Log.AI_SEARCH, neighborPaths.Count + " paths");
 		foreach (EdgePath neighborPath in neighborPaths) {
 			processNeighborPath (bestNode, neighborPath);
 		}
@@ -132,13 +132,13 @@ public class AStarSearch {
 	private void processNeighborPath (TravelNode parentNode, EdgePath neighborPath) {
 		Edge endEdge = neighborPath.getEndEdge ();
 
-		Log.D ("process path to " + endEdge, Log.AI_SEARCH);
+		Log.logger.Log (Log.AI_SEARCH, "process path to " + endEdge);
 		float xli, xri;
 		getTaperedStartRange (parentNode.xlf, parentNode.xrf, neighborPath, out xli, out xri);
 
 		float exli, exri;
 		neighborPath.getStartRange (out exli, out exri);
-		Log.D ("tapered start range: " + xli + ", " + xri, Log.AI_SEARCH);
+		Log.logger.Log (Log.AI_SEARCH, "tapered start range: " + xli + ", " + xri);
 
 		float walkTime = mHeuristic.GetWalkTime (parentNode.xlf, parentNode.xrf, xli, xri);
 		float tentativeG = parentNode.g + walkTime + neighborPath.getTravelTime ();
@@ -148,7 +148,7 @@ public class AStarSearch {
 
 		float exlf, exrf;
 		neighborPath.getEndRange (out exlf, out exrf);
-		Log.D ("tapered end range: " + xlf + ", " + xrf, Log.AI_SEARCH);
+		Log.logger.Log (Log.AI_SEARCH, "tapered end range: " + xlf + ", " + xrf);
 
 		if (!mBestHeuristics.ContainsKey (neighborPath)) {
 			mBestHeuristics[neighborPath] = new EdgeHeuristicRange<TravelNode> (exrf - exlf);
@@ -157,13 +157,13 @@ public class AStarSearch {
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (xlf - exlf, xrf - exlf, parentNode, out writeRange, out newRange);
 		if (!newRange) {
-			Log.D ("  did not add new heuristic", Log.AI_SEARCH);
+			Log.logger.Log (Log.AI_SEARCH, "  did not add new heuristic");
 			return;
 		}
 		TravelNode node = new TravelNode (neighborPath, neighborPath.getEndEdge (), xlf, xrf, tentativeG);
 
 		float f = mHeuristic.EstTotalTime (neighborPath.getEndEdge (), xlf, xrf, mDest, mDestX, tentativeG);
-		Log.D ("  new node! " + f, Log.AI_SEARCH);
+		Log.logger.Log (Log.AI_SEARCH, "  new node! " + f);
 		mOpenQueue.Enqueue (node, f);
 	}
 }

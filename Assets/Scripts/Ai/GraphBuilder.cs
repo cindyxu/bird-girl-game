@@ -10,11 +10,11 @@ public class GraphBuilder {
 			if (edge.isDown) {
 
 				JumpScan walkerScan = new JumpScan (wp, edge, edge.x0, wp.jumpSpd, edges);
-				Log.D ("scanning for " + edge, Log.AI_PLAN);
+				Log.logger.Log (Log.AI_PLAN, "scanning for " + edge);
 
 				while (walkerScan.Step ()) ;
 				List<JumpPath> jumpPaths = walkerScan.GetPaths ();
-				Log.D ("found " + jumpPaths.Count + " paths", Log.AI_PLAN);
+				Log.logger.Log (Log.AI_PLAN, "found " + jumpPaths.Count + " paths");
 				List<EdgePath> edgePaths = jumpPaths.ConvertAll ((JumpPath input) => (EdgePath) input);
 				paths [edge] = edgePaths;
 			}

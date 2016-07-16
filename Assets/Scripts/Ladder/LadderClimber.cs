@@ -31,7 +31,7 @@ public class LadderClimber {
 
 	public Ladder GetDescendLadder() {
 		if (mTopColliders.Count > 0) {
-			Log.D (mTopColliders [0].GetComponent<LadderDescend> ().ladder, Log.LOCOMOTION);
+			Log.logger.Log (Log.LOCOMOTION, mTopColliders [0].GetComponent<LadderDescend> ().ladder);
 			return mTopColliders [0].GetComponent<LadderDescend> ().ladder;
 		}
 		return null;

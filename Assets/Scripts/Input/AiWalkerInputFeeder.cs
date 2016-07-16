@@ -34,7 +34,7 @@ public class AiWalkerInputFeeder : InputFeeder {
 				mFacade.GetPosition ().y - mFacade.GetSize ().y / 2, 
 				mFacade.GetVelocity ().y);
 			if (mPathPlanner.FeedInput (catcher)) {
-				Log.D ("reached goal!", Log.AI_INPUT);
+				Log.logger.Log (Log.AI_INPUT, "reached goal!");
 				if (mOnReachDestination != null) {
 					mOnReachDestination ();
 					mOnReachDestination = null;

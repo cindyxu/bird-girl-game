@@ -6,7 +6,7 @@ public class IntraDoorTrigger : DoorTrigger {
 	public IntraDoorTrigger destination;
 
 	public override bool Execute(GameObject target) {
-		Log.D ("Triggered " + name);
+		Debug.Log ("Triggered " + name);
 		Inhabitant inhabitant = target.GetComponent<Inhabitant> ();
 		if (inhabitant == null) {
 			return false;

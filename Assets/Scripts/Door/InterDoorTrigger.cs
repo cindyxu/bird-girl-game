@@ -8,7 +8,7 @@ public class InterDoorTrigger : DoorTrigger {
 	public string destinationDoorName;
 
 	public override bool Execute(GameObject target) {
-		Log.D ("Triggered " + name, Log.TRIGGER);
+		Log.logger.Log (Log.TRIGGER, "Triggered " + name);
 		if (target != GameState.player) {
 			return false;
 		}

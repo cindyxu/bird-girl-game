@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class JumpPlanner {
 
-	public const float MOVE_THRESHOLD = 0.2f;
+	private const float MAX_RANGE_THRESHOLD = 0.1f;
 
 	private List<JumpScanArea> mScanAreas = new List<JumpScanArea> ();
 	private int mAidx;
@@ -35,8 +36,8 @@ public class JumpPlanner {
 //		float rightLim = mScanArea.end.xl + xMovement;
 //		if (x + mWp.size.x > rightLim - MOVE_THRESHOLD) mDir = 1;
 		float center = (mScanArea.end.xl + mScanArea.end.xr) / 2f;
-		if (x + mWp.size.x/2 < center) mDir = 1;
-		else if (x + mWp.size.x/2 > center) mDir = -1;
+		if (x + mWp.size.x/2 < center - MAX_RANGE_THRESHOLD) mDir = 1;
+		else if (x + mWp.size.x/2 > center + MAX_RANGE_THRESHOLD) mDir = -1;
 	}
 
 	public int GetMoveDir () {
@@ -46,12 +47,12 @@ public class JumpPlanner {
 	private void updateScanIdx (float vy) {
 		JumpScanArea mScanArea = mScanAreas [mAidx];
 		float evy = mScanArea.end.vy;
-//		Log.D ("vy = " + vy, Log.AI_PLAN);
-		while (vy < evy) {
+//		Debug.Log ("vy = " + vy, Log.AI_PLAN);
+		while (vy < evy && mAidx+1 < mScanAreas.Count) {
 			mAidx++;
 			mScanArea = mScanAreas [mAidx];
 			evy = mScanArea.end.vy;
-			Log.D ("jump idx = " + mAidx + " / " + mScanAreas.Count + ", evy = "  + evy, Log.AI_PLAN);
+			Log.logger.Log (Log.AI_PLAN, "jump idx = " + mAidx + " / " + mScanAreas.Count + ", evy = "  + evy);
 		}
 	}
 }

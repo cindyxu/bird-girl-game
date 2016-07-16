@@ -22,9 +22,10 @@ public class DefaultDoorLeaveCutsceneEvent {
 		Vector2 targetPosition = mDoor.GetTargetPosition (mTargetCollider2D.bounds);
 		Vector2 requestMovePosition = new Vector2 (targetPosition.x - mTargetCollider2D.offset.x,
 			                              targetPosition.y - mTargetCollider2D.offset.y);
-		mInhabitant.RequestMoveTo ("walk", delegate (out Vector2 pos, out Room room) {
+		mInhabitant.RequestMoveTo ("walk", delegate (out Room room, out Vector2 pos, out float dist) {
 			pos = requestMovePosition;
 			room = mDoor.GetRoom ();
+			dist = 0.01f;
 		}, delegate () {
 			StartDisappear(StartEvent, callback);
 		});
