@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 public class RenderSearch {
 
-	private AStarSearch mSearch;
+	private AStarEdgeSearch mSearch;
 	private List<GameObject> mDrawLines = new List<GameObject> ();
 
 	public RenderSearch (BoxCollider2D walker, BoxCollider2D target, WalkerParams wp, Edge startEdge, float startX, 
 		Edge destEdge, float destX, List<Edge> edges) {
 		Dictionary<Edge, List<EdgePath>> paths = 
-			GraphBuilder.BuildGraph (wp, edges);
-		mSearch = new AStarSearch (paths, wp, startEdge, startX, 
+			RoomGraph.BuildPaths (wp, edges);
+		mSearch = new AStarEdgeSearch (paths, wp, startEdge, startX, 
 			destEdge, destX); 
 	}
 
@@ -22,14 +22,14 @@ public class RenderSearch {
 	}
 
 	private void renderSearch () {
-		IEnumerator<TravelNode> enumerator = mSearch.getQueueEnumerator ();
+		IEnumerator<EdgeNode> enumerator = mSearch.getQueueEnumerator ();
 		do {
-			TravelNode node = enumerator.Current;
+			EdgeNode node = enumerator.Current;
 			renderNode (node);
 		} while (enumerator.MoveNext ());
 	}
 
-	private void renderNode (TravelNode node) {
+	private void renderNode (EdgeNode node) {
 		List<EdgePath> chain = mSearch.reconstructChain (node);
 		foreach (EdgePath path in chain) {
 			float xlf, xrf;

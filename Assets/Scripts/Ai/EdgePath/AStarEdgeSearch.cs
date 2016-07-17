@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Assertions;
 using Priority_Queue;
 
-public class AStarSearch {
+public class AStarEdgeSearch {
 
-	private readonly FastPriorityQueue<TravelNode> mOpenQueue;
-	private readonly Dictionary<EdgePath, EdgeHeuristicRange<TravelNode>> mBestHeuristics = 
-		new Dictionary<EdgePath, EdgeHeuristicRange<TravelNode>> ();
+	private readonly FastPriorityQueue<EdgeNode> mOpenQueue;
+	private readonly Dictionary<EdgePath, EdgeHeuristicRange<EdgeNode>> mBestHeuristics = 
+		new Dictionary<EdgePath, EdgeHeuristicRange<EdgeNode>> ();
 
 	private readonly Dictionary<Edge, List<EdgePath>> mEdgePaths;
 	private readonly Edge mStart;
@@ -19,14 +20,17 @@ public class AStarSearch {
 	private readonly WalkerHeuristic mHeuristic;
 	private List<EdgePath> mPathChain;
 
-	public AStarSearch (Dictionary <Edge, List<EdgePath>> edgePaths, WalkerParams wp, 
+	public AStarEdgeSearch (Dictionary <Edge, List<EdgePath>> edgePaths, WalkerParams wp, 
 		Edge start, float startX, Edge dest, float destX) {
+
+		Assert.AreNotEqual (start, null);
+		Assert.AreNotEqual (dest, null);
 
 		Log.logger.Log (Log.AI_SEARCH, "<b>starting Astar: from " + start + " to " + dest + ",</b>");
 
 		mWp = wp;
 		mHeuristic = new WalkerHeuristic (wp);
-		mOpenQueue = new FastPriorityQueue<TravelNode> (edgePaths.Count * edgePaths.Count / 2);
+		mOpenQueue = new FastPriorityQueue<EdgeNode> (edgePaths.Count * edgePaths.Count);
 		mEdgePaths = edgePaths;
 		mStart = start;
 		mStartX = startX;
@@ -37,35 +41,35 @@ public class AStarSearch {
 	}
 
 	private void startSearch () {
-		TravelNode startNode = new TravelNode (null, mStart, mStartX, 
+		EdgeNode startNode = new EdgeNode (null, mStart, mStartX, 
 			mStartX + mWp.size.x, 0);
 		mOpenQueue.Enqueue (startNode, mHeuristic.EstTotalTime (mStart, startNode.xlf, 
 			startNode.xrf, mDest, mDestX, 0));
 	}
 
-	public IEnumerator<TravelNode> getQueueEnumerator () {
+	public IEnumerator<EdgeNode> getQueueEnumerator () {
 		return mOpenQueue.GetEnumerator ();
 	}
 
-	public TravelNode peekQueue () {
+	public EdgeNode peekQueue () {
 		return mOpenQueue.First;
 	}
 
-	public List<EdgePath> reconstructChain (TravelNode end) {
+	public List<EdgePath> reconstructChain (EdgeNode end) {
 		List<EdgePath> chain = new List<EdgePath> ();
-		TravelNode curr = end;
+		EdgeNode curr = end;
 		while (curr != null && curr.edgePath != null) {
 			chain.Add (curr.edgePath);
-			EdgeHeuristicRange<TravelNode> ranges = mBestHeuristics [curr.edgePath];
+			EdgeHeuristicRange<EdgeNode> ranges = mBestHeuristics [curr.edgePath];
 			if (ranges == null) break;
 			float xli, xri;
 			curr.edgePath.getStartRange (out xli, out xri);
-			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, TravelNode pnode) {
+			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, EdgeNode pnode) {
 				if (pnode == null) return Mathf.Infinity;
 				return pnode.g + mHeuristic.GetWalkTime (pnode.xlf, pnode.xrf, xli, xri);
 			});
 			float rxl, rxr;
-			TravelNode node;
+			EdgeNode node;
 			ranges.getRangeAtIndex (idx, out rxl, out rxr, out node);
 			curr = node;
 		}
@@ -87,7 +91,7 @@ public class AStarSearch {
 			return false;
 		}
 
-		TravelNode bestNode = mOpenQueue.Dequeue ();
+		EdgeNode bestNode = mOpenQueue.Dequeue ();
 		if (bestNode.edge == mDest) {
 			Log.logger.Log (Log.AI_SEARCH, "<b>found best path!</b>");
 			result = mPathChain = reconstructChain (bestNode);
@@ -129,7 +133,7 @@ public class AStarSearch {
 		xrf = Mathf.Min (xrf, xri + neighborPath.getMovement ());
 	}
 
-	private void processNeighborPath (TravelNode parentNode, EdgePath neighborPath) {
+	private void processNeighborPath (EdgeNode parentNode, EdgePath neighborPath) {
 		Edge endEdge = neighborPath.getEndEdge ();
 
 		Log.logger.Log (Log.AI_SEARCH, "process path to " + endEdge);
@@ -151,16 +155,16 @@ public class AStarSearch {
 		Log.logger.Log (Log.AI_SEARCH, "tapered end range: " + xlf + ", " + xrf);
 
 		if (!mBestHeuristics.ContainsKey (neighborPath)) {
-			mBestHeuristics[neighborPath] = new EdgeHeuristicRange<TravelNode> (exrf - exlf);
+			mBestHeuristics[neighborPath] = new EdgeHeuristicRange<EdgeNode> (exrf - exlf);
 		}
-		EdgeHeuristicRange<TravelNode> heuristic = mBestHeuristics [neighborPath];
+		EdgeHeuristicRange<EdgeNode> heuristic = mBestHeuristics [neighborPath];
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (xlf - exlf, xrf - exlf, parentNode, out writeRange, out newRange);
 		if (!newRange) {
 			Log.logger.Log (Log.AI_SEARCH, "  did not add new heuristic");
 			return;
 		}
-		TravelNode node = new TravelNode (neighborPath, neighborPath.getEndEdge (), xlf, xrf, tentativeG);
+		EdgeNode node = new EdgeNode (neighborPath, neighborPath.getEndEdge (), xlf, xrf, tentativeG);
 
 		float f = mHeuristic.EstTotalTime (neighborPath.getEndEdge (), xlf, xrf, mDest, mDestX, tentativeG);
 		Log.logger.Log (Log.AI_SEARCH, "  new node! " + f);

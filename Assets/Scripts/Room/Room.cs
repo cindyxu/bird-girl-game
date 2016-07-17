@@ -23,6 +23,10 @@ public class Room : MonoBehaviour {
 		return mSortedEdges;
 	}
 
+	public IntraDoorTrigger[] GetIntraDoors () {
+		return GetComponentsInChildren <IntraDoorTrigger> ();
+	}
+
 	public void Enter (GameObject obj) {
 		Collider2D objCollider2D = obj.GetComponent<Collider2D> ();
 		foreach (SortedEdge surface in mSortedEdges) {

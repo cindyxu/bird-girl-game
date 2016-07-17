@@ -1,12 +1,12 @@
 ﻿using System;
 
-public class InputSwitcher {
+public class InputFeedSwitcher {
 
 	private readonly InputCatcher mInputCatcher;
 	private InputFeeder mBaseInputFeeder;
 	private InputFeeder mOverrideInputFeeder;
 
-	public InputSwitcher (InputCatcher inputCatcher) {
+	public InputFeedSwitcher (InputCatcher inputCatcher) {
 		mInputCatcher = inputCatcher;
 	}
 

@@ -8,7 +8,7 @@ public class WalkPlanner {
 	private WalkerParams mWp;
 	private float mX;
 
-	private const float MAX_RANGE_THRESHOLD = 0.1f;
+	private const float MAX_RANGE_THRESHOLD = 0f;
 
 	public WalkPlanner (WalkerParams wp, float xli, float xri) {
 		mWp = wp;
@@ -21,9 +21,9 @@ public class WalkPlanner {
 	}
 
 	public int GetMoveDir () {
-		float threshold = Mathf.Min ((mXri - mXli) / 2f, MAX_RANGE_THRESHOLD);
+		float threshold = Mathf.Min (((mXri - mXli) - mWp.size.x) / 2f, MAX_RANGE_THRESHOLD);
 		if (mX < mXli + threshold) return 1;
-		if (mX + mWp.size.x >= mXri - threshold) return -1;
+		if (mX + mWp.size.x > mXri - threshold) return -1;
 		return 0;
 	}
 }

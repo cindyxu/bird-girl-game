@@ -5,6 +5,12 @@ using UnityEngine;
 
 public class ChainPlanner {
 
+	public enum Status {
+		ACTIVE,
+		FAILED,
+		DONE
+	}
+
 	private float mX;
 	private float mY;
 	private float mVy;
@@ -12,9 +18,10 @@ public class ChainPlanner {
 	private readonly float mXlf;
 	private readonly float mXrf;
 
-	WalkerParams mWp;
-	List<EdgePath> mChain;
-	int mPathIdx = 0;
+	private WalkerParams mWp;
+	private List<EdgePath> mChain;
+	private int mPathIdx = 0;
+	private Status mStatus = Status.ACTIVE;
 
 	private JumpPlanner mJumpPlanner;
 	private WalkPlanner mWalkPlanner;
@@ -41,7 +48,7 @@ public class ChainPlanner {
 		}
 	}
 
-	public bool FeedInput (InputCatcher inputCatcher) {
+	public Status FeedInput (InputCatcher inputCatcher) {
 		if (mWalkPlanner != null) {
 			int dir = mWalkPlanner.GetMoveDir ();
 			inputMoveDir (inputCatcher, dir);
@@ -50,19 +57,27 @@ public class ChainPlanner {
 					if (!inputCatcher.GetJumpPress ()) inputCatcher.OnJumpPress ();
 					mWalkPlanner = null;
 					resolveEdgePlanner ();
-				} else return true;
+				} else mStatus = Status.DONE;
 			}
 		} else if (mJumpPlanner != null) {
 			inputMoveDir (inputCatcher, mJumpPlanner.GetMoveDir ());
 		}
-		return false;
+		return mStatus;
 	}
 
-	public void OnGrounded () {
+	public void OnGrounded (Edge edge) {
 		if (mJumpPlanner != null) {
 			mJumpPlanner = null;
-			mPathIdx++;
-			resolveWalkPlanner ();
+
+			EdgePath currPath = mChain [mPathIdx];
+			if (edge == currPath.getEndEdge ()) {
+				mPathIdx++;
+				resolveWalkPlanner ();
+			} else {
+				mWalkPlanner = null;
+				mStatus = Status.FAILED;
+				Log.logger.Log ("Failed to make jump! Recalculating path", Log.AI_PLAN);
+			}
 		}
 	}
 
@@ -70,11 +85,9 @@ public class ChainPlanner {
 		if (dir >= 0 && inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
 		if (dir <= 0 && inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
 		if (dir < 0 && !inputCatcher.GetLeft ()) {
-//			Log.logger.Log ("left press");
 			inputCatcher.OnLeftPress ();
 		} 
 		if (dir > 0 && !inputCatcher.GetRight ()) {
-//			Log.logger.Log ("right press");
 			inputCatcher.OnRightPress ();
 		}
 	}
@@ -94,8 +107,17 @@ public class ChainPlanner {
 	private void resolveEdgePlanner () {
 		EdgePath edgePath = mChain [mPathIdx];
 		if (edgePath is JumpPath) {
+
+			float xlt, xrt;
+			if (mPathIdx + 1 < mChain.Count) {
+				mChain [mPathIdx + 1].getStartRange (out xlt, out xrt);
+			} else {
+				xlt = mXlf;
+				xrt = mXrf;
+			}
+
 			Log.logger.Log (Log.AI_PLAN, "jumping it");
-			mJumpPlanner = new JumpPlanner ((JumpPath) edgePath, mWp);
+			mJumpPlanner = new JumpPlanner ((JumpPath) edgePath, xlt, xrt, mWp);
 		}
 	}
 }

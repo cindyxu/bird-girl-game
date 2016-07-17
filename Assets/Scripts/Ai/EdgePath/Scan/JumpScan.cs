@@ -12,7 +12,7 @@ public class JumpScan {
 
 	private WalkerParams mWp;
 
-	private const float EDGE_THRESHOLD = 0.1f;
+	public const float EDGE_THRESHOLD = 0.1f;
 
 	public JumpScan(WalkerParams wp, Edge startEdge, float x, float vy, List<Edge> edges) {
 

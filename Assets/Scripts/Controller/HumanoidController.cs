@@ -8,7 +8,7 @@ public class HumanoidController : IController {
 	private readonly LadderLocomotion mLadderLocomotion;
 
 	private Inhabitant mInhabitant;
-	private InputSwitcher mInputSwitcher;
+	private InputFeedSwitcher mInputSwitcher;
 
 	private readonly WalkerParams mWp;
 
@@ -19,7 +19,7 @@ public class HumanoidController : IController {
 		mWp = wp;
 
 		InputCatcher inputCatcher = new InputCatcher ();
-		mInputSwitcher = new InputSwitcher (inputCatcher);
+		mInputSwitcher = new InputFeedSwitcher (inputCatcher);
 		mObservable = new Observable ();
 
 		mWalkLocomotion = new WalkLocomotion (mInhabitant.GetFacade (), inputCatcher, mWp);
@@ -83,15 +83,15 @@ public class HumanoidController : IController {
 	void OnClimbLadder (Ladder ladder, int direction) {
 		mLadderLocomotion.SetLadder (ladder);
 		mInhabitant.StartLocomotion (mLadderLocomotion);
-		mObservable.onClimbLadder ();
+		mObservable.OnClimbLadder ();
 	}
 
 	void OnJump () {
-		mObservable.onJump ();
+		mObservable.OnJump ();
 	}
 
 	void OnGrounded () {
-		mObservable.onGrounded ();
+		mObservable.OnGrounded ();
 	}
 
 	void OnLadderEndReached (int direction) {
@@ -105,11 +105,23 @@ public class HumanoidController : IController {
 
 	public class Observable {
 		
-		public delegate void OnJump ();
-		public OnJump onJump;
-		public delegate void OnGrounded ();
-		public OnJump onGrounded;
-		public delegate void OnClimbLadder ();
-		public OnJump onClimbLadder;
+		public delegate void OnJumpEvent ();
+		public event OnJumpEvent onJump;
+		public delegate void OnGroundedEvent ();
+		public event OnJumpEvent onGrounded;
+		public delegate void OnClimbLadderEvent ();
+		public event OnJumpEvent onClimbLadder;
+
+		public void OnJump () {
+			if (onJump != null) onJump ();
+		}
+
+		public void OnGrounded () {
+			if (onGrounded != null) onGrounded ();
+		}
+
+		public void OnClimbLadder () {
+			if (onClimbLadder != null) onClimbLadder ();
+		}
 	}
 }

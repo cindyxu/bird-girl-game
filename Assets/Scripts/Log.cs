@@ -21,8 +21,6 @@ public static class Log
 
 	static Log () {
 		filters = new string[] {
-			CUTSCENE,
-			AI_PLAN
 		};
 		logger = new Logger (new LogHandler (filters));
 	}

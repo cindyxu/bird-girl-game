@@ -25,7 +25,8 @@ public class AiWalkerInputFeeder : InputFeeder {
 		mGetDest = getDest;
 		mOnReachDestination = onReachDest;
 		mPathPlanner = new PathPlanner (mWp, 
-			mFacade.GetPosition ().x, mFacade.GetPosition ().y, mGetDest);
+			mFacade.GetPosition ().x - mFacade.GetSize ().x / 2, 
+			mFacade.GetPosition ().y - mFacade.GetSize ().y / 2, mGetDest);
 	}
 
 	public override void FeedInput (InputCatcher catcher) {
@@ -71,7 +72,12 @@ public class AiWalkerInputFeeder : InputFeeder {
 	{}
 
 	void OnGrounded () {
-		if (mPathPlanner != null) mPathPlanner.OnGrounded ();
+		if (mPathPlanner != null) {
+			mPathPlanner.OnUpdate (mFacade.GetPosition ().x - mFacade.GetSize ().x / 2, 
+				mFacade.GetPosition ().y - mFacade.GetSize ().y / 2, 
+				mFacade.GetVelocity ().y);
+			mPathPlanner.OnGrounded ();
+		}
 	}
 
 }

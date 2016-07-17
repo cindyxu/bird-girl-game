@@ -5,7 +5,7 @@ public class WalkLocomotion : Locomotion {
 
 	private readonly InhabitantFacade mFacade;
 	private readonly InputCatcher mInputCatcher;
-	private readonly WalkerParams mWalkerParams;
+	private readonly WalkerParams mWp;
 
 	private LadderClimber mLadderClimber;
 	private SortedEdgeCollidable mSortedEdgeCollidable;
@@ -34,7 +34,7 @@ public class WalkLocomotion : Locomotion {
 		mFacade.GetRoomTraveller ().onLeaveRoom += OnLeaveRoom;
 		mSortedEdgeCollidable.onSortedEdgeChanged += OnSortedEdgeChanged;
 
-		mWalkerParams = walkerParams;
+		mWp = walkerParams;
 	}
 
 	public override void Enable () {
@@ -48,16 +48,16 @@ public class WalkLocomotion : Locomotion {
 	public override void HandleUpdate () {
 		Vector2 velocity = new Vector2 (0, mFacade.GetVelocity ().y);
 		if (mInputCatcher.GetLeft ()) {
-			velocity.x -= mWalkerParams.walkSpd;
+			velocity.x -= mWp.walkSpd;
 		}
 		if (mInputCatcher.GetRight()) {
-			velocity.x += mWalkerParams.walkSpd;
+			velocity.x += mWp.walkSpd;
 		}
 		if (mInputCatcher.GetJumpPress () && mIsGrounded) {
-			velocity.y = mWalkerParams.jumpSpd;
+			velocity.y = mWp.jumpSpd;
 			if (onJump != null) onJump ();
 		}
-		velocity.y = Mathf.Max (velocity.y, mWalkerParams.terminalV);
+		velocity.y = Mathf.Max (velocity.y, mWp.terminalV);
 		mFacade.SetVelocity (velocity);
 
 		if (movementOverride != null) {
@@ -83,12 +83,13 @@ public class WalkLocomotion : Locomotion {
 	}
 
 	public override void HandleFixedUpdate () {
+
 		Vector2 velocity = new Vector2 (0, mFacade.GetVelocity ().y);
 		if (mInputCatcher.GetLeft ()) {
-			velocity.x -= mWalkerParams.walkSpd;
+			velocity.x -= mWp.walkSpd;
 		}
 		if (mInputCatcher.GetRight()) {
-			velocity.x += mWalkerParams.walkSpd;
+			velocity.x += mWp.walkSpd;
 		}
 		mFacade.SetVelocity (velocity);
 	}
@@ -111,7 +112,7 @@ public class WalkLocomotion : Locomotion {
 
 	public void LadderJump (int direction) {
 		movementOverride += delegate {
-			mFacade.SetVelocity (new Vector2 (mWalkerParams.walkSpd * direction, mWalkerParams.jumpSpd / 2f));
+			mFacade.SetVelocity (new Vector2 (mWp.walkSpd * direction, mWp.jumpSpd / 2f));
 		};
 	}
 

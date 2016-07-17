@@ -4,13 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 using Priority_Queue;
 
-public class TravelNode : FastPriorityQueueNode, IComparable {
+public class EdgeNode : FastPriorityQueueNode, IComparable {
 	public readonly EdgePath edgePath;
 	public readonly Edge edge;
 	public readonly float xlf, xrf;
 	public readonly float g;
 
-	public TravelNode (EdgePath path, Edge edge, float xlf, float xrf, float g) {
+	public EdgeNode (EdgePath path, Edge edge, float xlf, float xrf, float g) {
 		this.edgePath = path;
 		this.edge = edge;
 		this.xlf = xlf;
@@ -20,7 +20,7 @@ public class TravelNode : FastPriorityQueueNode, IComparable {
 
 	public int CompareTo (object other) {
 		if (other == null) return 1;
-		TravelNode node = other as TravelNode;
+		EdgeNode node = other as EdgeNode;
 		if (node != null) {
 			return g.CompareTo (node.g);
 		} else throw new Exception ();
