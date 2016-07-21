@@ -3,12 +3,12 @@ using UnityEditor;
 using System.Collections.Generic;
 using NUnit.Framework;
 
-public class AStarSearchTest {
+public class AStarEdgeSearchTest {
 
 	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, -50, -100);
 
 	[Test]
-	public void AStarSearch_goalOneEdgeAcross_returnsChainToEdge()
+	public void AStarEdgeSearch_goalOneEdgeAcross_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -22,12 +22,12 @@ public class AStarSearchTest {
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].getStartEdge ());
-		Assert.AreEqual (dest, result [0].getEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (dest, result [0].GetEndEdge ());
 	}
 
 	[Test]
-	public void AStarSearch_goalTwoEdgesAcross_returnsChainToEdge()
+	public void AStarEdgeSearch_goalTwoEdgesAcross_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -42,14 +42,14 @@ public class AStarSearchTest {
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].getStartEdge ());
-		Assert.AreEqual (mid, result [0].getEndEdge ());
-		Assert.AreEqual (mid, result [1].getStartEdge ());
-		Assert.AreEqual (dest, result [1].getEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (mid, result [0].GetEndEdge ());
+		Assert.AreEqual (mid, result [1].GetStartEdge ());
+		Assert.AreEqual (dest, result [1].GetEndEdge ());
 	}
 
 	[Test]
-	public void AStarSearch_goalTwoAdjacentEdgesAcross_choosesFasterEdgeFirst()
+	public void AStarEdgeSearch_goalTwoAdjacentEdgesAcross_choosesFasterEdgeFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -65,12 +65,12 @@ public class AStarSearchTest {
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].getStartEdge ());
-		Assert.AreEqual (dest, result [0].getEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (dest, result [0].GetEndEdge ());
 	}
 
 	[Test]
-	public void AStarSearch_goalUnreachableAcross_returnsNull()
+	public void AStarEdgeSearch_goalUnreachableAcross_returnsNull()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -87,7 +87,7 @@ public class AStarSearchTest {
 	}
 
 	[Test]
-	public void AStarSearch_oneEdgeUp_returnsChainToEdge()
+	public void AStarEdgeSearch_oneEdgeUp_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -100,12 +100,12 @@ public class AStarSearchTest {
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].getStartEdge ());
-		Assert.AreEqual (dest, result [0].getEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (dest, result [0].GetEndEdge ());
 	}
 
 	[Test]
-	public void AStarSearch_goalOneEdgeDown_returnsChainToEdge()
+	public void AStarEdgeSearch_goalOneEdgeDown_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -118,12 +118,12 @@ public class AStarSearchTest {
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].getStartEdge ());
-		Assert.AreEqual (dest, result [0].getEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (dest, result [0].GetEndEdge ());
 	}
 
 	[Test]
-	public void AStarSearch_goalToLeft_searchesLeftFirst()
+	public void AStarEdgeSearch_goalToLeft_searchesLeftFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -142,7 +142,7 @@ public class AStarSearchTest {
 	}
 
 	[Test]
-	public void AStarSearch_goalToRight_searchesRightFirst()
+	public void AStarEdgeSearch_goalToRight_searchesRightFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -161,7 +161,7 @@ public class AStarSearchTest {
 	}
 
 	[Test]
-	public void AStarSearch_goalAbove_searchesAboveFirst()
+	public void AStarEdgeSearch_goalAbove_searchesAboveFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -180,7 +180,7 @@ public class AStarSearchTest {
 	}
 
 	[Test]
-	public void AStarSearch_goalBelow_searchesBelowFirst()
+	public void AStarEdgeSearch_goalBelow_searchesBelowFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -199,7 +199,7 @@ public class AStarSearchTest {
 	}
 
 	[Test]
-	public void AStarSearch_shortAboveAndLongBelow_picksShortPath () {
+	public void AStarEdgeSearch_shortAboveAndLongBelow_picksShortPath () {
 
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge dest = new Edge (9, 0, 10, 0);
@@ -233,12 +233,12 @@ public class AStarSearchTest {
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].getStartEdge ());
-		Assert.AreEqual (short0, result [0].getEndEdge ());
-		Assert.AreEqual (short0, result [1].getStartEdge ());
-		Assert.AreEqual (short1, result [1].getEndEdge ());
-		Assert.AreEqual (short1, result [2].getStartEdge ());
-		Assert.AreEqual (dest, result [2].getEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (short0, result [0].GetEndEdge ());
+		Assert.AreEqual (short0, result [1].GetStartEdge ());
+		Assert.AreEqual (short1, result [1].GetEndEdge ());
+		Assert.AreEqual (short1, result [2].GetStartEdge ());
+		Assert.AreEqual (dest, result [2].GetEndEdge ());
 	}
 
 }

@@ -1,10 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class FollowDemo : MonoBehaviour {
 
+	public static KeyBindingManager keybindingManager = new KeyBindingManager ();
+
 	public Room room;
 	public HumanoidInhabitant walker;
+	public GameObject cursor;
+
+	void Start () {
+		walker.GetFacade ().SetKeyBindingManager (keybindingManager);
+		walker.RequestEnablePlayerControl (true);
+	}
 	
 	// Update is called once per frame
 	void Update () {
@@ -18,6 +27,8 @@ public class FollowDemo : MonoBehaviour {
 			}, delegate {
 //				Debug.Log ("reached destination!");
 			});
+			cursor.transform.position = new Vector3 (movePos.x, movePos.y, 0);
 		};
 	}
+
 }

@@ -8,6 +8,7 @@ public class InhabitantFacade {
 	private Collider2D mCollider2D;
 	private Renderer mRenderer;
 	private float mGravityScale;
+	private KeyBindingManager mKmManager;
 
 	private readonly RoomTraveller mRoomTraveller;
 	private readonly Triggerer mTriggerer;
@@ -24,6 +25,14 @@ public class InhabitantFacade {
 
 		mRoomTraveller = roomTraveller;
 		mTriggerer = triggerer;
+	}
+
+	public virtual KeyBindingManager GetKeyBindingManager () {
+		return mKmManager;
+	}
+
+	public virtual void SetKeyBindingManager (KeyBindingManager kmManager) {
+		mKmManager = kmManager;
 	}
 
 	public virtual RoomTraveller GetRoomTraveller () {

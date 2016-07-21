@@ -34,10 +34,10 @@ public class WalkerHeuristicTest {
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (3, 0, 4, 0);
 		Edge endEdge = new Edge (6, 0, 7, 0);
-		float est0 = heuristic.EstTotalTime (startEdge0, startEdge0.left, startEdge0.right, 
-			             endEdge, endEdge.left, 0);
-		float est1 = heuristic.EstTotalTime (startEdge1, startEdge1.left, startEdge1.right, 
-			endEdge, endEdge.left, 0);
+		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, 
+			             endEdge, endEdge.left);
+		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, 
+			endEdge, endEdge.left);
 		Assert.Less (est1, est0);
 	}
 
@@ -48,10 +48,10 @@ public class WalkerHeuristicTest {
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (-3, 0, -2, 0);
 		Edge endEdge = new Edge (-6, 0, -5, 0);
-		float est0 = heuristic.EstTotalTime (startEdge0, startEdge0.left, startEdge0.right, 
-			endEdge, endEdge.left, 0);
-		float est1 = heuristic.EstTotalTime (startEdge1, startEdge1.left, startEdge1.right, 
-			endEdge, endEdge.left, 0);
+		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, 
+			endEdge, endEdge.left);
+		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, 
+			endEdge, endEdge.left);
 		Assert.Less (est1, est0);
 	}
 
@@ -62,10 +62,10 @@ public class WalkerHeuristicTest {
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (0, 2, 1, 2);
 		Edge endEdge = new Edge (0, 4, 1, 4);
-		float est0 = heuristic.EstTotalTime (startEdge0, startEdge0.left, startEdge0.right, 
-			endEdge, endEdge.left, 0);
-		float est1 = heuristic.EstTotalTime (startEdge1, startEdge1.left, startEdge1.right, 
-			endEdge, endEdge.left, 0);
+		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, 
+			endEdge, endEdge.left);
+		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, 
+			endEdge, endEdge.left);
 		Assert.Less (est1, est0);
 	}
 
@@ -76,10 +76,10 @@ public class WalkerHeuristicTest {
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (0, -1, 1, -1);
 		Edge endEdge = new Edge (0, -2, 1, -2);
-		float est0 = heuristic.EstTotalTime (startEdge0, startEdge0.left, startEdge0.right, 
-			endEdge, endEdge.left, 0);
-		float est1 = heuristic.EstTotalTime (startEdge1, startEdge1.left, startEdge1.right, 
-			endEdge, endEdge.left, 0);
+		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, 
+			endEdge, endEdge.left);
+		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, 
+			endEdge, endEdge.left);
 		Assert.Less (est1, est0);
 	}
 
@@ -90,10 +90,10 @@ public class WalkerHeuristicTest {
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (2, 0, 3, 0);
 		Edge endEdge = new Edge (4, 0, 5, 0);
-		float est0 = heuristic.EstTotalTime (startEdge0, startEdge0.left, startEdge0.right, 
-			endEdge, endEdge.left, 0);
-		float est1 = heuristic.EstTotalTime (startEdge1, startEdge1.left, startEdge1.right, 
-			endEdge, endEdge.left, 0);
+		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, 
+			endEdge, endEdge.left);
+		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, 
+			endEdge, endEdge.left);
 		Assert.AreEqual (est0, est1);
 	}
 }

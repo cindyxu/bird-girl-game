@@ -33,7 +33,7 @@ public class EdgeBuilder {
 			float minY = py - vert * collider.bounds.extents.y;
 			float maxY = py + vert * collider.bounds.extents.y;
 
-			if (platformEffector != null) {
+			if (platformEffector != null && platformEffector.useOneWay) {
 				if ((vert > 0 && collider.transform.up.x < 0) || (horz > 0 && collider.transform.up.y > 0)) {
 					edges.Add (new Edge (minX, minY, maxX, maxY));
 				} else {

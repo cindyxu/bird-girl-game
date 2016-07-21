@@ -20,7 +20,7 @@ public class GameState : MonoBehaviour {
 
 	public static Dictionary<string, int> flags;
 
-	void Awake() {
+	void Awake () {
 		if (FindObjectsOfType (GetType ()).Length > 1) {
 			Destroy (gameObject);
 
@@ -35,12 +35,17 @@ public class GameState : MonoBehaviour {
 	}
 
 	public static void InitializeScene(GameObject player, CameraController cameraController) {
+		Inhabitant[] inhabitants = FindObjectsOfType (typeof (Inhabitant)) as Inhabitant[];
+		foreach (Inhabitant inhabitant in inhabitants) {
+			inhabitant.GetFacade ().SetKeyBindingManager (keybindingManager);
+		}
+
 		if (GameState.player != null) {
-			GameState.player.GetComponent<Inhabitant> ().RequestEnablePlayerInput (false);
+			GameState.player.GetComponent<Inhabitant> ().RequestEnablePlayerControl (false);
 		}
 
 		GameState.player = player;
-		player.GetComponent<Inhabitant> ().RequestEnablePlayerInput (true);
+		player.GetComponent<Inhabitant> ().RequestEnablePlayerControl (true);
 		GameState.cameraController = cameraController;
 		cameraController.SetFollowTarget (player);
 		mPlayerRoomController.Init (player.GetComponent<Inhabitant> ()

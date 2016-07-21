@@ -11,7 +11,6 @@ public class HumanoidController : IController {
 	private InputFeedSwitcher mInputSwitcher;
 
 	private readonly WalkerParams mWp;
-
 	private Observable mObservable;
 
 	public HumanoidController (Inhabitant inhabitant, WalkerParams wp) {
@@ -63,9 +62,9 @@ public class HumanoidController : IController {
 		return true;
 	}
 
-	public bool EnablePlayerInput (bool enable) {
+	public bool EnablePlayerControl (bool enable) {
 		if (enable && !(mInputSwitcher.GetBaseInputFeeder () is PlayerInputFeeder)) {
-			mInputSwitcher.SetBaseInputFeeder (new PlayerInputFeeder ());
+			mInputSwitcher.SetBaseInputFeeder (new PlayerInputFeeder (mInhabitant.GetFacade ().GetKeyBindingManager ()));
 		} else if (!enable && !(mInputSwitcher.GetBaseInputFeeder () is AiWalkerInputFeeder)) {
 			mInputSwitcher.SetBaseInputFeeder (new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mObservable));
 		}
@@ -90,8 +89,8 @@ public class HumanoidController : IController {
 		mObservable.OnJump ();
 	}
 
-	void OnGrounded () {
-		mObservable.OnGrounded ();
+	void OnGrounded (bool grounded) {
+		mObservable.OnGrounded (grounded);
 	}
 
 	void OnLadderEndReached (int direction) {
@@ -107,17 +106,17 @@ public class HumanoidController : IController {
 		
 		public delegate void OnJumpEvent ();
 		public event OnJumpEvent onJump;
-		public delegate void OnGroundedEvent ();
-		public event OnJumpEvent onGrounded;
+		public delegate void OnGroundedEvent (bool grounded);
+		public event OnGroundedEvent onGrounded;
 		public delegate void OnClimbLadderEvent ();
-		public event OnJumpEvent onClimbLadder;
+		public event OnClimbLadderEvent onClimbLadder;
 
 		public void OnJump () {
 			if (onJump != null) onJump ();
 		}
 
-		public void OnGrounded () {
-			if (onGrounded != null) onGrounded ();
+		public void OnGrounded (bool grounded) {
+			if (onGrounded != null) onGrounded (grounded);
 		}
 
 		public void OnClimbLadder () {

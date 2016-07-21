@@ -34,8 +34,8 @@ public class Inhabitant : MonoBehaviour {
 		return mController.RequestFinishRequest ();
 	}
 
-	public bool RequestEnablePlayerInput (bool enable) {
-		return mController.EnablePlayerInput (enable);
+	public bool RequestEnablePlayerControl (bool enable) {
+		return mController.EnablePlayerControl (enable);
 	}
 
 	void Awake () {
@@ -53,6 +53,10 @@ public class Inhabitant : MonoBehaviour {
 
 	public InhabitantFacade GetFacade () {
 		return mFacade;
+	}
+
+	public IController GetController () {
+		return mController;
 	}
 
 	void Start () {

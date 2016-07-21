@@ -19,7 +19,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.AreEqual (result [0].getEndEdge (), endEdge);
+		Assert.AreEqual (result [0].GetEndEdge (), endEdge);
 	}
 
 	[Test]
@@ -34,7 +34,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.IsNull (result.Find ((JumpPath obj) => obj.getEndEdge () == startEdge));
+		Assert.IsNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == startEdge));
 	}
 
 	[Test]
@@ -49,7 +49,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.AreEqual (result [0].getEndEdge (), endEdge);
+		Assert.AreEqual (result [0].GetEndEdge (), endEdge);
 	}
 
 	[Test]
@@ -66,8 +66,8 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.getEndEdge () == endEdge1));
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.getEndEdge () == endEdge2));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge1));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge2));
 	}
 
 	[Test]
@@ -82,7 +82,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.IsNull (result.Find ((JumpPath obj) => obj.getEndEdge () == endEdge));
+		Assert.IsNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge));
 	}
 
 	[Test]
@@ -97,7 +97,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.getEndEdge () == endEdge));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge));
 	}
 
 	[Test]
@@ -112,7 +112,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.getEndEdge () == endEdge));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge));
 	}
 
 	[Test]
@@ -127,6 +127,42 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.getEndEdge () == endEdge));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge));
+	}
+
+	[Test]
+	public void JumpScanTest_drop_findsPathToEdge()
+	{
+		List<Edge> edges = new List<Edge> ();
+		Edge startEdge = new Edge (0, 0, 1, 0);
+		Edge endEdge = new Edge (-1, -1, 2, -1);
+		edges.Add (startEdge);
+		edges.Add (endEdge);
+
+		JumpScan scan = new JumpScan (wp, startEdge, 0, 0, edges);
+		while (scan.Step ()) ;
+		List<JumpPath> result = scan.GetPaths ();
+		Assert.AreEqual (2, result.Count);
+		Assert.AreEqual (result [0].GetEndEdge (), endEdge);
+		Assert.AreEqual (result [1].GetEndEdge (), endEdge);
+	}
+
+	[Test]
+	public void JumpScanTest_drop_sidesBlocked_doesNotFindPathToEdge()
+	{
+		List<Edge> edges = new List<Edge> ();
+		Edge startEdge = new Edge (0, 0, 1, 0);
+		Edge leftEdge = new Edge (0, 1, 0, 0);
+		Edge rightEdge = new Edge (1, 0, 1, 1);
+		Edge endEdge = new Edge (-1, -1, 2, -1);
+		edges.Add (startEdge);
+		edges.Add (leftEdge);
+		edges.Add (rightEdge);
+		edges.Add (endEdge);
+
+		JumpScan scan = new JumpScan (wp, startEdge, 0, 0, edges);
+		while (scan.Step ()) ;
+		List<JumpPath> result = scan.GetPaths ();
+		Assert.AreEqual (0, result.Count);
 	}
 }

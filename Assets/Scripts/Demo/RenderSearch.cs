@@ -33,9 +33,9 @@ public class RenderSearch {
 		List<EdgePath> chain = mSearch.reconstructChain (node);
 		foreach (EdgePath path in chain) {
 			float xlf, xrf;
-			path.getEndRange (out xlf, out xrf);
-			mDrawLines.Add (RenderUtils.CreateLine (xlf, path.getEndEdge ().y0, 
-				xrf, path.getEndEdge ().y1, Color.yellow));
+			path.GetEndRange (out xlf, out xrf);
+			mDrawLines.Add (RenderUtils.CreateLine (xlf, path.GetEndEdge ().y0, 
+				xrf, path.GetEndEdge ().y1, Color.yellow));
 		}
 	}
 

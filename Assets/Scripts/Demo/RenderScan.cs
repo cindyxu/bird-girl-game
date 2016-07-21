@@ -30,9 +30,9 @@ public class RenderScan {
 		}
 		List<JumpPath> paths = mScan.GetPaths ();
 		foreach (JumpPath path in paths) {
-			Edge edge = path.getEndEdge ();
+			Edge edge = path.GetEndEdge ();
 			GameObject go = RenderUtils.CreateLine (edge.x0, edge.y0, edge.x1, edge.y1, Color.yellow);
-			GameObject areaChain = renderArea (path.getScanArea ());
+			GameObject areaChain = renderArea (path.GetScanArea ());
 			if (areaChain != null) {
 				areaChain.transform.parent = go.transform;
 			}

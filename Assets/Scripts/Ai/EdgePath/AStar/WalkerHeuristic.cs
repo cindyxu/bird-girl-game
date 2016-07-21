@@ -9,15 +9,14 @@ public class WalkerHeuristic {
 		mWp = wp;
 	}
 
-	public float GetWalkTime(float pxlf, float pxrf, float nxli, float nxri) {
+	public float GetWalkTime (float pxlf, float pxrf, float nxli, float nxri) {
 		float walkDist = 0;
 		if (nxli > pxrf) walkDist = nxli - pxrf;
 		else if (nxri < pxlf) walkDist = pxlf - nxri;
 		return walkDist / mWp.walkSpd;
 	}
 
-	public float EstTotalTime (Edge edge, float exl, float exr, Edge destEdge, float destX, float tentativeG) {
-
+	public float EstRemainingTime (Edge edge, float exl, float exr, Edge destEdge, float destX) {
 		float jumpHeight = mWp.trajectory.GetDeltaYFromVyFinal (mWp.jumpSpd, 0);
 		float dy = destEdge.bottom - edge.bottom;
 
@@ -44,7 +43,6 @@ public class WalkerHeuristic {
 				adx = Mathf.Max (adx - walkDist, 0);			
 			}
 		}
-
-		return tentativeG + estTime + (adx / mWp.walkSpd);
+		return estTime + (adx / mWp.walkSpd);
 	}
 }

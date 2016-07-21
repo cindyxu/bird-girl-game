@@ -6,6 +6,6 @@ public interface IController {
 	bool RequestMoveTo (string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback);
 	bool RequestFreeze ();
 	bool RequestFinishRequest ();
-	bool EnablePlayerInput (bool enable);
+	bool EnablePlayerControl (bool enable);
 }
 

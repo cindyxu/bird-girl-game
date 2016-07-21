@@ -15,7 +15,7 @@ public class WalkLocomotion : Locomotion {
 	public delegate void OnClimbLadder (Ladder ladder, int direction);
 	public event OnClimbLadder onClimbLadder;
 
-	public delegate void OnGrounded ();
+	public delegate void OnGrounded (bool grounded);
 	public event OnGrounded onGrounded;
 
 	public delegate void OnJump ();
@@ -118,8 +118,8 @@ public class WalkLocomotion : Locomotion {
 
 	void OnSortedEdgeChanged (SortedEdge sortedEdge) {
 		bool isGrounded = (sortedEdge != null);
-		if (isGrounded && !mIsGrounded && onGrounded != null) onGrounded ();
 		mIsGrounded = isGrounded;
+		if (onGrounded != null) onGrounded (mIsGrounded);
 	}
 }
 

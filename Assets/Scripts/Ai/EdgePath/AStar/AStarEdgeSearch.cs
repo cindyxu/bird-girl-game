@@ -43,8 +43,8 @@ public class AStarEdgeSearch {
 	private void startSearch () {
 		EdgeNode startNode = new EdgeNode (null, mStart, mStartX, 
 			mStartX + mWp.size.x, 0);
-		mOpenQueue.Enqueue (startNode, mHeuristic.EstTotalTime (mStart, startNode.xlf, 
-			startNode.xrf, mDest, mDestX, 0));
+		mOpenQueue.Enqueue (startNode, mHeuristic.EstRemainingTime (mStart, startNode.xlf, 
+			startNode.xrf, mDest, mDestX));
 	}
 
 	public IEnumerator<EdgeNode> getQueueEnumerator () {
@@ -63,7 +63,7 @@ public class AStarEdgeSearch {
 			EdgeHeuristicRange<EdgeNode> ranges = mBestHeuristics [curr.edgePath];
 			if (ranges == null) break;
 			float xli, xri;
-			curr.edgePath.getStartRange (out xli, out xri);
+			curr.edgePath.GetStartRange (out xli, out xri);
 			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, EdgeNode pnode) {
 				if (pnode == null) return Mathf.Infinity;
 				return pnode.g + mHeuristic.GetWalkTime (pnode.xlf, pnode.xrf, xli, xri);
@@ -97,7 +97,7 @@ public class AStarEdgeSearch {
 			result = mPathChain = reconstructChain (bestNode);
 			string s = "";
 			foreach (EdgePath path in result) {
-				s += path.getEndEdge () + " ";
+				s += path.GetEndEdge () + " ";
 			}
 			Log.logger.Log (Log.AI_SEARCH, s);
 			return false;
@@ -119,7 +119,7 @@ public class AStarEdgeSearch {
 		out float tnxli, out float tnxri) {
 
 		float nxli, nxri;
-		neighborPath.getStartRange (out nxli, out nxri);
+		neighborPath.GetStartRange (out nxli, out nxri);
 
 		tnxli = Mathf.Min (Mathf.Max (pxlf, nxli), nxri - mWp.size.x);
 		tnxri = Mathf.Min (Mathf.Max (pxrf, nxli + mWp.size.x), nxri);
@@ -128,30 +128,31 @@ public class AStarEdgeSearch {
 	private void getTaperedEndRange (EdgePath neighborPath, float xli, float xri, 
 		out float xlf, out float xrf) {
 
-		neighborPath.getEndRange (out xlf, out xrf);
-		xlf = Mathf.Max (xlf, xli - neighborPath.getMovement ());
-		xrf = Mathf.Min (xrf, xri + neighborPath.getMovement ());
+		neighborPath.GetEndRange (out xlf, out xrf);
+		xlf = Mathf.Max (xlf, xli - neighborPath.GetMovement ());
+		xrf = Mathf.Min (xrf, xri + neighborPath.GetMovement ());
 	}
 
 	private void processNeighborPath (EdgeNode parentNode, EdgePath neighborPath) {
-		Edge endEdge = neighborPath.getEndEdge ();
+		Edge endEdge = neighborPath.GetEndEdge ();
 
 		Log.logger.Log (Log.AI_SEARCH, "process path to " + endEdge);
 		float xli, xri;
 		getTaperedStartRange (parentNode.xlf, parentNode.xrf, neighborPath, out xli, out xri);
 
 		float exli, exri;
-		neighborPath.getStartRange (out exli, out exri);
+		neighborPath.GetStartRange (out exli, out exri);
 		Log.logger.Log (Log.AI_SEARCH, "tapered start range: " + xli + ", " + xri);
 
 		float walkTime = mHeuristic.GetWalkTime (parentNode.xlf, parentNode.xrf, xli, xri);
-		float tentativeG = parentNode.g + walkTime + neighborPath.getTravelTime ();
+		float tentativeG = parentNode.g + walkTime + 
+			neighborPath.GetTravelTime () * neighborPath.GetPenaltyMult ();
 
 		float xlf, xrf;
 		getTaperedEndRange (neighborPath, xli, xri, out xlf, out xrf);
 
 		float exlf, exrf;
-		neighborPath.getEndRange (out exlf, out exrf);
+		neighborPath.GetEndRange (out exlf, out exrf);
 		Log.logger.Log (Log.AI_SEARCH, "tapered end range: " + xlf + ", " + xrf);
 
 		if (!mBestHeuristics.ContainsKey (neighborPath)) {
@@ -164,9 +165,9 @@ public class AStarEdgeSearch {
 			Log.logger.Log (Log.AI_SEARCH, "  did not add new heuristic");
 			return;
 		}
-		EdgeNode node = new EdgeNode (neighborPath, neighborPath.getEndEdge (), xlf, xrf, tentativeG);
+		EdgeNode node = new EdgeNode (neighborPath, neighborPath.GetEndEdge (), xlf, xrf, tentativeG);
 
-		float f = mHeuristic.EstTotalTime (neighborPath.getEndEdge (), xlf, xrf, mDest, mDestX, tentativeG);
+		float f = tentativeG + mHeuristic.EstRemainingTime (neighborPath.GetEndEdge (), xlf, xrf, mDest, mDestX);
 		Log.logger.Log (Log.AI_SEARCH, "  new node! " + f);
 		mOpenQueue.Enqueue (node, f);
 	}

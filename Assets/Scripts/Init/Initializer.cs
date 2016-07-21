@@ -6,11 +6,8 @@ public class Initializer : MonoBehaviour {
 	public GameObject player;
 	public CameraController cameraController;
 
-	void Awake () {
-		GameState.InitializeScene (player, cameraController);
-	}
-
 	void Start () {
+		GameState.InitializeScene (player, cameraController);
 		GameState.HandlePrepared ();
 	}
 }

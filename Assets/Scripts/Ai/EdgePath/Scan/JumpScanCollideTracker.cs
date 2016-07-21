@@ -83,7 +83,7 @@ public class JumpScanCollideTracker {
 				}
 			}
 		}
-//		Debug.Log ("initialized edges: rising: " + mRisingEdges.Count + ", falling: " + mFallingEdges.Count);
+		Log.logger.Log ("initialized edges: rising: " + mRisingEdges.Count + ", falling: " + mFallingEdges.Count, Log.AI_SCAN);
 	}
 
 	private void PopulatePts () {

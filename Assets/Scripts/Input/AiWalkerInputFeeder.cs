@@ -71,12 +71,12 @@ public class AiWalkerInputFeeder : InputFeeder {
 	void OnClimbLadder ()
 	{}
 
-	void OnGrounded () {
+	void OnGrounded (bool grounded) {
 		if (mPathPlanner != null) {
 			mPathPlanner.OnUpdate (mFacade.GetPosition ().x - mFacade.GetSize ().x / 2, 
 				mFacade.GetPosition ().y - mFacade.GetSize ().y / 2, 
 				mFacade.GetVelocity ().y);
-			mPathPlanner.OnGrounded ();
+			mPathPlanner.OnGrounded (grounded);
 		}
 	}
 

@@ -38,37 +38,45 @@ public class PathPlanner {
 		Edge destEdge = EdgeUtil.FindUnderEdge (mGraph.edges, 
 			pos.x - mWp.size.x / 2, pos.x + mWp.size.x / 2, pos.y);
 
-		float xlf = Mathf.Max (destEdge.left - mWp.size.x + JumpScan.EDGE_THRESHOLD, 
-			pos.x - mWp.size.x / 2 - minDist);
-		float xrf = Mathf.Min (destEdge.right + mWp.size.x - JumpScan.EDGE_THRESHOLD, 
-			pos.x + mWp.size.x / 2 + minDist);
+		if (destEdge != null) {
+			float xlf = Mathf.Max (destEdge.left - mWp.size.x + JumpScan.EDGE_THRESHOLD, 
+				            pos.x - mWp.size.x / 2 - minDist);
+			float xrf = Mathf.Min (destEdge.right + mWp.size.x - JumpScan.EDGE_THRESHOLD, 
+				            pos.x + mWp.size.x / 2 + minDist);
 
-		if (startEdge != destEdge) {
+			if (startEdge != destEdge) {
 
-			AStarEdgeSearch search = new AStarEdgeSearch (mGraph.paths, mWp, startEdge, 
-				(float) (mPx - mWp.size.x / 2), destEdge, (float) (pos.x - mWp.size.x / 2));
-			List<EdgePath> result;
-			while (search.Step (out result)) ;
-			mChainPlanner = new ChainPlanner (mWp, result, xlf, xrf);
-		} else {
-			mChainPlanner = new ChainPlanner (mWp, new List<EdgePath> (), xlf, xrf);
-		}
-
+				AStarEdgeSearch search = new AStarEdgeSearch (mGraph.paths, mWp, startEdge, 
+					                         (float) (mPx - mWp.size.x / 2), destEdge, (float) (pos.x - mWp.size.x / 2));
+				List<EdgePath> result;
+				while (search.Step (out result)) ;
+				if (result != null) {
+					mChainPlanner = new ChainPlanner (mWp, result, xlf, xrf, mPx, mPy);
+				} else mChainPlanner = null;
+			} else {
+				mChainPlanner = new ChainPlanner (mWp, new List<EdgePath> (), xlf, xrf, mPx, mPy);
+			}
+		} else mChainPlanner = null;
 	}
 
 	public void OnUpdate (float x, float y, float vy) {
 		mPx = x;
 		mPy = y;
-		mChainPlanner.OnUpdate (x, y, vy);
+		if (mChainPlanner != null) mChainPlanner.OnUpdate (x, y, vy);
 	}
 
-	public void OnGrounded () {
-		Edge edge = EdgeUtil.FindUnderEdge (mGraph.edges, 
-			mPx, mPx + mWp.size.x, mPy + mWp.size.y / 2);
-		mChainPlanner.OnGrounded (edge);
+	public void OnGrounded (bool grounded) {
+		if (mChainPlanner != null) {
+			if (grounded) {
+				Edge edge = EdgeUtil.FindUnderEdge (mGraph.edges, 
+					            mPx, mPx + mWp.size.x, mPy + mWp.size.y / 2);
+				mChainPlanner.OnGrounded (edge);
+			} else mChainPlanner.OnGrounded (null);
+		}
 	}
 
 	public bool FeedInput (InputCatcher inputCatcher) {
+		if (mChainPlanner == null) return false;
 		ChainPlanner.Status status = mChainPlanner.FeedInput (inputCatcher);
 		if (status.Equals (ChainPlanner.Status.FAILED)) {
 			initializePath ();

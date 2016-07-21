@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class JumpPlanner {
 
-	private const float MAX_RANGE_THRESHOLD = 0.1f;
+	public const float MAX_RANGE_THRESHOLD = 0.1f;
 
+	private JumpPath mJumpPath;
 	private List<JumpScanArea> mScanAreas = new List<JumpScanArea> ();
 	private int mAidx;
 	private WalkerParams mWp;
@@ -16,7 +17,8 @@ public class JumpPlanner {
 		mWp = wp;
 		mXlt = xlt;
 		mXrt = xrt;
-		JumpScanArea scanArea = jumpPath.getScanArea ();
+		mJumpPath = jumpPath;
+		JumpScanArea scanArea = jumpPath.GetScanArea ();
 		while (scanArea != null) {
 			mScanAreas.Insert (0, scanArea);
 			scanArea = scanArea.parent;
@@ -29,15 +31,24 @@ public class JumpPlanner {
 		JumpScanArea mScanArea = mScanAreas [mAidx];
 
 		mDir = 0;
-		float rightLim = mScanArea.end.xr - MAX_RANGE_THRESHOLD;
-		float leftLim = mScanArea.end.xl + MAX_RANGE_THRESHOLD;
+		// if just started dropping, don't move so you don't accidentally return to edge
+		if (mJumpPath.IsDropPath () && y > mJumpPath.GetStartEdge ().y0 - 0.1f) return;
+
+		float endRangeX = mScanArea.end.xr - mScanArea.end.xl;
+		float padding = (endRangeX - mWp.size.x) / 2f;
+
+		// target distance from either left or right
+		float threshold = Mathf.Max (Mathf.Min (MAX_RANGE_THRESHOLD, padding - MAX_RANGE_THRESHOLD), 0);
+		float rightLim = mScanArea.end.xr - threshold;
+		float leftLim = mScanArea.end.xl + threshold;
+
 		if (x < leftLim) {
 			mDir = 1;
 		} else if (x + mWp.size.x > rightLim) {
 			mDir = -1;
 		} else {
-			if (x < Mathf.Min (mXlt, rightLim)) mDir = 1;
-			if (x + mWp.size.x > Mathf.Max (mXrt, leftLim)) mDir = -1;
+			if (x < Mathf.Min (mXlt + threshold, rightLim - mWp.size.x)) mDir = 1;
+			if (x > Mathf.Max (mXrt - threshold - mWp.size.x, leftLim)) mDir = -1;
 		}
 	}
 
@@ -52,7 +63,7 @@ public class JumpPlanner {
 			mAidx++;
 			mScanArea = mScanAreas [mAidx];
 			evy = mScanArea.end.vy;
-			Log.logger.Log (Log.AI_PLAN, "jump idx = " + mAidx + " / " + mScanAreas.Count + ", evy = "  + evy);
+//			Log.logger.Log (Log.AI_PLAN, "jump idx = " + mAidx + " / " + mScanAreas.Count + ", evy = "  + evy);
 		}
 	}
 }

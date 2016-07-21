@@ -3,12 +3,17 @@ using System.Collections;
 
 public class PlayerInputFeeder : InputFeeder {
 
+	private KeyBindingManager mKmManager;
+
+	public PlayerInputFeeder (KeyBindingManager kmManager) {
+		mKmManager = kmManager;
+	}
+
 	public override void OnBeginInput (InputCatcher catcher) {
-		KeyBindingManager kmManager = GameState.keybindingManager;
-		if (kmManager.GetKey (ActionKey.LEFT)) {
+		if (mKmManager.GetKey (ActionKey.LEFT)) {
 			catcher.OnLeftPress ();
 		}
-		if (kmManager.GetKey (ActionKey.RIGHT)) {
+		if (mKmManager.GetKey (ActionKey.RIGHT)) {
 			catcher.OnRightPress ();
 		}
 	}
@@ -17,42 +22,40 @@ public class PlayerInputFeeder : InputFeeder {
 	}
 
 	public override void FeedInput (InputCatcher catcher) {
-		KeyBindingManager kmManager = GameState.keybindingManager;
-
-		if (kmManager.GetKeyDown (ActionKey.LEFT)) {
+		if (mKmManager.GetKeyDown (ActionKey.LEFT)) {
 			catcher.OnLeftPress ();
 		}
-		if (kmManager.GetKeyUp (ActionKey.LEFT)) {
+		if (mKmManager.GetKeyUp (ActionKey.LEFT)) {
 			catcher.OnLeftRelease ();
 		}
 
-		if (kmManager.GetKeyDown (ActionKey.RIGHT)) {
+		if (mKmManager.GetKeyDown (ActionKey.RIGHT)) {
 			catcher.OnRightPress ();
 		} 
-		if (kmManager.GetKeyUp (ActionKey.RIGHT)) {
+		if (mKmManager.GetKeyUp (ActionKey.RIGHT)) {
 			catcher.OnRightRelease ();
 		}
 
-		if (kmManager.GetKeyDown (ActionKey.UP)) {
+		if (mKmManager.GetKeyDown (ActionKey.UP)) {
 			catcher.OnUpPress ();
 		}
-		if (kmManager.GetKeyUp (ActionKey.UP)) {
+		if (mKmManager.GetKeyUp (ActionKey.UP)) {
 			catcher.OnUpRelease ();
 		}
 
-		if (kmManager.GetKeyDown (ActionKey.DOWN)) {
+		if (mKmManager.GetKeyDown (ActionKey.DOWN)) {
 			catcher.OnDownPress ();
 		} 
 
-		if (kmManager.GetKeyUp (ActionKey.DOWN)) {
+		if (mKmManager.GetKeyUp (ActionKey.DOWN)) {
 			catcher.OnDownRelease ();
 		}
 
-		if (kmManager.GetKeyDown (ActionKey.JUMP)) {
+		if (mKmManager.GetKeyDown (ActionKey.JUMP)) {
 			catcher.OnJumpPress ();
 		}
 
-		if (kmManager.GetKeyDown (ActionKey.ACTION)) {
+		if (mKmManager.GetKeyDown (ActionKey.ACTION)) {
 			catcher.OnActionPress ();
 		}
 	}
