@@ -52,12 +52,12 @@ public class JumpScan {
 	// gets edges within the maximum x-distance of the furthest y
 	private List<Edge> getQualifiedEdges (float xl, float xr, float yi, float vyi, List<Edge> edges) {
 
-		float yZenith = yi + mWp.trajectory.GetDeltaYFromVyFinal (vyi, 0);
+		float yZenithTop = yi + mWp.trajectory.GetDeltaYFromVyFinal (vyi, 0) + mWp.size.y;
 		float yMin = Mathf.Infinity;
 
 		List<Edge> qualifiedEdges = new List<Edge> ();
 		foreach (Edge edge in edges) {
-			if (edge.y0 <= yZenith || edge.y1 <= yZenith) {
+			if (edge.y0 <= yZenithTop || edge.y1 <= yZenithTop) {
 				qualifiedEdges.Add(edge);
 				yMin = Mathf.Min (edge.bottom, yMin);
 			}
