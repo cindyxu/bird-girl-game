@@ -27,14 +27,11 @@ public class RoomGraph {
 		}
 		LRUCache<Room, Graph> roomGraphs = mGraphs [wp];
 		if (roomGraphs.get (room) == null) {
-			SortedEdge[] sortedEdges = room.GetSortedEdges ();
-			EdgeCollider2D[] edgeColliders = new EdgeCollider2D [sortedEdges.Length];
-			for (int i = 0; i < sortedEdges.Length; i++) {
-				edgeColliders [i] = sortedEdges [i].GetComponent<EdgeCollider2D> ();
-			}
-
 			List<Edge> edges = BuildEdges (room);
-			Dictionary<Edge, List<EdgePath>> paths = BuildPaths (wp, edges);
+			List<Rect> ladders = BuildLadderRects (room);
+			Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+			AddJumpPaths (wp, edges, paths);
+			AddLadderPaths (wp, edges, ladders, paths);
 			Graph graph = new Graph (room, edges, paths);
 			roomGraphs.add (room, graph);
 		}
@@ -50,16 +47,43 @@ public class RoomGraph {
 		return EdgeBuilder.BuildEdges (colliders);
 	}
 
-	public static Dictionary<Edge, List<EdgePath>> BuildPaths(WalkerParams wp, List<Edge> edges) {
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+	private static List<Rect> BuildLadderRects (Room room) {
+		Ladder[] goLadders = room.GetLadders ();
+		List<Rect> ladders = new List<Rect> ();
+		foreach (Ladder l in goLadders) {
+			Vector2 position = l.transform.position;
+			position -= l.GetSize () / 2f;
+			ladders.Add (new Rect (position, l.GetSize ()));
+		}
+		return ladders;
+	}
+
+	public static void AddJumpPaths (WalkerParams wp, List<Edge> edges, Dictionary<Edge, List<EdgePath>> paths) {
 		foreach (Edge edge in edges) {
 			if (edge.isDown) {
 				Log.logger.Log (Log.AI_SCAN, "scanning for " + edge);
-				List<EdgePath> edgePaths = PathBuilder.BuildPaths (wp, edges, edge);
+				List<EdgePath> edgePaths = PathBuilder.BuildJumpPaths (wp, edges, edge);
 				Log.logger.Log (Log.AI_SCAN, "found " + edgePaths.Count + " paths");
-				paths [edge] = edgePaths;
+				if (paths.ContainsKey (edge)) {
+					paths [edge].AddRange (edgePaths);
+				} else {
+					paths [edge] = edgePaths;
+				}
 			}
 		}
-		return paths;
+	}
+
+	public static void AddLadderPaths (WalkerParams wp, List<Edge> edges, List<Rect> ladders, Dictionary<Edge, List<EdgePath>> paths) {
+		foreach (Rect ladder in ladders) {
+			List<LadderPath> ladderPaths = PathBuilder.BuildLadderPaths (wp, edges, ladder);
+			if (ladderPaths != null) {
+				foreach (LadderPath path in ladderPaths) {
+					if (!paths.ContainsKey (path.GetStartEdge ())) {
+						paths [path.GetStartEdge ()].Add (path);
+					}
+					paths [path.GetStartEdge ()].Add (path);
+				}
+			}
+		}
 	}
 }

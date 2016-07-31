@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 public class AStarEdgeSearchTest {
 
-	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, -50, -100);
+	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, 10, -50, -100);
 
 	[Test]
 	public void AStarEdgeSearch_goalOneEdgeAcross_returnsChainToEdge()
@@ -15,7 +15,8 @@ public class AStarEdgeSearchTest {
 		Edge dest = new Edge (2, 0, 3, 0);
 		edges.Add (start);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, 
 			start, 0, dest, 2);
@@ -36,7 +37,8 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (mid);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 6);
 		List<EdgePath> result;
@@ -59,7 +61,8 @@ public class AStarEdgeSearchTest {
 		edges.Add (mid);
 		edges.Add (dest);
 
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 3);
 		List<EdgePath> result;
@@ -77,7 +80,8 @@ public class AStarEdgeSearchTest {
 		Edge dest = new Edge (6, 0, 7, 0);
 		edges.Add (start);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 6);
 		List<EdgePath> result;
@@ -94,7 +98,8 @@ public class AStarEdgeSearchTest {
 		Edge dest = new Edge (0, 1, 1, 1);
 		edges.Add (start);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 0);
 		List<EdgePath> result;
@@ -112,7 +117,8 @@ public class AStarEdgeSearchTest {
 		Edge dest = new Edge (0, -1, 1, -1);
 		edges.Add (start);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 0);
 		List<EdgePath> result;
@@ -132,7 +138,8 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (left);
 		edges.Add (right);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, left, -3);
 		List<EdgePath> result;
@@ -151,7 +158,8 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (left);
 		edges.Add (right);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, right, 3);
 		List<EdgePath> result;
@@ -170,7 +178,8 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (up);
 		edges.Add (down);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, up, 0);
 		List<EdgePath> result;
@@ -189,7 +198,8 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (up);
 		edges.Add (down);
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, down, 0);
 		List<EdgePath> result;
@@ -226,7 +236,8 @@ public class AStarEdgeSearchTest {
 		edges.Add (short1);
 		edges.Add (dest);
 
-		Dictionary<Edge, List<EdgePath>> paths = RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, 
 			start, 0, dest, 9);

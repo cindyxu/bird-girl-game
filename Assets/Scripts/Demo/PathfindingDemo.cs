@@ -6,6 +6,7 @@ public class PathfindingDemo : MonoBehaviour {
 
 	public float walkSpd;
 	public float jumpSpd;
+	public float climbSpd;
 	public float terminalV;
 
 	public GameObject walker;
@@ -26,7 +27,7 @@ public class PathfindingDemo : MonoBehaviour {
 
 		EdgeCollider2D[] edgeColliders = FindObjectsOfType<EdgeCollider2D> ();
 		mEdges = EdgeBuilder.BuildEdges (edgeColliders);
-		mWp = new WalkerParams (walker.GetComponent<BoxCollider2D> ().size, walkSpd, jumpSpd, 
+		mWp = new WalkerParams (walker.GetComponent<BoxCollider2D> ().size, walkSpd, jumpSpd, climbSpd,
 			walker.GetComponent <Rigidbody2D> ().gravityScale * Physics2D.gravity.y,
 			terminalV);
 

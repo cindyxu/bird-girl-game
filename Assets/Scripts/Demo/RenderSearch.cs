@@ -9,8 +9,8 @@ public class RenderSearch {
 
 	public RenderSearch (BoxCollider2D walker, BoxCollider2D target, WalkerParams wp, Edge startEdge, float startX, 
 		Edge destEdge, float destX, List<Edge> edges) {
-		Dictionary<Edge, List<EdgePath>> paths = 
-			RoomGraph.BuildPaths (wp, edges);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		RoomGraph.AddJumpPaths (wp, edges, paths);
 		mSearch = new AStarEdgeSearch (paths, wp, startEdge, startX, 
 			destEdge, destX); 
 	}

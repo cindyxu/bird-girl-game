@@ -8,19 +8,27 @@ public class Room : MonoBehaviour {
 	public Renderer backgroundRenderer;
 	private SortedEdge[] mSortedEdges;
 	private Ladder[] mLadders;
-	private LadderDescend[] mLadderTops;
+	private LadderDescend[] mLadderDescends;
 	private Trigger[] mActionTriggers;
 
 	// Use this for initialization
 	void Awake () { 
 		mSortedEdges = GetComponentsInChildren<SortedEdge> ();
 		mLadders = GetComponentsInChildren<Ladder> ();
-		mLadderTops = GetComponentsInChildren<LadderDescend> ();
+		mLadderDescends = GetComponentsInChildren<LadderDescend> ();
 		mActionTriggers = GetComponentsInChildren<Trigger> ();
 	}
 
 	public SortedEdge[] GetSortedEdges () {
 		return mSortedEdges;
+	}
+
+	public Ladder[] GetLadders () {
+		return mLadders;
+	}
+
+	public LadderDescend[] GetLadderDescends () {
+		return mLadderDescends;
 	}
 
 	public IntraDoorTrigger[] GetIntraDoors () {
@@ -35,7 +43,7 @@ public class Room : MonoBehaviour {
 		foreach (Ladder ladder in mLadders) {
 			ladder.EnableClimbable (objCollider2D, true);
 		}
-		foreach (LadderDescend ladderTop in mLadderTops) {
+		foreach (LadderDescend ladderTop in mLadderDescends) {
 			Physics2D.IgnoreCollision (objCollider2D, ladderTop.GetComponent<Collider2D> (), false);
 		}
 		foreach (Trigger trigger in mActionTriggers) {
@@ -51,7 +59,7 @@ public class Room : MonoBehaviour {
 		foreach (Ladder ladder in mLadders) {
 			ladder.EnableClimbable (objCollider2D, false);
 		}
-		foreach (LadderDescend ladderTop in mLadderTops) {
+		foreach (LadderDescend ladderTop in mLadderDescends) {
 			Physics2D.IgnoreCollision (objCollider2D, ladderTop.GetComponent<Collider2D> ());
 		}
 		foreach (Trigger trigger in mActionTriggers) {

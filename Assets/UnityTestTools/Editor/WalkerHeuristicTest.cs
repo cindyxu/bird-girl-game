@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 public class WalkerHeuristicTest {
 
-	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, -50, -100);
+	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, 10, -50, -100);
 
 	[Test]
 	public void WalkerHeuristic_getWalkTime_goalToRight_getsCorrectWalkTime()

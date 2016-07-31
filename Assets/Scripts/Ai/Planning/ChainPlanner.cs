@@ -26,6 +26,7 @@ public class ChainPlanner {
 
 	private JumpPlanner mJumpPlanner;
 	private WalkPlanner mWalkPlanner;
+	private LadderPlanner mLadderPlanner;
 
 	public ChainPlanner (WalkerParams wp, List<EdgePath> chain, float xlf, float xrf, float x, float y) {
 		Assert.IsNotNull (chain);
@@ -56,8 +57,8 @@ public class ChainPlanner {
 
 	public Status FeedInput (InputCatcher inputCatcher) {
 		if (mWalkPlanner != null) {
-			int dir = mWalkPlanner.GetMoveDir ();
-			inputMoveDir (inputCatcher, dir);
+			int dir = mWalkPlanner.GetLateralDir ();
+			inputLateralDir (inputCatcher, dir);
 			if (dir == 0) {
 				if (mPathIdx < mChain.Count) {
 					enterEdgePath (inputCatcher);
@@ -67,7 +68,10 @@ public class ChainPlanner {
 				}
 			}
 		} else if (mJumpPlanner != null) {
-			inputMoveDir (inputCatcher, mJumpPlanner.GetMoveDir ());
+			inputLateralDir (inputCatcher, mJumpPlanner.GetMoveDir ());
+		} else if (mLadderPlanner != null) {
+			inputLateralDir (inputCatcher, mLadderPlanner.GetLateralDir ());
+			inputVerticalDir (inputCatcher, mLadderPlanner.GetVerticalDir ());
 		}
 		return mStatus;
 	}
@@ -75,23 +79,31 @@ public class ChainPlanner {
 	private void enterEdgePath (InputCatcher inputCatcher) {
 		mWalkPlanner = null;
 
+		float xlt, xrt;
+		getTargetRange (out xlt, out xrt);
+
 		EdgePath currPath = mChain [mPathIdx];
 		if (currPath is JumpPath) {
-			JumpPath jumpPath = (JumpPath) currPath;
+			JumpPath jumpPath = currPath as JumpPath;
 			if (!jumpPath.IsDropPath ()) {
-				Log.logger.Log (Log.AI_PLAN, "jumping it " + jumpPath.GetPenaltyMult ());
+				Log.logger.Log (Log.AI_PLAN, "jumping it");
 				if (!inputCatcher.GetJumpPress ()) inputCatcher.OnJumpPress ();
 			} else {
-				Log.logger.Log (Log.AI_PLAN, "dropping it " + jumpPath.GetPenaltyMult ());
+				Log.logger.Log (Log.AI_PLAN, "dropping it");
 			}
-			mJumpPlanner = createJumpPlanner (jumpPath);
+			mJumpPlanner = new JumpPlanner (jumpPath, xlt, xrt, mWp);
+		} else if (currPath is LadderPath) {
+			Log.logger.Log (Log.AI_PLAN, "climbing it");
+			LadderPath ladderPath = currPath as LadderPath;
+			mLadderPlanner = new LadderPlanner (ladderPath, mWp, xlt, xrt, mX); 
 		}
 	}
 
 	public void OnGrounded (Edge edge) {
 		Log.logger.Log (Log.AI_PLAN, "on grounded " + edge);
-		if (edge != null && mJumpPlanner != null) {
+		if (edge != null && (mJumpPlanner != null || mLadderPlanner != null)) {
 			mJumpPlanner = null;
+			mLadderPlanner = null;
 
 			EdgePath currPath = mChain [mPathIdx];
 			if (edge == currPath.GetEndEdge ()) {
@@ -106,7 +118,7 @@ public class ChainPlanner {
 		}
 	}
 
-	private void inputMoveDir (InputCatcher inputCatcher, int dir) {
+	private void inputLateralDir (InputCatcher inputCatcher, int dir) {
 		if (dir >= 0 && inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
 		if (dir <= 0 && inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
 		if (dir < 0 && !inputCatcher.GetLeft ()) {
@@ -114,6 +126,17 @@ public class ChainPlanner {
 		} 
 		if (dir > 0 && !inputCatcher.GetRight ()) {
 			inputCatcher.OnRightPress ();
+		}
+	}
+
+	private void inputVerticalDir (InputCatcher inputCatcher, int dir) {
+		if (dir >= 0 && inputCatcher.GetDown ()) inputCatcher.OnDownRelease ();
+		if (dir <= 0 && inputCatcher.GetUp ()) inputCatcher.OnUpRelease ();
+		if (dir < 0 && !inputCatcher.GetDown ()) {
+			inputCatcher.OnDownPress ();
+		} 
+		if (dir > 0 && !inputCatcher.GetUp ()) {
+			inputCatcher.OnUpPress ();
 		}
 	}
 
@@ -129,14 +152,12 @@ public class ChainPlanner {
 		}
 	}
 
-	private JumpPlanner createJumpPlanner (JumpPath jumpPath) {
-		float xlt, xrt;
+	private void getTargetRange (out float xlt, out float xrt) {
 		if (mPathIdx + 1 < mChain.Count) {
 			mChain [mPathIdx + 1].GetStartRange (out xlt, out xrt);
 		} else {
 			xlt = mXlf;
 			xrt = mXrf;
 		}
-		return new JumpPlanner (jumpPath, xlt, xrt, mWp);
 	}
 }

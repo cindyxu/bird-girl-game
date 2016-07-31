@@ -59,22 +59,22 @@ public class JumpPath : EdgePath {
 
 	private float evaluatePenaltyMult (WalkerParams wp) {
 		float penaltyMult = 1f;
-		// does it have overly narrow areas?
-		// not counting launch area
-		JumpScanArea area = mLeafArea;
-		while (area != null && area.parent != null) {
-			float padding = ((area.end.xr - area.end.xl) - wp.size.x) / 2f;
-			if (padding < 0.5f) {
-				penaltyMult += 0.2f * Mathf.Abs (area.end.vy) * Mathf.Max (0.5f - padding, 0);
-			}
-			area = area.parent;
-		}
-
-		// does it just catch the edge?
-		float xlf = mLeafArea.end.xl;
-		float xrf = mLeafArea.end.xr;
-		float overlap = Mathf.Min (xrf - mEndEdge.left, mEndEdge.right- xlf);
-		penaltyMult += 4f * Mathf.Max (0.5f - overlap, 0);
+//		// does it have overly narrow areas?
+//		// not counting launch area
+//		JumpScanArea area = mLeafArea;
+//		while (area != null && area.parent != null) {
+//			float padding = ((area.end.xr - area.end.xl) - wp.size.x) / 2f;
+//			if (padding < 0.5f) {
+//				penaltyMult += 0.2f * Mathf.Abs (area.end.vy) * Mathf.Max (0.5f - padding, 0);
+//			}
+//			area = area.parent;
+//		}
+//
+//		// does it just catch the edge?
+//		float xlf = mLeafArea.end.xl;
+//		float xrf = mLeafArea.end.xr;
+//		float overlap = Mathf.Min (xrf - mEndEdge.left, mEndEdge.right- xlf);
+//		penaltyMult += 4f * Mathf.Max (0.5f - overlap, 0);
 
 		return penaltyMult;
 	}

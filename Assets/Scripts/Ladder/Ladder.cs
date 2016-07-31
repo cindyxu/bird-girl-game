@@ -11,10 +11,10 @@ public class Ladder : MonoBehaviour {
 	public Collider2D bottomCollider;
 	public LadderDescend descend;
 
-	private Collider2D mCollider2D;
+	private BoxCollider2D mCollider2D;
 
 	void Awake () {
-		mCollider2D = GetComponent<Collider2D> ();
+		mCollider2D = GetComponent<BoxCollider2D> ();
 	}
 
 	public Room GetRoom () {
@@ -27,6 +27,16 @@ public class Ladder : MonoBehaviour {
 
 	public Room GetDestRoom () {
 		return descend.GetComponentInParent<Room> ();
+	}
+
+	public Vector2 GetSize () {
+		Vector2 size = mCollider2D.size;
+		Transform transform = mCollider2D.transform;
+		while (transform != null) {
+			size = Vector2.Scale (size, new Vector2 (transform.localScale.x, transform.localScale.y));
+			transform = transform.parent;
+		}
+		return size;
 	}
 
 	public String GetDestSortingLayerName () {

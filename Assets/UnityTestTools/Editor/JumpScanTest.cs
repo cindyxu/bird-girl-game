@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class JumpScanTest {
 
-	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, -50, -100);
+	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, 10, -50, -100);
 
 	[Test]
 	public void JumpScanTest_oneAdjacentEdgeRight_findsPathToEdge()

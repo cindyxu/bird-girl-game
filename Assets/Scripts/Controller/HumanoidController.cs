@@ -26,7 +26,7 @@ public class HumanoidController : IController {
 		mWalkLocomotion.onGrounded += OnGrounded;
 		mWalkLocomotion.onJump += OnJump;
 
-		mLadderLocomotion = new LadderLocomotion (mInhabitant.GetFacade (), inputCatcher);
+		mLadderLocomotion = new LadderLocomotion (mInhabitant.GetFacade (), inputCatcher, mWp);
 		mLadderLocomotion.onLadderEndReached += OnLadderEndReached;
 		mLadderLocomotion.onLadderDismount += OnLadderDismount;
 

@@ -6,8 +6,7 @@ public class LadderLocomotion : Locomotion {
 	private RoomTraveller mRoomTraveller;
 	private InputCatcher mInputCatcher;
 
-	private float mClimbSpeed = 5;
-	private float mSlideSpeed = 5;
+	private WalkerParams mWp;
 
 	private Ladder mCurrentLadder;
 
@@ -17,8 +16,9 @@ public class LadderLocomotion : Locomotion {
 	public delegate void OnLadderDismount(int direction);
 	public event OnLadderDismount onLadderDismount;
 
-	public LadderLocomotion (InhabitantFacade facade, InputCatcher inputCatcher) {
+	public LadderLocomotion (InhabitantFacade facade, InputCatcher inputCatcher, WalkerParams wp) {
 		mFacade = facade;
+		mWp = wp;
 		mInputCatcher = inputCatcher;
 		mRoomTraveller = mFacade.GetRoomTraveller ();
 	}
@@ -84,16 +84,16 @@ public class LadderLocomotion : Locomotion {
 	public override void HandleFixedUpdate() {
 		Vector2 velocity = new Vector2 (0, 0);
 		if (mInputCatcher.GetLeft()) {
-			velocity.x = -mSlideSpeed;
+			velocity.x = -mWp.walkSpd;
 		}
 		if (mInputCatcher.GetRight()) {
-			velocity.x = mSlideSpeed;
+			velocity.x = mWp.walkSpd;
 		}
 		if (mInputCatcher.GetUp()) {
-			velocity.y = mClimbSpeed;
+			velocity.y = mWp.climbSpd;
 		}
 		if (mInputCatcher.GetDown()) {
-			velocity.y = -mClimbSpeed;
+			velocity.y = -mWp.climbSpd;
 		}
 
 		mFacade.SetVelocity (velocity);
