@@ -1003,7 +1003,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startRoom: {fileID: 849631220}
-  climbSpd: 12
+  climbSpd: 6
   walkSpd: 8
   jumpSpd: 14
   maxVelocity: -100

@@ -4,7 +4,6 @@ public class LadderPlanner {
 
 	private LadderPath mLadderPath;
 	private int mHDir = 0;
-	private int mVDir = 0;
 	
 	public LadderPlanner (LadderPath ladderPath, WalkerParams wp, float xlf, float xrf, float x) {
 		mLadderPath = ladderPath;

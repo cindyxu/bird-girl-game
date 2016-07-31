@@ -31,7 +31,7 @@ public class WalkPlanner {
 		mX = x;
 	}
 
-	public int GetLateralDir () {
+	public int GetHorizontalDir () {
 		if (mDir < 0) {
 			float rightSide = mX + mWp.size.x;
 			float rightLim = mXri - mThreshold;

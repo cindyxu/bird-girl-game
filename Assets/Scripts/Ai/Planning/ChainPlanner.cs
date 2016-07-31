@@ -57,9 +57,9 @@ public class ChainPlanner {
 
 	public Status FeedInput (InputCatcher inputCatcher) {
 		if (mWalkPlanner != null) {
-			int dir = mWalkPlanner.GetLateralDir ();
-			inputLateralDir (inputCatcher, dir);
-			if (dir == 0) {
+			int hdir = mWalkPlanner.GetHorizontalDir ();
+			inputLateralDir (inputCatcher, hdir);
+			if (hdir == 0) {
 				if (mPathIdx < mChain.Count) {
 					enterEdgePath (inputCatcher);
 				} else {
@@ -67,8 +67,10 @@ public class ChainPlanner {
 					Log.logger.Log (Log.AI_PLAN, "DONE!");
 				}
 			}
+			inputVerticalDir (inputCatcher, 0);
 		} else if (mJumpPlanner != null) {
 			inputLateralDir (inputCatcher, mJumpPlanner.GetMoveDir ());
+			inputVerticalDir (inputCatcher, 0);
 		} else if (mLadderPlanner != null) {
 			inputLateralDir (inputCatcher, mLadderPlanner.GetLateralDir ());
 			inputVerticalDir (inputCatcher, mLadderPlanner.GetVerticalDir ());
@@ -91,7 +93,7 @@ public class ChainPlanner {
 			} else {
 				Log.logger.Log (Log.AI_PLAN, "dropping it");
 			}
-			mJumpPlanner = new JumpPlanner (jumpPath, xlt, xrt, mWp);
+			mJumpPlanner = new JumpPlanner (jumpPath, xlt, xrt, mWp, mX);
 		} else if (currPath is LadderPath) {
 			Log.logger.Log (Log.AI_PLAN, "climbing it");
 			LadderPath ladderPath = currPath as LadderPath;
