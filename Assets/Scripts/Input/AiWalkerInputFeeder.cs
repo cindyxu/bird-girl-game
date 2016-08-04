@@ -62,7 +62,6 @@ public class AiWalkerInputFeeder : InputFeeder {
 	}
 
 	void OnGravityScaleChanged () {
-
 	}
 
 	void OnJump ()

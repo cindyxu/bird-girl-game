@@ -2,23 +2,16 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent (typeof (DialogueController))]
 public class GameState : MonoBehaviour {
 
-	public static CutsceneController cutsceneController = new CutsceneController ();
-	public static DialogueLibrary dialogueLibrary;
-	public static CutsceneLibrary cutsceneLibrary;
 	public static KeyBindingManager keybindingManager = new KeyBindingManager ();
 	public static SceneController sceneController = new SceneController ();
 	private static PlayerRoomController mPlayerRoomController = new PlayerRoomController ();
 
-	public static DialogueController dialogueController;
-
 	public static GameState instance;
-	public static GameObject player;
-	public static CameraController cameraController;
 
-	public static Dictionary<string, int> flags;
+	public GameObject player;
+	public CameraController cameraController;
 
 	void Awake () {
 		if (FindObjectsOfType (GetType ()).Length > 1) {
@@ -26,35 +19,29 @@ public class GameState : MonoBehaviour {
 
 		} else {
 			DontDestroyOnLoad (gameObject);
-			dialogueController = GetComponent<DialogueController> ();
-			cutsceneLibrary = new CutsceneLibrary ();
-			dialogueLibrary = new DialogueLibrary ();
-			dialogueLibrary.FindDialogueBoxes ();
 			instance = this;
 		}
 	}
 
-	public static void InitializeScene(GameObject player, CameraController cameraController) {
+	public void InitializeScene(GameObject player, CameraController cameraController) {
+		this.player = player;
+		this.cameraController = cameraController;
+
 		Inhabitant[] inhabitants = FindObjectsOfType (typeof (Inhabitant)) as Inhabitant[];
 		foreach (Inhabitant inhabitant in inhabitants) {
 			inhabitant.GetFacade ().SetKeyBindingManager (keybindingManager);
 		}
 
-		if (GameState.player != null) {
-			GameState.player.GetComponent<Inhabitant> ().RequestEnablePlayerControl (false);
+		if (player != null) {
+			player.GetComponent<Inhabitant> ().RequestEnablePlayerControl (false);
 		}
 
-		GameState.player = player;
 		player.GetComponent<Inhabitant> ().RequestEnablePlayerControl (true);
-		GameState.cameraController = cameraController;
 		cameraController.SetFollowTarget (player);
 		mPlayerRoomController.Init (player.GetComponent<Inhabitant> ()
 			.GetFacade ().GetRoomTraveller (), cameraController);
-	}
 
-	public static void HandlePrepared() {
 		sceneController.HandleLevelWasLoaded ();
-//		cutsceneController.PlayCutscene (cutsceneLibrary.BuildCutscene ("intro"));
 	}
 
 	void Update()

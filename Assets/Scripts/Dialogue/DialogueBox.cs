@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Fungus;
+using NodeCanvas.DialogueTrees;
 
 public class DialogueBox : MonoBehaviour {
 
@@ -34,8 +35,8 @@ public class DialogueBox : MonoBehaviour {
 		}
 	}
 
-	public void WriteCluster(Dialogue.Cluster cluster, System.Action onFinished) {
-		mWriter.Write (cluster.line, true, true, null, onFinished);
+	public void WriteStatement(Statement statement, System.Action onFinished) {
+		mWriter.Write (statement.text, true, true, statement.audio, onFinished);
 	}
 
 	public void OnNextLineEvent () {

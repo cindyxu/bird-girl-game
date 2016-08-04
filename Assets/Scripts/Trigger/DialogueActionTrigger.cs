@@ -6,16 +6,16 @@ public class DialogueActionTrigger : Trigger {
 	public string dialogueName;
 
 	public override bool Execute(GameObject gameObject) {
-		Cutscene.Builder builder = new Cutscene.Builder ();
-		Dialogue dialogue = GameState.dialogueLibrary.GetDialogue (dialogueName);
-		Cutscene.Event cutsceneEvent = null;
-		cutsceneEvent = delegate(Cutscene.EventFinished callback) {
-			GameState.dialogueController.StartDialogueEvent (dialogue, delegate {
-				callback (cutsceneEvent);
-			});
-		};
-		builder.Play (cutsceneEvent);
-		GameState.cutsceneController.PlayCutscene (builder.Build());
+//		Cutscene.Builder builder = new Cutscene.Builder ();
+//		Dialogue dialogue = GameState.dialogueLibrary.GetDialogue (dialogueName);
+//		Cutscene.Event cutsceneEvent = null;
+//		cutsceneEvent = delegate(Cutscene.EventFinished callback) {
+//			GameState.dialogueController.StartDialogueEvent (dialogue, delegate {
+//				callback (cutsceneEvent);
+//			});
+//		};
+//		builder.Play (cutsceneEvent);
+//		GameState.cutsceneController.PlayCutscene (builder.Build());
 		return true;
 	}
 

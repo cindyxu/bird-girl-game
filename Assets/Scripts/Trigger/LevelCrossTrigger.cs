@@ -11,14 +11,14 @@ public class LevelCrossTrigger : Trigger {
 	}
 
 	public override bool Execute(GameObject gameObject) {
-		if (gameObject != GameState.player) {
+		if (gameObject != GameState.instance.player) {
 			return false;
 		}
 		GameState.sceneController.LoadScene(levelName, delegate {
 			ITarget destTarget = GameObject.Find (destTargetName).GetComponent<ITarget> ();
-			GameState.player.transform.position = destTarget
-				.GetTargetPosition (GameState.player.GetComponent<Collider2D> ().bounds);
-			GameState.player.GetComponent<Inhabitant> ().GetFacade ().GetRoomTraveller ()
+			GameState.instance.player.transform.position = destTarget
+				.GetTargetPosition (GameState.instance.player.GetComponent<Collider2D> ().bounds);
+			GameState.instance.player.GetComponent<Inhabitant> ().GetFacade ().GetRoomTraveller ()
 				.TransportTo (destTarget.GetRoom (), destTarget.GetSortingLayerName ());
 		});
 		return true;

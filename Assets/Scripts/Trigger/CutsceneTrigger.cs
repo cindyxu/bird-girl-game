@@ -22,13 +22,13 @@ public class CutsceneTrigger : Trigger {
 	}
 
 	public override bool Execute(GameObject target) {
-		foreach (KeyValuePair<string, int> pair in flags) {
-			if (GameState.flags [pair.Key] != pair.Value) {
-				return false;
-			}
-		}
-		Cutscene cutscene = GameState.cutsceneLibrary.BuildCutscene (cutsceneName, target);
-		GameState.cutsceneController.PlayCutscene (cutscene);
+//		foreach (KeyValuePair<string, int> pair in flags) {
+//			if (GameState.flags [pair.Key] != pair.Value) {
+//				return false;
+//			}
+//		}
+//		Cutscene cutscene = GameState.cutsceneLibrary.BuildCutscene (cutsceneName, target);
+//		GameState.cutsceneController.PlayCutscene (cutscene);
 		return true;
 	}
 

@@ -5,6 +5,9 @@ public abstract class DoorTrigger : Trigger, ITarget {
 	
 	protected Room pRoom;
 
+	public delegate void DoorEnterEvent (System.Action callback);
+	public delegate void DoorLeaveEvent (System.Action callback);
+
 	[IsSortingLayer]
 	public string sortingLayerName;
 
@@ -26,12 +29,12 @@ public abstract class DoorTrigger : Trigger, ITarget {
 		return sortingLayerName;
 	}
 
-	public Cutscene.Event CreateEnterCutsceneEvent(GameObject gameObject) {
-		return new DefaultDoorEnterCutsceneEvent (gameObject, this).StartEvent;
+	public DoorEnterEvent CreateEnterEvent(Inhabitant inhabitant) {
+		return new DefaultDoorEnterEvent (inhabitant, this).StartEvent;
 	}
 
-	public Cutscene.Event CreateLeaveCutsceneEvent(GameObject gameObject) {
-		return new DefaultDoorLeaveCutsceneEvent (gameObject, this).StartEvent;
+	public DoorLeaveEvent CreateLeaveEvent(Inhabitant inhabitant) {
+		return new DefaultDoorLeaveEvent (inhabitant, this).StartEvent;
 	}
 
 	public Vector2 GetTargetPosition(Bounds bounds) {
