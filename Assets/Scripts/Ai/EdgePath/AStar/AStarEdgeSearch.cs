@@ -13,18 +13,16 @@ public class AStarEdgeSearch {
 	private readonly Dictionary<Edge, List<EdgePath>> mEdgePaths;
 	private readonly Edge mStart;
 	private readonly float mStartX;
-	private readonly Edge mDest;
-	private readonly float mDestX;
+	private readonly Vector2 mDest;
 
 	private readonly WalkerParams mWp;
 	private readonly WalkerHeuristic mHeuristic;
 	private List<EdgePath> mPathChain;
 
 	public AStarEdgeSearch (Dictionary <Edge, List<EdgePath>> edgePaths, WalkerParams wp, 
-		Edge start, float startX, Edge dest, float destX) {
+		Edge start, float startX, Vector2 dest) {
 
 		Assert.AreNotEqual (start, null);
-		Assert.AreNotEqual (dest, null);
 
 		Log.logger.Log (Log.AI_SEARCH, "<b>starting Astar: from " + start + " to " + dest + ",</b>");
 
@@ -35,7 +33,6 @@ public class AStarEdgeSearch {
 		mStart = start;
 		mStartX = startX;
 		mDest = dest;
-		mDestX = destX;
 
 		startSearch ();
 	}
@@ -44,7 +41,7 @@ public class AStarEdgeSearch {
 		EdgeNode startNode = new EdgeNode (null, mStart, mStartX, 
 			mStartX + mWp.size.x, 0);
 		mOpenQueue.Enqueue (startNode, mHeuristic.EstRemainingTime (mStart, startNode.xlf, 
-			startNode.xrf, mDest, mDestX));
+			startNode.xrf, mDest));
 	}
 
 	public IEnumerator<EdgeNode> getQueueEnumerator () {
@@ -92,7 +89,8 @@ public class AStarEdgeSearch {
 		}
 
 		EdgeNode bestNode = mOpenQueue.Dequeue ();
-		if (bestNode.edge == mDest) {
+
+		if (mHeuristic.ReachedDest (bestNode, mDest)) {
 			Log.logger.Log (Log.AI_SEARCH, "<b>found best path!</b>");
 			result = mPathChain = reconstructChain (bestNode);
 			string s = "";
@@ -167,7 +165,7 @@ public class AStarEdgeSearch {
 		}
 		EdgeNode node = new EdgeNode (neighborPath, neighborPath.GetEndEdge (), xlf, xrf, tentativeG);
 
-		float f = tentativeG + mHeuristic.EstRemainingTime (neighborPath.GetEndEdge (), xlf, xrf, mDest, mDestX);
+		float f = tentativeG + mHeuristic.EstRemainingTime (neighborPath.GetEndEdge (), xlf, xrf, mDest);
 		Log.logger.Log (Log.AI_SEARCH, "  new node! " + f);
 		mOpenQueue.Enqueue (node, f);
 	}

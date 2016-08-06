@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class WalkPlanner {
+public class WalkPilot {
 
 	private readonly float mXlt;
 	private readonly float mXrt;
@@ -13,7 +13,7 @@ public class WalkPlanner {
 
 	private float RANGE_THRESHOLD = 0.5f;
 
-	public WalkPlanner (WalkerParams wp, float xlt, float xrt, float x) {
+	public WalkPilot (WalkerParams wp, float xlt, float xrt, float x) {
 		mWp = wp;
 		mXlt = xlt;
 		mXrt = xrt;

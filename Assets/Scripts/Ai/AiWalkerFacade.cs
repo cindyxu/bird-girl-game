@@ -49,6 +49,10 @@ public class AiWalkerFacade {
 		return mRoomGraph;
 	}
 
+	public Edge GetEdge () {
+		return mEdge;
+	}
+
 	public void OnEnterRoom (RoomTraveller traveller, Room room) {
 		mRoomGraph = getRoomGraphForRoom (room);
 	}
@@ -56,7 +60,7 @@ public class AiWalkerFacade {
 	private RoomGraph getRoomGraphForRoom (Room room) {
 		RoomGraph roomGraph = mRoomGraphs.get (room);
 		if (roomGraph == null) {
-			roomGraph = RoomGraph.GetGraphForRoom (mWp, room);
+			roomGraph = new RoomGraph (mWp, room);
 			mRoomGraphs.add (room, roomGraph);
 		}
 		return roomGraph;

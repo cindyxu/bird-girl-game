@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class JumpPlanner {
+public class JumpPilot {
 
 	public const float MAX_RANGE_THRESHOLD = 0.1f;
 
@@ -16,7 +16,7 @@ public class JumpPlanner {
 	private int mDir = 0;
 	private float tx;
 
-	public JumpPlanner (JumpPath jumpPath, float xlt, float xrt, WalkerParams wp, float x) {
+	public JumpPilot (JumpPath jumpPath, float xlt, float xrt, WalkerParams wp, float x) {
 		mWp = wp;
 		mXlt = xlt;
 		mXrt = xrt;

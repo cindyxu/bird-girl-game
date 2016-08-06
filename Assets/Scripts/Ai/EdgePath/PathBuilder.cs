@@ -21,17 +21,9 @@ public static class PathBuilder {
 	}
 
 	public static List<LadderPath> BuildLadderPaths (WalkerParams wp, List<Edge> edges, Rect ladder) {
-		Edge topEdge = null;
-		Edge bottomEdge = null;
-		foreach (Edge e in edges) {
-			if (e.left <= ladder.xMin && e.right >= ladder.xMax) {
-				if (e.y0 == ladder.yMin) {
-					bottomEdge = e;
-				} else if (e.y0 == ladder.yMax) {
-					topEdge = e;
-				}
-			}
-		}
+		Edge topEdge = EdgeUtil.FindLadderTopEdge (ladder, edges);
+		Edge bottomEdge = EdgeUtil.FindLadderBottomEdge (ladder, edges);
+
 		if (topEdge != null && bottomEdge != null) {
 			List<LadderPath> ladderPaths = new List<LadderPath> ();
 			ladderPaths.Add (new LadderPath (wp, topEdge, bottomEdge, ladder));

@@ -19,7 +19,7 @@ public class AStarEdgeSearchTest {
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, 
-			start, 0, dest, 2);
+			start, 0, new Vector2 (2, 0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -40,7 +40,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 6);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (6, 0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -64,7 +64,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 3);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (3, 0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -83,7 +83,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 6);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (6, 0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -101,7 +101,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 0);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (0, 1));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -120,7 +120,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 0);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (0, -1));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -141,7 +141,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, left, -3);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (-3, 0));
 		List<EdgePath> result;
 		search.Step (out result) ;
 		EdgeNode bestNode = search.peekQueue ();
@@ -161,7 +161,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, right, 3);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (3, 0));
 		List<EdgePath> result;
 		search.Step (out result) ;
 		EdgeNode bestNode = search.peekQueue ();
@@ -181,7 +181,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, up, 0);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (0, 1));
 		List<EdgePath> result;
 		search.Step (out result) ;
 		EdgeNode bestNode = search.peekQueue ();
@@ -201,7 +201,7 @@ public class AStarEdgeSearchTest {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, down, 0);
+		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (0, -1));
 		List<EdgePath> result;
 		search.Step (out result) ;
 		EdgeNode bestNode = search.peekQueue ();
@@ -240,7 +240,7 @@ public class AStarEdgeSearchTest {
 		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, 
-			start, 0, dest, 9);
+			start, 0, new Vector2 (9, 0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 

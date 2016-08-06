@@ -52,7 +52,7 @@ public class ScenePathPlanner {
 
 			if (startEdge != destEdge) {
 				AStarEdgeSearch search = new AStarEdgeSearch (graph.paths, mWp, startEdge, 
-					pos.x, destEdge, destPos.x - mWp.size.x / 2);
+					pos.x, new Vector2 (destPos.x - mWp.size.x / 2, destEdge.y0));
 				List<EdgePath> result;
 				while (search.Step (out result)) ;
 				if (result != null) {

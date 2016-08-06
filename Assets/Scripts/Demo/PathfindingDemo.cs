@@ -53,14 +53,9 @@ public class PathfindingDemo : MonoBehaviour {
 			walker.transform.position.x + walkerCollider.size.x/2f, 
 			walker.transform.position.y);
 
-		Edge endEdge = EdgeUtil.FindUnderEdge (mEdges, 
-			targetCollider.transform.position.x - targetCollider.size.x/2f, 
-			targetCollider.transform.position.x + targetCollider.size.x/2f, 
-			targetCollider.transform.position.y);
-
 		mRenderSearch = new RenderSearch (walkerCollider, targetCollider, mWp, startEdge, 
 			walker.transform.position.x - walkerCollider.size.x/2f, 
-			endEdge, targetCollider.transform.position.x - targetCollider.size.x/2f, mEdges);
+			((Vector2) targetCollider.transform.position) - mWp.size / 2, mEdges);
 	}
 
 	public void StartScan () {

@@ -9,6 +9,17 @@ public class WalkerHeuristic {
 		mWp = wp;
 	}
 
+	public bool ReachedDest (EdgeNode node, Vector2 dest) {
+		if (edgeAtPt (node.edge, dest)) return true;
+		if (node.edgePath != null) {
+			LadderPath ladderPath = node.edgePath as LadderPath;
+			if (ladderPath != null) {
+				if (ladderPath.GetLadder ().Contains (dest)) return true;
+			}
+		}
+		return false;
+	}
+
 	public float GetWalkTime (float pxlf, float pxrf, float nxli, float nxri) {
 		float walkDist = 0;
 		if (nxli > pxrf) walkDist = nxli - pxrf;
@@ -16,17 +27,22 @@ public class WalkerHeuristic {
 		return walkDist / mWp.walkSpd;
 	}
 
-	public float EstRemainingTime (Edge edge, float exl, float exr, Edge destEdge, float destX) {
+	private bool edgeAtPt (Edge edge, Vector2 pt) {
+		return edge.y0 == pt.y && (edge.x0 < pt.x + mWp.size.x
+			&& edge.x1 > pt.x);
+	}
+
+	public float EstRemainingTime (Edge edge, float exl, float exr, Vector2 dest) {
 		float jumpHeight = mWp.trajectory.GetDeltaYFromVyFinal (mWp.jumpSpd, 0);
-		float dy = destEdge.bottom - edge.bottom;
+		float dy = dest.y - edge.bottom;
 
 		float adx;
-		if (destX + mWp.size.x < exl) adx = exl - (destX + mWp.size.x);
-		else if (destX > exr) adx = destX - exr;
+		if (dest.x + mWp.size.x < exl) adx = exl - (dest.x + mWp.size.x);
+		else if (dest.x > exr) adx = dest.x - exr;
 		else adx = 0;
 
 		float estTime = 0;
-		if (edge != destEdge) {
+		if (!edgeAtPt (edge, dest)) {
 			if (dy > 0) {
 				while (dy > 0) {
 					float jumpDy = Mathf.Min (dy, jumpHeight);

@@ -8,11 +8,10 @@ public class RenderSearch {
 	private List<GameObject> mDrawLines = new List<GameObject> ();
 
 	public RenderSearch (BoxCollider2D walker, BoxCollider2D target, WalkerParams wp, Edge startEdge, float startX, 
-		Edge destEdge, float destX, List<Edge> edges) {
+		Vector2 dest, List<Edge> edges) {
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
 		RoomGraph.addJumpPaths (wp, edges, paths);
-		mSearch = new AStarEdgeSearch (paths, wp, startEdge, startX, 
-			destEdge, destX); 
+		mSearch = new AStarEdgeSearch (paths, wp, startEdge, startX, dest); 
 	}
 
 	public void StepSearch () {

@@ -9,21 +9,20 @@ public class RoomGraph {
 	public readonly List<Rect> ladders;
 	public readonly Dictionary<Edge, List<EdgePath>> paths;
 
-	public RoomGraph (Room room, List<Edge> edges, List<Rect> ladders, Dictionary<Edge, List<EdgePath>> paths) {
-		this.room = room;
-		this.edges = edges;
-		this.ladders = ladders;
-		this.paths = paths;
-	}
+	public readonly Dictionary<Rect, Eppy.Tuple<Edge, Edge>> ladderEdges;
 
-	public static RoomGraph GetGraphForRoom (WalkerParams wp, Room room) {
-		
-		List<Edge> edges = buildEdges (room);
-		List<Rect> ladders = buildLadderRects (room);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+	public RoomGraph (WalkerParams wp, Room room) {
+
+		this.room = room;
+
+		edges = buildEdges (room);
+		ladders = buildLadderRects (room);
+		paths = new Dictionary<Edge, List<EdgePath>> ();
 		addJumpPaths (wp, edges, paths);
 		addLadderPaths (wp, edges, ladders, paths);
-		return new RoomGraph (room, edges, ladders, paths);
+
+		ladderEdges = new Dictionary<Rect, Eppy.Tuple<Edge, Edge>> ();
+		addLadderEdges (edges, ladders, ladderEdges);
 	}
 
 	public Rect? GetLadder (Ladder ladder) {
@@ -36,7 +35,27 @@ public class RoomGraph {
 				return oladderRect;
 			}
 		}
+		return null;
+	}
 
+	public Rect? GetLadder (Vector2 pos) {
+		foreach (Rect oladderRect in ladders) {
+			if (oladderRect.Contains (pos)) {
+				return oladderRect;
+			}
+		}
+		return null;
+	}
+
+	public LadderPath GetLadderPath (Edge edge, Rect ladder) {
+		foreach (EdgePath path in paths[edge]) {
+			LadderPath ladderPath = path as LadderPath;
+			if (ladderPath != null) {
+				if (ladderPath.GetLadder ().Equals (ladder)) {
+					return ladderPath;
+				}
+			}
+		}
 		return null;
 	}
 
@@ -85,6 +104,16 @@ public class RoomGraph {
 					}
 					paths [path.GetStartEdge ()].Add (path);
 				}
+			}
+		}
+	}
+
+	private static void addLadderEdges (List<Edge> edges, List<Rect> ladders, Dictionary<Rect, Eppy.Tuple<Edge, Edge>> ladderEdges) {
+		foreach (Rect rect in ladders) {
+			Edge topEdge = EdgeUtil.FindLadderTopEdge (rect, edges);
+			Edge bottomEdge = EdgeUtil.FindLadderBottomEdge (rect, edges);
+			if (topEdge != null && bottomEdge != null) {
+				ladderEdges.Add (rect, new Eppy.Tuple<Edge, Edge> (topEdge, bottomEdge));
 			}
 		}
 	}

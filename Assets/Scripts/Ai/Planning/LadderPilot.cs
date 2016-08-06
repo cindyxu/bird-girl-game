@@ -1,13 +1,13 @@
 ﻿using System;
 
-public class LadderPlanner {
+public class LadderPilot {
 
 	private int mHDir = 0;
 	private int mVDir = 0;
 	private float mYt;
 	private float mY;
 	
-	public LadderPlanner (WalkerParams wp, float xlf, float xrf, float yt, float x, float y) {
+	public LadderPilot (WalkerParams wp, float xlf, float xrf, float yt, float x, float y) {
 		if (x < xlf) mHDir = 1;
 		if (x + wp.size.x > xrf) mHDir = -1;
 		mYt = yt;

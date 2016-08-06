@@ -25,6 +25,10 @@ public class LadderPath : EdgePath {
 		mVDir = (endEdge.y0 < startEdge.y0 ? -1 : 1);
 	}
 
+	public Rect GetLadder () {
+		return mLadder;
+	}
+
 	public Edge GetStartEdge () {
 		return mStartEdge;
 	}
