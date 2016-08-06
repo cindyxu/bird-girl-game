@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 public class GameState : MonoBehaviour {
 
-	public static KeyBindingManager keybindingManager = new KeyBindingManager ();
 	public static SceneController sceneController = new SceneController ();
-	private static PlayerRoomController mPlayerRoomController = new PlayerRoomController ();
-
 	public static GameState instance;
+
+	private PlayerRoomController mPlayerRoomController = new PlayerRoomController ();
+	public KeyBindingManager keybindingManager = new KeyBindingManager ();
 
 	public GameObject player;
 	public CameraController cameraController;
@@ -23,14 +23,18 @@ public class GameState : MonoBehaviour {
 		}
 	}
 
+	public Inhabitant LoadInhabitant(string name, Room room, Vector2 position, string sortingLayerName) {
+		UnityEngine.Object res = Resources.Load ("Prefabs/Characters/" + name);
+		GameObject go = (GameObject) GameObject.Instantiate (res, position, Quaternion.identity);
+		Inhabitant inhabitant = go.GetComponent<Inhabitant> ();
+		inhabitant.GetFacade ().GetRoomTraveller ().TransportTo (room, sortingLayerName);
+		inhabitant.GetFacade ().SetKeyBindingManager (keybindingManager);
+		return inhabitant;
+	}
+
 	public void InitializeScene(GameObject player, CameraController cameraController) {
 		this.player = player;
 		this.cameraController = cameraController;
-
-		Inhabitant[] inhabitants = FindObjectsOfType (typeof (Inhabitant)) as Inhabitant[];
-		foreach (Inhabitant inhabitant in inhabitants) {
-			inhabitant.GetFacade ().SetKeyBindingManager (keybindingManager);
-		}
 
 		if (player != null) {
 			player.GetComponent<Inhabitant> ().RequestEnablePlayerControl (false);

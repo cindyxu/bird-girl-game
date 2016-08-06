@@ -8,19 +8,22 @@ namespace NodeCanvas.Tasks.Actions{
 	[Category("Dialogue")]
 	[Description("You can use a variable inline with the text by using brackets likeso: [myVarName] or [Global/myVarName].\nThe bracket will be replaced with the variable value ToString")]
 	[Icon("Dialogue")]
-	[AgentType(typeof(DialogueBox))]
+	[AgentType (typeof (DialogueBox))]
 	public class SayFungus : ActionTask<DialogueBox> {
 
 		public Statement statement = new Statement("This is a dialogue text...");
 
-		protected override string info{
+		protected override string info {
 			get { return string.Format("<i>' {0} '</i>", (statement.text.Length > 30? statement.text.Substring(0, 30) + "..." : statement.text) ); }
 		}
 
-		protected override void OnExecute(){
+		protected override void OnExecute () {
 			var tempStatement = statement.BlackboardReplace(blackboard);
-//			DialogueTree.RequestSubtitles( new SubtitlesRequestInfo( (IDialogueActor)agent, tempStatement, EndAction ) );
-			agent.WriteStatement (statement, EndAction);
+			agent.GetComponent<Canvas> ().enabled = true;
+			agent.WriteStatement (statement, delegate {
+				agent.GetComponent<Canvas> ().enabled = false;
+				EndAction ();
+			});
 		}
 
 		////////////////////////////////////////
@@ -28,7 +31,7 @@ namespace NodeCanvas.Tasks.Actions{
 		////////////////////////////////////////
 		#if UNITY_EDITOR
 
-		protected override void OnTaskInspectorGUI(){
+		protected override void OnTaskInspectorGUI () {
 			statement.text = UnityEditor.EditorGUILayout.TextArea(statement.text, (GUIStyle)"textField", GUILayout.Height(100));
 			statement.audio = (AudioClip)UnityEditor.EditorGUILayout.ObjectField("Audio Clip", statement.audio, typeof(AudioClip), false);
 			statement.meta = UnityEditor.EditorGUILayout.TextField("Meta", statement.meta);

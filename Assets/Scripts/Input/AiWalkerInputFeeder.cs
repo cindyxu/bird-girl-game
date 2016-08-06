@@ -8,32 +8,28 @@ public class AiWalkerInputFeeder : InputFeeder {
 	private event OnReachDestination mOnReachDestination;
 
 	private readonly WalkerParams mWp;
-	private readonly InhabitantFacade mFacade;
-	private readonly HumanoidController.Observable mObservable;
+	private readonly AiWalkerFacade mAiFacade;
 
 	private Inhabitant.GetDest mGetDest;
-	private PathPlanner mPathPlanner;
+	private ScenePathPlanner mPathPlanner;
+
+	private bool mInputOn = false;
 
 	public AiWalkerInputFeeder (WalkerParams wp, 
-		InhabitantFacade facade, HumanoidController.Observable observable) {
+		InhabitantFacade facade, HumanoidFacade hFacade) {
 		mWp = wp;
-		mFacade = facade;
-		mObservable = observable;
+		mAiFacade = new AiWalkerFacade (wp, facade, hFacade);
 	}
 
 	public void SetDest (Inhabitant.GetDest getDest, OnReachDestination onReachDest) {
 		mGetDest = getDest;
 		mOnReachDestination = onReachDest;
-		mPathPlanner = new PathPlanner (mWp, 
-			mFacade.GetPosition ().x - mFacade.GetSize ().x / 2, 
-			mFacade.GetPosition ().y - mFacade.GetSize ().y / 2, mGetDest);
+		if (mInputOn) mPathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
 	}
 
 	public override void FeedInput (InputCatcher catcher) {
 		if (mPathPlanner != null) {
-			mPathPlanner.OnUpdate (mFacade.GetPosition ().x - mFacade.GetSize ().x / 2, 
-				mFacade.GetPosition ().y - mFacade.GetSize ().y / 2, 
-				mFacade.GetVelocity ().y);
+			mPathPlanner.OnUpdate ();
 			if (mPathPlanner.FeedInput (catcher)) {
 				Log.logger.Log (Log.AI_INPUT, "reached goal!");
 				if (mOnReachDestination != null) {
@@ -46,37 +42,16 @@ public class AiWalkerInputFeeder : InputFeeder {
 	}
 
 	public override void OnBeginInput (InputCatcher catcher) {
-		mObservable.onClimbLadder += OnClimbLadder;
-		mObservable.onGrounded += OnGrounded;
-		mObservable.onJump += OnJump;
-
-		mFacade.onGravityScaleChanged += OnGravityScaleChanged;
+		mAiFacade.StartObserving ();
+		if (mGetDest != null) {
+			mPathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
+		}
+		mInputOn = true;
 	}
 
 	public override void OnEndInput (InputCatcher catcher) {
-		mObservable.onClimbLadder -= OnClimbLadder;
-		mObservable.onGrounded -= OnGrounded;
-		mObservable.onJump -= OnJump;
-
-		mFacade.onGravityScaleChanged -= OnGravityScaleChanged;
+		mAiFacade.StopObserving ();
+		mPathPlanner = null;
+		mInputOn = false;
 	}
-
-	void OnGravityScaleChanged () {
-	}
-
-	void OnJump ()
-	{}
-
-	void OnClimbLadder ()
-	{}
-
-	void OnGrounded (bool grounded) {
-		if (mPathPlanner != null) {
-			mPathPlanner.OnUpdate (mFacade.GetPosition ().x - mFacade.GetSize ().x / 2, 
-				mFacade.GetPosition ().y - mFacade.GetSize ().y / 2, 
-				mFacade.GetVelocity ().y);
-			mPathPlanner.OnGrounded (grounded);
-		}
-	}
-
 }

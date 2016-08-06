@@ -3,8 +3,8 @@ using System.Collections;
 
 public class WalkPlanner {
 
-	private readonly float mXli;
-	private readonly float mXri;
+	private readonly float mXlt;
+	private readonly float mXrt;
 	private readonly WalkerParams mWp;
 	private readonly float mThreshold;
 
@@ -13,17 +13,17 @@ public class WalkPlanner {
 
 	private float RANGE_THRESHOLD = 0.5f;
 
-	public WalkPlanner (WalkerParams wp, float xli, float xri, float x) {
+	public WalkPlanner (WalkerParams wp, float xlt, float xrt, float x) {
 		mWp = wp;
-		mXli = xli;
-		mXri = xri;
+		mXlt = xlt;
+		mXrt = xrt;
 		mX = x;
 
-		float minPadding = (mXri - mXli - mWp.size.x - RANGE_THRESHOLD) / 2f;
+		float minPadding = (mXrt - mXlt - mWp.size.x - RANGE_THRESHOLD) / 2f;
 		mThreshold = Mathf.Max (Mathf.Min (minPadding, RANGE_THRESHOLD), 0);
 
-		if (mX + mWp.size.x > mXri - mThreshold) mDir = -1;
-		else if (mX < mXli + mThreshold) mDir = 1;
+		if (mX + mWp.size.x > mXrt - mThreshold) mDir = -1;
+		else if (mX < mXlt + mThreshold) mDir = 1;
 		else mDir = 0;
 	}
 
@@ -34,11 +34,11 @@ public class WalkPlanner {
 	public int GetHorizontalDir () {
 		if (mDir < 0) {
 			float rightSide = mX + mWp.size.x;
-			float rightLim = mXri - mThreshold;
+			float rightLim = mXrt - mThreshold;
 			if (rightSide > rightLim) return -1;
 		}
 		if (mDir > 0) {
-			float leftLim = mXli + mThreshold;
+			float leftLim = mXlt + mThreshold;
 			if (mX < leftLim) return 1;
 		}
 		return 0;

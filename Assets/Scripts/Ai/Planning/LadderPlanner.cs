@@ -2,13 +2,21 @@
 
 public class LadderPlanner {
 
-	private LadderPath mLadderPath;
 	private int mHDir = 0;
+	private int mVDir = 0;
+	private float mYt;
+	private float mY;
 	
-	public LadderPlanner (LadderPath ladderPath, WalkerParams wp, float xlf, float xrf, float x) {
-		mLadderPath = ladderPath;
+	public LadderPlanner (WalkerParams wp, float xlf, float xrf, float yt, float x, float y) {
 		if (x < xlf) mHDir = 1;
 		if (x + wp.size.x > xrf) mHDir = -1;
+		mYt = yt;
+		mY = y;
+		mVDir = (y < yt ? 1 : (y > yt ? -1 : 0));
+	}
+
+	public void OnUpdate (float y) {
+		mY = y;
 	}
 
 	public int GetLateralDir () {
@@ -16,7 +24,9 @@ public class LadderPlanner {
 	}
 
 	public int GetVerticalDir () {
-		return mLadderPath.GetVerticalDir ();
+		if (mVDir > 0 && mY < mYt) return 1;
+		if (mVDir < 0 && mY > mYt) return -1;
+		return 0;
 	}
 
 }

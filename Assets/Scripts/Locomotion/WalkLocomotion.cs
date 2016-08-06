@@ -10,12 +10,10 @@ public class WalkLocomotion : Locomotion {
 	private LadderClimber mLadderClimber;
 	private SortedEdgeCollidable mSortedEdgeCollidable;
 
-	private bool mIsGrounded = false;
-
 	public delegate void OnClimbLadder (Ladder ladder, int direction);
 	public event OnClimbLadder onClimbLadder;
 
-	public delegate void OnGrounded (bool grounded);
+	public delegate void OnGrounded (SortedEdge edge);
 	public event OnGrounded onGrounded;
 
 	public delegate void OnJump ();
@@ -37,10 +35,6 @@ public class WalkLocomotion : Locomotion {
 		mWp = walkerParams;
 	}
 
-	public override void Enable () {
-		mIsGrounded = (mSortedEdgeCollidable.GetCurrentEdge () != null);
-	}
-
 	public void OnLeaveRoom (RoomTraveller traveller, Room room) {
 		mLadderClimber.Reset ();
 	}
@@ -53,7 +47,7 @@ public class WalkLocomotion : Locomotion {
 		if (mInputCatcher.GetRight()) {
 			velocity.x += mWp.walkSpd;
 		}
-		if (mInputCatcher.GetJumpPress () && mIsGrounded) {
+		if (mInputCatcher.GetJumpPress () && mSortedEdgeCollidable.GetCurrentEdge () != null) {
 			velocity.y = mWp.jumpSpd;
 			if (onJump != null) onJump ();
 		}
@@ -75,7 +69,7 @@ public class WalkLocomotion : Locomotion {
 			if (ascendLadder != null) onClimbLadder (ascendLadder, 1);
 		}
 		if (mInputCatcher.GetDownPress()) {
-			if (mIsGrounded) {
+			if (mSortedEdgeCollidable.GetCurrentEdge () != null) {
 				Ladder descendLadder = mLadderClimber.GetDescendLadder ();
 				if (descendLadder != null) onClimbLadder (descendLadder, -1);
 			}
@@ -117,9 +111,7 @@ public class WalkLocomotion : Locomotion {
 	}
 
 	void OnSortedEdgeChanged (SortedEdge sortedEdge) {
-		bool isGrounded = (sortedEdge != null);
-		mIsGrounded = isGrounded;
-		if (onGrounded != null) onGrounded (mIsGrounded);
+		if (onGrounded != null) onGrounded (sortedEdge);
 	}
 }
 

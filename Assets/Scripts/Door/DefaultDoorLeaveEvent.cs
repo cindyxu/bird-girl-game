@@ -21,9 +21,17 @@ public class DefaultDoorLeaveEvent {
 	}
 
 	public void StartEvent(System.Action callback) {
+//		Action onFinished = delegate() {
+//			StartDisappear(callback);
+//		};
+
 		Action onFinished = delegate() {
-			StartDisappear(callback);
+			mTargetRigidbody2D.constraints = mConstraints;
+			mTargetCollider2D.enabled = false;
+			mTargetCollider2D.enabled = true;
+			callback();
 		};
+
 		mTargetRigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
 		Vector2 transportPosition = mDoor.GetTargetPosition (mTargetCollider2D.bounds);
 		iTween.MoveTo (mInhabitant.gameObject, iTween.Hash (

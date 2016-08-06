@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Fungus;
@@ -11,12 +12,21 @@ public class Room : MonoBehaviour {
 	private LadderDescend[] mLadderDescends;
 	private Trigger[] mActionTriggers;
 
+	private Renderer[] mRenderers;
+	private List<Renderer> mRoomTravellerRenderers = new List<Renderer> ();
+
+	private float mStartAlpha = 1f;
+	private float mEndAlpha = 1f;
+	private float mElapsedTime = 0f;
+	private float mTotalTime = 0f;
+
 	// Use this for initialization
 	void Awake () { 
 		mSortedEdges = GetComponentsInChildren<SortedEdge> ();
 		mLadders = GetComponentsInChildren<Ladder> ();
 		mLadderDescends = GetComponentsInChildren<LadderDescend> ();
 		mActionTriggers = GetComponentsInChildren<Trigger> ();
+		mRenderers = GetComponentsInChildren<Renderer> ();
 	}
 
 	public SortedEdge[] GetSortedEdges () {
@@ -49,6 +59,12 @@ public class Room : MonoBehaviour {
 		foreach (Trigger trigger in mActionTriggers) {
 			Physics2D.IgnoreCollision (objCollider2D, trigger.GetComponent<Collider2D> (), false);
 		}
+
+		Renderer renderer = obj.GetComponent<Renderer> ();
+		if (renderer != null) {
+			mRoomTravellerRenderers.Add (renderer);
+			SetRendererAlpha (renderer, evaluateAlpha());
+		}
 	}
 
 	public void Exit (GameObject obj) {
@@ -65,19 +81,51 @@ public class Room : MonoBehaviour {
 		foreach (Trigger trigger in mActionTriggers) {
 			Physics2D.IgnoreCollision (objCollider2D, trigger.GetComponent<Collider2D> ());
 		}
+
+		Renderer renderer = obj.GetComponent<Renderer> ();
+		if (renderer != null) {
+			mRoomTravellerRenderers.Remove (renderer);
+			SetRendererAlpha (renderer, 0);
+		}
+	}
+
+	public void Update () {
+		mElapsedTime = Mathf.Min (mElapsedTime + Time.deltaTime, mTotalTime);
+		DebugPanel.Log (name, mElapsedTime);
+		setAlpha (evaluateAlpha ());
+	}
+
+	private float evaluateAlpha () {
+		if (mTotalTime == 0) return mEndAlpha;
+		return Mathf.Lerp (mStartAlpha, mEndAlpha, mElapsedTime / mTotalTime);
+	}
+
+	private void setAlpha (float alpha) {
+		foreach (Renderer renderer in mRenderers) {
+			SetRendererAlpha (renderer, alpha);
+		}
+		foreach (Renderer renderer in mRoomTravellerRenderers) {
+			SetRendererAlpha (renderer, alpha);
+		}
+	}
+
+	public static void SetRendererAlpha (Renderer renderer, float alpha) {
+		Color color = renderer.material.color;
+		color.a = alpha;
+		renderer.material.color = color;
 	}
 
 	public void Hide (float time) {
-		iTween.FadeTo(gameObject, iTween.Hash(
-			"alpha", 0,
-			"time", time
-		));
+		mStartAlpha = evaluateAlpha ();
+		mEndAlpha = 0f;
+		mTotalTime = time;
+		mElapsedTime = 0;
 	}
 
 	public void Show (float time) {
-		iTween.FadeTo(gameObject, iTween.Hash(
-			"alpha", 1,
-			"time", time
-		));
+		mStartAlpha = evaluateAlpha ();
+		mEndAlpha = 1f;
+		mTotalTime = time;
+		mElapsedTime = 0;
 	}
 }

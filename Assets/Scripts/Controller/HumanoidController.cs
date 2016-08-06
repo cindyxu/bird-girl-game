@@ -11,7 +11,7 @@ public class HumanoidController : IController {
 	private InputFeedSwitcher mInputSwitcher;
 
 	private readonly WalkerParams mWp;
-	private Observable mObservable;
+	private HumanoidFacade mHFacade;
 
 	public HumanoidController (Inhabitant inhabitant, WalkerParams wp) {
 		mInhabitant = inhabitant;
@@ -19,7 +19,7 @@ public class HumanoidController : IController {
 
 		InputCatcher inputCatcher = new InputCatcher ();
 		mInputSwitcher = new InputFeedSwitcher (inputCatcher);
-		mObservable = new Observable ();
+		mHFacade = new HumanoidFacade ();
 
 		mWalkLocomotion = new WalkLocomotion (mInhabitant.GetFacade (), inputCatcher, mWp);
 		mWalkLocomotion.onClimbLadder += OnClimbLadder;
@@ -30,14 +30,14 @@ public class HumanoidController : IController {
 		mLadderLocomotion.onLadderEndReached += OnLadderEndReached;
 		mLadderLocomotion.onLadderDismount += OnLadderDismount;
 
-		mInputSwitcher.SetBaseInputFeeder (new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mObservable));
+		mInputSwitcher.SetBaseInputFeeder (new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mHFacade));
 	}
 
 	public bool RequestMoveTo (string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
 		switch (locomotion) {
 			case "walk":
 //				mWalkLocomotion.SetWalkSpeed (1);
-				AiWalkerInputFeeder followFeeder = new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mObservable);
+				AiWalkerInputFeeder followFeeder = new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mHFacade);
 				AiWalkerInputFeeder.OnReachDestination onReachDestination = delegate {
 					RequestFinishRequest ();
 					callback ();
@@ -51,7 +51,7 @@ public class HumanoidController : IController {
 	}
 
 	public bool RequestFreeze () {
-		AiWalkerInputFeeder freezeFeeder = new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mObservable);
+		AiWalkerInputFeeder freezeFeeder = new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mHFacade);
 		mInputSwitcher.SetOverrideInputFeeder (freezeFeeder);
 		return true;
 	}
@@ -66,7 +66,7 @@ public class HumanoidController : IController {
 		if (enable && !(mInputSwitcher.GetBaseInputFeeder () is PlayerInputFeeder)) {
 			mInputSwitcher.SetBaseInputFeeder (new PlayerInputFeeder (mInhabitant.GetFacade ().GetKeyBindingManager ()));
 		} else if (!enable && !(mInputSwitcher.GetBaseInputFeeder () is AiWalkerInputFeeder)) {
-			mInputSwitcher.SetBaseInputFeeder (new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mObservable));
+			mInputSwitcher.SetBaseInputFeeder (new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mHFacade));
 		}
 		return true;
 	}
@@ -82,15 +82,15 @@ public class HumanoidController : IController {
 	void OnClimbLadder (Ladder ladder, int direction) {
 		mLadderLocomotion.SetLadder (ladder);
 		mInhabitant.StartLocomotion (mLadderLocomotion);
-		mObservable.OnClimbLadder ();
+		mHFacade.OnClimbLadder (ladder);
 	}
 
 	void OnJump () {
-		mObservable.OnJump ();
+		mHFacade.OnJump ();
 	}
 
-	void OnGrounded (bool grounded) {
-		mObservable.OnGrounded (grounded);
+	void OnGrounded (SortedEdge edge) {
+		mHFacade.OnGrounded (edge);
 	}
 
 	void OnLadderEndReached (int direction) {
@@ -100,27 +100,5 @@ public class HumanoidController : IController {
 	void OnLadderDismount (int direction) {
 		mInhabitant.StartLocomotion (mWalkLocomotion);
 		mWalkLocomotion.LadderJump (direction);
-	}
-
-	public class Observable {
-		
-		public delegate void OnJumpEvent ();
-		public event OnJumpEvent onJump;
-		public delegate void OnGroundedEvent (bool grounded);
-		public event OnGroundedEvent onGrounded;
-		public delegate void OnClimbLadderEvent ();
-		public event OnClimbLadderEvent onClimbLadder;
-
-		public void OnJump () {
-			if (onJump != null) onJump ();
-		}
-
-		public void OnGrounded (bool grounded) {
-			if (onGrounded != null) onGrounded (grounded);
-		}
-
-		public void OnClimbLadder () {
-			if (onClimbLadder != null) onClimbLadder ();
-		}
 	}
 }

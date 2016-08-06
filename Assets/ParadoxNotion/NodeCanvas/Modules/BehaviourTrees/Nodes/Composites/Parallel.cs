@@ -30,7 +30,6 @@ namespace NodeCanvas.BehaviourTrees{
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){
 
-			var finished = true;
 			var defferedStatus = Status.Resting;
 			for ( var i = 0; i < outConnections.Count; i++){
 
@@ -45,8 +44,6 @@ namespace NodeCanvas.BehaviourTrees{
 				status = outConnections[i].Execute(agent, blackboard);
 
 				if (defferedStatus == Status.Resting){
-					if (status != Status.Success && status != Status.Failure) finished = false;
-
 					if (status == Status.Failure && (policy == ParallelPolicy.FirstFailure || policy == ParallelPolicy.FirstSuccessOrFailure) ){
 						defferedStatus = Status.Failure;
 					}

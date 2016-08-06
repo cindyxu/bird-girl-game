@@ -20,7 +20,8 @@ public class PixelPerfectCam : MonoBehaviour {
 	 */
 	private GameObject followTarget;
 
-	public Rect boundaryRect;
+	public BoxCollider2D boundaryCollider;
+	private Bounds _boundary;
 
 	private Camera _camera;
 	private int _currentScreenWidth = 0;
@@ -31,12 +32,17 @@ public class PixelPerfectCam : MonoBehaviour {
 
 	protected void Start() {
 		_camera = this.GetComponent<Camera>();
+		_boundary = boundaryCollider.bounds;
 		if(!_camera){
 			Debug.LogWarning("No camera for pixel perfect cam to use");
 		}else{
 			_camera.orthographic = true;
 			ResizeCamToTargetSize();
 		}
+	}
+
+	public Bounds getBoundary () {
+		return _boundary;
 	}
 
 	public void SetFollowTarget(GameObject followTarget) {
@@ -75,8 +81,8 @@ public class PixelPerfectCam : MonoBehaviour {
 			float nextX = Mathf.Round(_pixelLockedPPU * newPosition.x);
 			float nextY = Mathf.Round(_pixelLockedPPU * newPosition.y);
 			_camera.transform.position = new Vector3(
-				Mathf.Clamp(boundaryRect.xMin, nextX/_pixelLockedPPU, boundaryRect.xMax),
-				Mathf.Clamp(boundaryRect.yMin, nextY/_pixelLockedPPU, boundaryRect.yMax),
+				Mathf.Clamp(_boundary.min.x, nextX/_pixelLockedPPU, _boundary.max.x),
+				Mathf.Clamp(_boundary.min.y, nextY/_pixelLockedPPU, _boundary.max.y),
 				_camera.transform.position.z);
 		}
 	}

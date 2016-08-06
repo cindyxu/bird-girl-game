@@ -21,17 +21,23 @@ public class DefaultDoorEnterEvent {
 	}
 
 	public void StartEvent(System.Action callback) {
+//		Action onFinished = delegate() {
+//			StartAppear(callback);
+//		};
 		Action onFinished = delegate() {
-			StartAppear(callback);
+			mTargetRigidbody2D.constraints = mConstraints;
+			mTargetCollider2D.enabled = false;
+			mTargetCollider2D.enabled = true;
+			callback();
 		};
 
 		RoomTraveller traveller = mInhabitant.GetFacade ().GetRoomTraveller ();
 		traveller.TransportTo (mDoor.GetRoom (), mDoor.GetSortingLayerName ());
 
 		mTargetRigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
-		iTween.FadeTo (mInhabitant.gameObject, iTween.Hash (
-			"alpha", 0,
-			"time", 0));
+//		iTween.FadeTo (mInhabitant.gameObject, iTween.Hash (
+//			"alpha", 0,
+//			"time", 0));
 		Vector2 position = mDoor.GetTargetPosition (mTargetCollider2D.bounds);
 		iTween.MoveTo (mInhabitant.gameObject, iTween.Hash (
 			"x", position.x - mTargetCollider2D.offset.x,
@@ -42,17 +48,17 @@ public class DefaultDoorEnterEvent {
 		));
 	}
 
-	private void StartAppear(System.Action callback) {
-		Action onFinished = delegate() {
-			mTargetRigidbody2D.constraints = mConstraints;
-			mTargetCollider2D.enabled = false;
-			mTargetCollider2D.enabled = true;
-			callback();
-		};
-		iTween.FadeTo (mInhabitant.gameObject, iTween.Hash (
-			"alpha", 1,
-			"time", 0.1,
-			"oncomplete", onFinished
-		));
-	}
+//	private void StartAppear(System.Action callback) {
+//		Action onFinished = delegate() {
+//			mTargetRigidbody2D.constraints = mConstraints;
+//			mTargetCollider2D.enabled = false;
+//			mTargetCollider2D.enabled = true;
+//			callback();
+//		};
+//		iTween.FadeTo (mInhabitant.gameObject, iTween.Hash (
+//			"alpha", 1,
+//			"time", 0.1,
+//			"oncomplete", onFinished
+//		));
+//	}
 }

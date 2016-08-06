@@ -4,7 +4,11 @@ using System.Collections.Generic;
 using NodeCanvas;
 using NodeCanvas.Framework;
 
-public class GameFlags {
+public static class Flags {
+
+	public static StageMain stageMain = StageMain.NONE;
+	public static StageMaskTheatre stageMaskTheatre = StageMaskTheatre.NONE;
+	public static StageMaskHorseLifting stageMaskHorseLifting = StageMaskHorseLifting.NONE;
 
 	public enum StageMain {
 		NONE,

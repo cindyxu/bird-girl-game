@@ -1,44 +1,46 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using LRUCache;
 
 public class RoomGraph {
 
-	private static Dictionary <WalkerParams, LRUCache<Room, Graph>> mGraphs = 
-		new Dictionary <WalkerParams, LRUCache<Room, Graph>> ();
+	public readonly Room room;
+	public readonly List<Edge> edges;
+	public readonly List<Rect> ladders;
+	public readonly Dictionary<Edge, List<EdgePath>> paths;
 
-	public class Graph {
-		public readonly Room room;
-		public readonly List<Edge> edges;
-		public readonly Dictionary<Edge, List<EdgePath>> paths;
-
-		public Graph (Room room, List<Edge> edges, Dictionary<Edge, List<EdgePath>> paths) {
-			this.room = room;
-			this.edges = edges;
-			this.paths = paths;
-		}
+	public RoomGraph (Room room, List<Edge> edges, List<Rect> ladders, Dictionary<Edge, List<EdgePath>> paths) {
+		this.room = room;
+		this.edges = edges;
+		this.ladders = ladders;
+		this.paths = paths;
 	}
 
-	public static Graph GetGraphForRoom (WalkerParams wp, Room room) {
-
-		if (!mGraphs.ContainsKey (wp)) {
-			mGraphs [wp] = new LRUCache<Room, Graph> (3);
-		}
-		LRUCache<Room, Graph> roomGraphs = mGraphs [wp];
-		if (roomGraphs.get (room) == null) {
-			List<Edge> edges = BuildEdges (room);
-			List<Rect> ladders = BuildLadderRects (room);
-			Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-			AddJumpPaths (wp, edges, paths);
-			AddLadderPaths (wp, edges, ladders, paths);
-			Graph graph = new Graph (room, edges, paths);
-			roomGraphs.add (room, graph);
-		}
-		return roomGraphs.get (room);
+	public static RoomGraph GetGraphForRoom (WalkerParams wp, Room room) {
+		
+		List<Edge> edges = buildEdges (room);
+		List<Rect> ladders = buildLadderRects (room);
+		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
+		addJumpPaths (wp, edges, paths);
+		addLadderPaths (wp, edges, ladders, paths);
+		return new RoomGraph (room, edges, ladders, paths);
 	}
 
-	private static List<Edge> BuildEdges (Room room) {
+	public Rect? GetLadder (Ladder ladder) {
+		Vector2 position = ladder.transform.position;
+		position -= ladder.GetSize () / 2f;
+		Rect ladderRect = new Rect (position, ladder.GetSize ());
+
+		foreach (Rect oladderRect in ladders) {
+			if (ladderRect.Equals (oladderRect)) {
+				return oladderRect;
+			}
+		}
+
+		return null;
+	}
+
+	private static List<Edge> buildEdges (Room room) {
 		SortedEdge[] sortedEdges = room.GetSortedEdges ();
 		EdgeCollider2D[] colliders = new EdgeCollider2D [sortedEdges.Length];
 		for (int i = 0; i < sortedEdges.Length; i++) {
@@ -47,7 +49,7 @@ public class RoomGraph {
 		return EdgeBuilder.BuildEdges (colliders);
 	}
 
-	private static List<Rect> BuildLadderRects (Room room) {
+	private static List<Rect> buildLadderRects (Room room) {
 		Ladder[] goLadders = room.GetLadders ();
 		List<Rect> ladders = new List<Rect> ();
 		foreach (Ladder l in goLadders) {
@@ -58,7 +60,7 @@ public class RoomGraph {
 		return ladders;
 	}
 
-	public static void AddJumpPaths (WalkerParams wp, List<Edge> edges, Dictionary<Edge, List<EdgePath>> paths) {
+	public static void addJumpPaths (WalkerParams wp, List<Edge> edges, Dictionary<Edge, List<EdgePath>> paths) {
 		foreach (Edge edge in edges) {
 			if (edge.isDown) {
 				Log.logger.Log (Log.AI_SCAN, "scanning for " + edge);
@@ -73,7 +75,7 @@ public class RoomGraph {
 		}
 	}
 
-	public static void AddLadderPaths (WalkerParams wp, List<Edge> edges, List<Rect> ladders, Dictionary<Edge, List<EdgePath>> paths) {
+	public static void addLadderPaths (WalkerParams wp, List<Edge> edges, List<Rect> ladders, Dictionary<Edge, List<EdgePath>> paths) {
 		foreach (Rect ladder in ladders) {
 			List<LadderPath> ladderPaths = PathBuilder.BuildLadderPaths (wp, edges, ladder);
 			if (ladderPaths != null) {

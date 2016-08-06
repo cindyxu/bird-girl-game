@@ -16,7 +16,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, 
 			start, 0, dest, 2);
@@ -38,7 +38,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (mid);
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 6);
 		List<EdgePath> result;
@@ -62,7 +62,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 3);
 		List<EdgePath> result;
@@ -81,7 +81,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 6);
 		List<EdgePath> result;
@@ -99,7 +99,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 0);
 		List<EdgePath> result;
@@ -118,7 +118,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (dest);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, dest, 0);
 		List<EdgePath> result;
@@ -139,7 +139,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (left);
 		edges.Add (right);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, left, -3);
 		List<EdgePath> result;
@@ -159,7 +159,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (left);
 		edges.Add (right);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, right, 3);
 		List<EdgePath> result;
@@ -179,7 +179,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (up);
 		edges.Add (down);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, up, 0);
 		List<EdgePath> result;
@@ -199,7 +199,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (up);
 		edges.Add (down);
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, down, 0);
 		List<EdgePath> result;
@@ -237,7 +237,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.AddJumpPaths (wp, edges, paths);
+		RoomGraph.addJumpPaths (wp, edges, paths);
 
 		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, 
 			start, 0, dest, 9);

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class ChainPlanner {
+public class RoomPathPlanner {
 
 	public enum Status {
 		ACTIVE,
@@ -12,15 +12,13 @@ public class ChainPlanner {
 		DONE
 	}
 
-	private float mX;
-	private float mY;
-	private float mVy;
-
 	private readonly float mXlf;
 	private readonly float mXrf;
+	private readonly float mYf;
 
 	private WalkerParams mWp;
 	private List<EdgePath> mChain;
+	private AiWalkerFacade mAWFacade;
 	private int mPathIdx = 0;
 	private Status mStatus = Status.ACTIVE;
 
@@ -28,30 +26,51 @@ public class ChainPlanner {
 	private WalkPlanner mWalkPlanner;
 	private LadderPlanner mLadderPlanner;
 
-	public ChainPlanner (WalkerParams wp, List<EdgePath> chain, float xlf, float xrf, float x, float y) {
+	public RoomPathPlanner (WalkerParams wp, List<EdgePath> chain, float xlf, float xrf, float yf,
+		AiWalkerFacade aWFacade) {
 		Assert.IsNotNull (chain);
 
 		mXlf = xlf;
 		mXrf = xrf;
-		mX = x;
-		mY = y;
+		mYf = yf;
 
 		mWp = wp;
 		mChain = chain;
+		mAWFacade = aWFacade;
 
-		resolveWalkPlanner ();
+		if (mAWFacade.GetLadder ().HasValue) {
+			Vector2 pos = mAWFacade.GetPosition ();
+			float xlt, xrt;
+			getTargetRange (out xlt, out xrt);
+			float lyt = 0;
+			if (mChain.Count > 0) {
+				lyt = mChain [0].GetStartEdge ().y0;
+			} else {
+				lyt = mYf;
+			}
+			mLadderPlanner = new LadderPlanner (mWp, xlt, xrt, lyt, pos.x, pos.y);
+		} else {
+			mWalkPlanner = resolveWalkPlanner ();
+		}
 	}
 
-	public void OnUpdate (float x, float y, float vy) {
-		mX = x;
-		mY = y;
-		mVy = vy;
+	public void StartObserving () {
+		mAWFacade.onGrounded += OnGrounded;
+	}
+
+	public void StopObserving () {
+		mAWFacade.onGrounded -= OnGrounded;
+	}
+
+	public void OnUpdate () {
+		Vector2 pos = mAWFacade.GetPosition ();
+		Vector2 vel = mAWFacade.GetVelocity ();
 
 		if (mWalkPlanner != null) {
-			mWalkPlanner.OnUpdate (mX);
+			mWalkPlanner.OnUpdate (pos.x);
 
 		} if (mJumpPlanner != null) {
-			mJumpPlanner.OnUpdate (mX, mY, mVy);
+			mJumpPlanner.OnUpdate (pos.x, pos.y, vel.y);
 		}
 	}
 
@@ -61,7 +80,7 @@ public class ChainPlanner {
 			inputLateralDir (inputCatcher, hdir);
 			if (hdir == 0) {
 				if (mPathIdx < mChain.Count) {
-					enterEdgePath (inputCatcher);
+					enterNextEdgePath (inputCatcher);
 				} else {
 					mStatus = Status.DONE;
 					Log.logger.Log (Log.AI_PLAN, "DONE!");
@@ -73,12 +92,17 @@ public class ChainPlanner {
 			inputVerticalDir (inputCatcher, 0);
 		} else if (mLadderPlanner != null) {
 			inputLateralDir (inputCatcher, mLadderPlanner.GetLateralDir ());
-			inputVerticalDir (inputCatcher, mLadderPlanner.GetVerticalDir ());
+			int vdir = mLadderPlanner.GetVerticalDir ();
+			inputVerticalDir (inputCatcher, vdir);
+			if (vdir == 0 && mPathIdx == mChain.Count) {
+				mStatus = Status.DONE;
+			}
 		}
 		return mStatus;
 	}
 
-	private void enterEdgePath (InputCatcher inputCatcher) {
+	private void enterNextEdgePath (InputCatcher inputCatcher) {
+		Vector2 pos = mAWFacade.GetPosition ();
 		mWalkPlanner = null;
 
 		float xlt, xrt;
@@ -88,20 +112,28 @@ public class ChainPlanner {
 		if (currPath is JumpPath) {
 			JumpPath jumpPath = currPath as JumpPath;
 			if (!jumpPath.IsDropPath ()) {
-				Log.logger.Log (Log.AI_PLAN, "jumping it");
+				Log.logger.Log (Log.AI_PLAN, "jumping it " + currPath.GetEndEdge ());
 				if (!inputCatcher.GetJumpPress ()) inputCatcher.OnJumpPress ();
 			} else {
-				Log.logger.Log (Log.AI_PLAN, "dropping it");
+				Log.logger.Log (Log.AI_PLAN, "dropping it " + currPath.GetEndEdge ());
 			}
-			mJumpPlanner = new JumpPlanner (jumpPath, xlt, xrt, mWp, mX);
+			mJumpPlanner = new JumpPlanner (jumpPath, xlt, xrt, mWp, pos.x);
 		} else if (currPath is LadderPath) {
-			Log.logger.Log (Log.AI_PLAN, "climbing it");
+			Log.logger.Log (Log.AI_PLAN, "climbing it " + currPath.GetEndEdge ());
 			LadderPath ladderPath = currPath as LadderPath;
-			mLadderPlanner = new LadderPlanner (ladderPath, mWp, xlt, xrt, mX); 
+
+			float lyt;
+			if (mPathIdx == mChain.Count) {
+				lyt = mChain [0].GetStartEdge ().y0;
+			} else {
+				lyt = ladderPath.GetEndEdge ().y0;
+			}
+			mLadderPlanner = new LadderPlanner (mWp, xlt, xrt, lyt, pos.x, pos.y); 
 		}
 	}
 
 	public void OnGrounded (Edge edge) {
+		Debug.Log ("on grounded " + edge);
 		Log.logger.Log (Log.AI_PLAN, "on grounded " + edge);
 		if (edge != null && (mJumpPlanner != null || mLadderPlanner != null)) {
 			mJumpPlanner = null;
@@ -111,11 +143,11 @@ public class ChainPlanner {
 			if (edge == currPath.GetEndEdge ()) {
 				Log.logger.Log (Log.AI_PLAN, "now at " + mPathIdx + " / " + mChain.Count);
 				mPathIdx++;
-				resolveWalkPlanner ();
+				mWalkPlanner = resolveWalkPlanner ();
 			} else {
 				mWalkPlanner = null;
 				mStatus = Status.FAILED;
-				Log.logger.Log (Log.AI_PLAN, "Failed to make jump! Recalculating path");
+				Log.logger.Log (Log.AI_PLAN, "Failed jump " + currPath.GetStartEdge () + " to " + currPath.GetEndEdge () + " ! Recalculating");
 			}
 		}
 	}
@@ -142,15 +174,17 @@ public class ChainPlanner {
 		}
 	}
 
-	private void resolveWalkPlanner () {
-		Log.logger.Log (Log.AI_PLAN, "walking it");
+	private WalkPlanner resolveWalkPlanner () {
+		Vector2 pos = mAWFacade.GetPosition ();
 		if (mPathIdx < mChain.Count) {
 			EdgePath nextPath = mChain [mPathIdx];
 			float xli, xri;
 			nextPath.GetStartRange (out xli, out xri);
-			mWalkPlanner = new WalkPlanner (mWp, xli, xri, mX);
+			Log.logger.Log (Log.AI_PLAN, "walking it to " + xli + ", " + xri);
+			return new WalkPlanner (mWp, xli, xri, pos.x);
 		} else {
-			mWalkPlanner = new WalkPlanner (mWp, mXlf, mXrf, mX);
+			Log.logger.Log (Log.AI_PLAN, "walking it to " + mXlf + ", " + mXrf);
+			return new WalkPlanner (mWp, mXlf, mXrf, pos.x);
 		}
 	}
 
