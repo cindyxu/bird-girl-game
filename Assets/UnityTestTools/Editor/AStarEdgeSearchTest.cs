@@ -8,18 +8,17 @@ public class AStarEdgeSearchTest {
 	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, 10, -50, -100);
 
 	[Test]
-	public void AStarEdgeSearch_goalOneEdgeAcross_returnsChainToEdge()
+	public void GoalOneEdgeAcross_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge dest = new Edge (2, 0, 3, 0);
 		edges.Add (start);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, 
-			start, 0, new Vector2 (2, 0));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -28,7 +27,7 @@ public class AStarEdgeSearchTest {
 	}
 
 	[Test]
-	public void AStarEdgeSearch_goalTwoEdgesAcross_returnsChainToEdge()
+	public void GoalTwoEdgesAcross_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -37,10 +36,10 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (mid);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (6, 0));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -51,7 +50,7 @@ public class AStarEdgeSearchTest {
 	}
 
 	[Test]
-	public void AStarEdgeSearch_goalTwoAdjacentEdgesAcross_choosesFasterEdgeFirst()
+	public void GoalTwoAdjacentEdgesAcross_choosesFasterEdgeFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -61,10 +60,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (mid);
 		edges.Add (dest);
 
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
-
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (3, 0));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -73,17 +71,18 @@ public class AStarEdgeSearchTest {
 	}
 
 	[Test]
-	public void AStarEdgeSearch_goalUnreachableAcross_returnsNull()
+	public void GoalUnreachableAcross_returnsNull()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge dest = new Edge (6, 0, 7, 0);
 		edges.Add (start);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (6, 0));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -91,17 +90,18 @@ public class AStarEdgeSearchTest {
 	}
 
 	[Test]
-	public void AStarEdgeSearch_oneEdgeUp_returnsChainToEdge()
+	public void OneEdgeUp_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge dest = new Edge (0, 1, 1, 1);
 		edges.Add (start);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (0, 1));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -110,17 +110,18 @@ public class AStarEdgeSearchTest {
 	}
 
 	[Test]
-	public void AStarEdgeSearch_goalOneEdgeDown_returnsChainToEdge()
+	public void GoalOneEdgeDown_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge dest = new Edge (0, -1, 1, -1);
 		edges.Add (start);
 		edges.Add (dest);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (0, -1));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
@@ -129,87 +130,159 @@ public class AStarEdgeSearchTest {
 	}
 
 	[Test]
-	public void AStarEdgeSearch_goalToLeft_searchesLeftFirst()
+	public void GoalUpLadder_returnsChainToEdge()
+	{
+		Edge start = new Edge (0, 0, 5, 0);
+		Edge dest = new Edge (0, 5, 5, 5);
+		List<Edge> edges = new List<Edge> { start, dest };
+		Rect ladder = new Rect (0, 0, 1, 5);
+		List<Rect> ladders = new List<Rect> { ladder };
+
+		RoomGraph graph = new RoomGraph (wp, edges, ladders);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (4, 0), new Vector2 (4, 5));
+
+		List<EdgePath> result;
+		while (search.Step (out result)) ;
+
+		Assert.AreEqual (1, result.Count);
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (dest, result [0].GetEndEdge ());
+		Assert.IsInstanceOf (typeof (LadderPath), result [0]);
+	}
+
+	[Test]
+	public void OnLadder_GoalAbove_returnsChainToEdge()
+	{
+		Edge start = new Edge (0, 0, 5, 0);
+		Edge dest = new Edge (0, 5, 5, 5);
+		List<Edge> edges = new List<Edge> { start, dest };
+		Rect ladder = new Rect (0, 0, 1, 5);
+		List<Rect> ladders = new List<Rect> { ladder };
+
+		RoomGraph graph = new RoomGraph (wp, edges, ladders);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (0, 3), new Vector2 (4, 5));
+
+		List<EdgePath> result;
+		while (search.Step (out result)) ;
+
+		Assert.AreEqual (1, result.Count);
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (dest, result [0].GetEndEdge ());
+		Assert.IsInstanceOf (typeof (LadderPath), result [0]);
+	}
+
+	[Test]
+	public void GoalTwoLaddersAbove_returnsChainToEdge()
+	{
+		Edge start = new Edge (0, 0, 1, 0);
+		Edge bottom = new Edge (0, 5, 1, 5);
+		Edge top = new Edge (0, 10, 1, 10);
+		List<Edge> edges = new List<Edge> { start, bottom, top };
+		Rect ladder0 = new Rect (0, 0, 1, 5);
+		Rect ladder1 = new Rect (0, 5, 1, 5);
+		List<Rect> ladders = new List<Rect> { ladder0, ladder1 };
+
+		RoomGraph graph = new RoomGraph (wp, edges, ladders);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (0, 0), new Vector2 (0, 8));
+
+		List<EdgePath> result;
+		while (search.Step (out result)) ;
+
+		Assert.AreEqual (2, result.Count);
+		Assert.AreEqual (start, result [0].GetStartEdge ());
+		Assert.AreEqual (bottom, result [0].GetEndEdge ());
+		Assert.AreEqual (top, result [1].GetEndEdge ());
+	}
+
+	[Test]
+	public void GoalToLeft_searchesLeftFirst()
+	{
+		List<Edge> edges = new List<Edge> ();
+		Edge start = new Edge (0, 0, 1, 0);
+		Edge dest = new Edge (-3, 0, -2, -0);
+		Edge right = new Edge (3, 0, 4, 0);
+		edges.Add (start);
+		edges.Add (dest);
+		edges.Add (right);
+
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+
+		List<EdgePath> result;
+		search.Step (out result) ;
+		EdgeNode bestNode = search.peekQueue ();
+		Assert.AreEqual (bestNode.edge, dest);
+	}
+
+	[Test]
+	public void GoalToRight_searchesRightFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge left = new Edge (-3, 0, -2, -0);
-		Edge right = new Edge (3, 0, 4, 0);
+		Edge dest = new Edge (3, 0, 4, 0);
 		edges.Add (start);
 		edges.Add (left);
-		edges.Add (right);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
+		edges.Add (dest);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (-3, 0));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		
 		List<EdgePath> result;
 		search.Step (out result) ;
 		EdgeNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.edge, left);
+		Assert.AreEqual (bestNode.edge, dest);
 	}
 
 	[Test]
-	public void AStarEdgeSearch_goalToRight_searchesRightFirst()
+	public void GoalAbove_searchesAboveFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
-		Edge left = new Edge (-3, 0, -2, -0);
-		Edge right = new Edge (3, 0, 4, 0);
+		Edge dest = new Edge (0, 1, 1, 1);
+		Edge down = new Edge (0, -1, 1, -1);
 		edges.Add (start);
-		edges.Add (left);
-		edges.Add (right);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
+		edges.Add (dest);
+		edges.Add (down);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (3, 0));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+
 		List<EdgePath> result;
 		search.Step (out result) ;
 		EdgeNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.edge, right);
+		Assert.AreEqual (bestNode.edge, dest);
 	}
 
 	[Test]
-	public void AStarEdgeSearch_goalAbove_searchesAboveFirst()
+	public void GoalBelow_searchesBelowFirst()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge up = new Edge (0, 1, 1, 1);
-		Edge down = new Edge (0, -1, 1, -1);
+		Edge dest = new Edge (0, -1, 1, -1);
 		edges.Add (start);
 		edges.Add (up);
-		edges.Add (down);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
+		edges.Add (dest);
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (0, 1));
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+
 		List<EdgePath> result;
 		search.Step (out result) ;
 		EdgeNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.edge, up);
+		Assert.AreEqual (bestNode.edge, dest);
 	}
 
 	[Test]
-	public void AStarEdgeSearch_goalBelow_searchesBelowFirst()
-	{
-		List<Edge> edges = new List<Edge> ();
-		Edge start = new Edge (0, 0, 1, 0);
-		Edge up = new Edge (0, 1, 1, 1);
-		Edge down = new Edge (0, -1, 1, -1);
-		edges.Add (start);
-		edges.Add (up);
-		edges.Add (down);
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
-
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, start, 0, new Vector2 (0, -1));
-		List<EdgePath> result;
-		search.Step (out result) ;
-		EdgeNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.edge, down);
-	}
-
-	[Test]
-	public void AStarEdgeSearch_shortAboveAndLongBelow_picksShortPath () {
+	public void ShortAboveAndLongBelow_picksShortPath () {
 
 		Edge start = new Edge (0, 0, 1, 0);
 		Edge dest = new Edge (9, 0, 10, 0);
@@ -236,11 +309,10 @@ public class AStarEdgeSearchTest {
 		edges.Add (short1);
 		edges.Add (dest);
 
-		Dictionary<Edge, List<EdgePath>> paths = new Dictionary<Edge, List<EdgePath>> ();
-		RoomGraph.addJumpPaths (wp, edges, paths);
+		RoomGraph graph = new RoomGraph (wp, edges);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 
-		AStarEdgeSearch search = new AStarEdgeSearch (paths, wp, 
-			start, 0, new Vector2 (9, 0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 

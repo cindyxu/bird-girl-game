@@ -36,11 +36,7 @@ public class HumanoidFacade {
 
 	public void OnGrounded (SortedEdge edge) {
 		mLadder = null;
-		if (edge != null) {
-			mSortedEdge = null;
-		} else {
-			mSortedEdge = edge;
-		}
+		mSortedEdge = edge;
 		if (onGrounded != null) onGrounded (edge);
 	}
 

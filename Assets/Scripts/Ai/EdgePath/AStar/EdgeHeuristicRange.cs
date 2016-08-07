@@ -98,6 +98,7 @@ public class EdgeHeuristicRange<T> where T : IComparable {
 		mergeHeuristics ();
 	}
 
+	// finds range with least rank & returns its index
 	public int getMinRangeIndex (Func<float, float, T, float> rangeRank) {
 		int bestIndex = -1;
 		float bestVal = Mathf.Infinity;

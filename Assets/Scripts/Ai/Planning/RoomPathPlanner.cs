@@ -18,7 +18,7 @@ public class RoomPathPlanner {
 
 	private WalkerParams mWp;
 	private List<EdgePath> mChain;
-	private AiWalkerFacade mAWFacade;
+	private IAiWalkerFacade mAWFacade;
 	private int mPathIdx = 0;
 	private Status mStatus = Status.ACTIVE;
 
@@ -27,7 +27,7 @@ public class RoomPathPlanner {
 	private LadderPilot mLadderPilot;
 
 	public RoomPathPlanner (WalkerParams wp, List<EdgePath> chain, float xlf, float xrf, float yf,
-		AiWalkerFacade aWFacade) {
+		IAiWalkerFacade aWFacade) {
 		Assert.IsNotNull (chain);
 
 		mXlf = xlf;
@@ -113,20 +113,7 @@ public class RoomPathPlanner {
 
 		// if we're on a ladder now ...
 		if (mAWFacade.GetLadder ().HasValue) {
-			Vector2 pos = mAWFacade.GetPosition ();
-
-			float xlt, xrt;
-			getTargetRange (out xlt, out xrt);
-
-			float lyt = 0;
-			if (mChain.Count > 0) {
-				// get to nearest edge
-				lyt = mChain [0].GetStartEdge ().y0;
-			} else {
-				// we're just moving on the ladder, so return target y
-				lyt = mYf;
-			}
-			mLadderPilot = new LadderPilot (mWp, xlt, xrt, lyt, pos.x, pos.y);
+			mLadderPilot = createLadderPilot ();
 
 		} else {
 			mWalkPilot = resolveWalkPlanner ();
@@ -134,14 +121,15 @@ public class RoomPathPlanner {
 	}
 
 	private void enterNextEdgePath (InputCatcher inputCatcher) {
-		Vector2 pos = mAWFacade.GetPosition ();
 		mWalkPilot = null;
-
-		float xlt, xrt;
-		getTargetRange (out xlt, out xrt);
 
 		EdgePath currPath = mChain [mPathIdx];
 		if (currPath is JumpPath) {
+			Vector2 pos = mAWFacade.GetPosition ();
+
+			float xlt, xrt;
+			getAnticipatedTargetRange (out xlt, out xrt);
+
 			JumpPath jumpPath = currPath as JumpPath;
 			if (!jumpPath.IsDropPath ()) {
 				Log.logger.Log (Log.AI_PLAN, "jumping it " + currPath.GetEndEdge ());
@@ -152,16 +140,26 @@ public class RoomPathPlanner {
 			mJumpPilot = new JumpPilot (jumpPath, xlt, xrt, mWp, pos.x);
 		} else if (currPath is LadderPath) {
 			Log.logger.Log (Log.AI_PLAN, "climbing it " + currPath.GetEndEdge ());
-			LadderPath ladderPath = currPath as LadderPath;
-
-			float lyt;
-			if (mPathIdx == mChain.Count - 1) {
-				lyt = mChain [0].GetStartEdge ().y0;
-			} else {
-				lyt = ladderPath.GetEndEdge ().y0;
-			}
-			mLadderPilot = new LadderPilot (mWp, xlt, xrt, lyt, pos.x, pos.y); 
+			mLadderPilot = createLadderPilot ();
 		}
+	}
+
+	private LadderPilot createLadderPilot () {
+		Vector2 pos = mAWFacade.GetPosition ();
+
+		float xlt, xrt;
+		getAnticipatedTargetRange (out xlt, out xrt);
+
+		float lyt = 0;
+		if (mPathIdx < mChain.Count - 1) {
+			// get to nearest edge
+			lyt = mChain [mPathIdx].GetEndEdge ().y0;
+		} else {
+			// we're just moving on the ladder, so return target y
+			lyt = mYf;
+		}
+
+		return new LadderPilot (mWp, xlt, xrt, lyt, pos.x, pos.y);
 	}
 
 	private void inputLateralDir (InputCatcher inputCatcher, int dir) {
@@ -176,6 +174,7 @@ public class RoomPathPlanner {
 	}
 
 	private void inputVerticalDir (InputCatcher inputCatcher, int dir) {
+		DebugPanel.Log ("vertical", dir);
 		if (dir >= 0 && inputCatcher.GetDown ()) inputCatcher.OnDownRelease ();
 		if (dir <= 0 && inputCatcher.GetUp ()) inputCatcher.OnUpRelease ();
 		if (dir < 0 && !inputCatcher.GetDown ()) {
@@ -200,7 +199,7 @@ public class RoomPathPlanner {
 		}
 	}
 
-	private void getTargetRange (out float xlt, out float xrt) {
+	private void getAnticipatedTargetRange (out float xlt, out float xrt) {
 		if (mPathIdx + 1 < mChain.Count) {
 			mChain [mPathIdx + 1].GetStartRange (out xlt, out xrt);
 		} else {

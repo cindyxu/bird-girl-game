@@ -8,9 +8,9 @@ public class ScenePathPlanner {
 	private Inhabitant.GetDest mGetDest;
 	private WalkerParams mWp;
 	private RoomPathPlanner mRoomPathPlanner;
-	private AiWalkerFacade mAWFacade;
+	private IAiWalkerFacade mAWFacade;
 
-	public ScenePathPlanner (WalkerParams wp, AiWalkerFacade awFacade, Inhabitant.GetDest getDest) {
+	public ScenePathPlanner (WalkerParams wp, IAiWalkerFacade awFacade, Inhabitant.GetDest getDest) {
 		mWp = wp;
 		mGetDest = getDest;
 		mAWFacade = awFacade;
@@ -28,41 +28,17 @@ public class ScenePathPlanner {
 
 		RoomGraph graph = mAWFacade.GetRoomGraph ();
 		Vector2 pos = mAWFacade.GetPosition ();
+		if (mAWFacade.GetEdge () != null) pos.y = mAWFacade.GetEdge ().y0;
 
-		Edge destEdge = EdgeUtil.FindUnderEdge (graph.edges, 
-			destPos.x - mWp.size.x / 2, destPos.x + mWp.size.x / 2, destPos.y);
+		AStarEdgeSearch search = new AStarEdgeSearch (graph, mWp, pos, destPos);
+		List<EdgePath> result;
+		while (search.Step (out result)) ;
 
-		Edge startUnderEdge = EdgeUtil.FindUnderEdge (graph.edges, 
-			pos.x, pos.x + mWp.size.x, pos.y + mWp.size.y / 2);
-		Edge startOverEdge = EdgeUtil.FindOverEdge (graph.edges, 
-			pos.x, pos.x + mWp.size.x, pos.y + mWp.size.y / 2);
-		
-		Edge startEdge;
-		if (mAWFacade.GetLadder ().HasValue) {
-			if (startUnderEdge == null) startEdge = startOverEdge;
-			else if (startOverEdge == null) startEdge = startUnderEdge;
-			else startEdge = (startOverEdge.y0 - pos.y < pos.y - startUnderEdge.y0 ? startOverEdge : startUnderEdge);
-		} else startEdge = startUnderEdge;
-
-		if (destEdge != null) {
-			float xlf = Mathf.Max (destEdge.left - mWp.size.x + JumpScan.EDGE_THRESHOLD, 
-				destPos.x - mWp.size.x / 2 - minDist);
-			float xrf = Mathf.Min (destEdge.right + mWp.size.x - JumpScan.EDGE_THRESHOLD, 
-				destPos.x + mWp.size.x / 2 + minDist);
-
-			if (startEdge != destEdge) {
-				AStarEdgeSearch search = new AStarEdgeSearch (graph.paths, mWp, startEdge, 
-					pos.x, new Vector2 (destPos.x - mWp.size.x / 2, destEdge.y0));
-				List<EdgePath> result;
-				while (search.Step (out result)) ;
-				if (result != null) {
-					setRoomPathPlanner (new RoomPathPlanner (mWp, result, xlf, xrf, destEdge.y0, mAWFacade));
-				} else setRoomPathPlanner (null);
-
-			} else {
-				setRoomPathPlanner (new RoomPathPlanner (mWp, new List<EdgePath> (), xlf, xrf, destEdge.y0, mAWFacade));
-			}
+		if (result != null) {
+			setRoomPathPlanner (new RoomPathPlanner (mWp, result, destPos.x - minDist, 
+				destPos.x + mWp.size.x + minDist, destPos.y, mAWFacade));
 		} else setRoomPathPlanner (null);
+
 	}
 
 	public void OnUpdate () {

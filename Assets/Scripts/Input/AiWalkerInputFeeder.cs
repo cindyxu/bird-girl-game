@@ -8,7 +8,7 @@ public class AiWalkerInputFeeder : InputFeeder {
 	private event OnReachDestination mOnReachDestination;
 
 	private readonly WalkerParams mWp;
-	private readonly AiWalkerFacade mAiFacade;
+	private readonly AiWalkerFacadeImpl mAiFacade;
 
 	private Inhabitant.GetDest mGetDest;
 	private ScenePathPlanner mPathPlanner;
@@ -18,7 +18,7 @@ public class AiWalkerInputFeeder : InputFeeder {
 	public AiWalkerInputFeeder (WalkerParams wp, 
 		InhabitantFacade facade, HumanoidFacade hFacade) {
 		mWp = wp;
-		mAiFacade = new AiWalkerFacade (wp, facade, hFacade);
+		mAiFacade = new AiWalkerFacadeImpl (wp, facade, hFacade);
 	}
 
 	public void SetDest (Inhabitant.GetDest getDest, OnReachDestination onReachDest) {

@@ -10,7 +10,7 @@ public static class EdgeUtil {
 		// descending
 		downEdges.Sort ((Edge edge0, Edge edge1) => edge1.y0.CompareTo (edge0.y0));
 		foreach (Edge edge in downEdges) {
-			if (edge.x0 <= x1 && edge.x1 >= x0) {
+			if (edge.x0 < x1 && edge.x1 > x0) {
 				return edge;
 			}
 		}
@@ -22,7 +22,16 @@ public static class EdgeUtil {
 		// ascending
 		downEdges.Sort ((Edge edge0, Edge edge1) => edge0.y0.CompareTo (edge1.y0));
 		foreach (Edge edge in downEdges) {
-			if (edge.x0 <= x1 && edge.x1 >= x0) {
+			if (edge.x0 < x1 && edge.x1 > x0) {
+				return edge;
+			}
+		}
+		return null;
+	}
+
+	public static Edge FindOnEdge (List<Edge> edges, float x0, float x1, float y) {
+		foreach (Edge edge in edges) {
+			if (edge.isDown && edge.y0 == y && edge.x0 < x1 && edge.x1 > x0) {
 				return edge;
 			}
 		}
@@ -31,7 +40,7 @@ public static class EdgeUtil {
 
 	public static Edge FindLadderBottomEdge (Rect ladder, List<Edge> edges) {
 		foreach (Edge e in edges) {
-			if (e.left <= ladder.xMin && e.right >= ladder.xMax) {
+			if (e.isDown && e.left <= ladder.xMin && e.right >= ladder.xMax) {
 				if (e.y0 == ladder.yMin) {
 					return e;
 				}
@@ -42,7 +51,7 @@ public static class EdgeUtil {
 
 	public static Edge FindLadderTopEdge (Rect ladder, List<Edge> edges) {
 		foreach (Edge e in edges) {
-			if (e.left <= ladder.xMin && e.right >= ladder.xMax) {
+			if (e.isDown && e.left <= ladder.xMin && e.right >= ladder.xMax) {
 				if (e.y0 == ladder.yMax) {
 					return e;
 				} 

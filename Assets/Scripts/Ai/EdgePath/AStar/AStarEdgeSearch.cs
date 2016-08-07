@@ -10,38 +10,36 @@ public class AStarEdgeSearch {
 	private readonly Dictionary<EdgePath, EdgeHeuristicRange<EdgeNode>> mBestHeuristics = 
 		new Dictionary<EdgePath, EdgeHeuristicRange<EdgeNode>> ();
 
-	private readonly Dictionary<Edge, List<EdgePath>> mEdgePaths;
-	private readonly Edge mStart;
-	private readonly float mStartX;
+	private readonly RoomGraph mGraph;
+	private readonly Vector2 mStart;
 	private readonly Vector2 mDest;
 
 	private readonly WalkerParams mWp;
 	private readonly WalkerHeuristic mHeuristic;
+
+	private List<EdgeNode> mStartNodes;
 	private List<EdgePath> mPathChain;
 
-	public AStarEdgeSearch (Dictionary <Edge, List<EdgePath>> edgePaths, WalkerParams wp, 
-		Edge start, float startX, Vector2 dest) {
-
-		Assert.AreNotEqual (start, null);
+	public AStarEdgeSearch (RoomGraph graph, WalkerParams wp, 
+		Vector2 start, Vector2 dest) {
 
 		Log.logger.Log (Log.AI_SEARCH, "<b>starting Astar: from " + start + " to " + dest + ",</b>");
 
 		mWp = wp;
 		mHeuristic = new WalkerHeuristic (wp);
-		mOpenQueue = new FastPriorityQueue<EdgeNode> (edgePaths.Count * edgePaths.Count);
-		mEdgePaths = edgePaths;
+		mGraph = graph;
+		mOpenQueue = new FastPriorityQueue<EdgeNode> (graph.paths.Count * graph.paths.Count);
 		mStart = start;
-		mStartX = startX;
 		mDest = dest;
 
 		startSearch ();
 	}
 
 	private void startSearch () {
-		EdgeNode startNode = new EdgeNode (null, mStart, mStartX, 
-			mStartX + mWp.size.x, 0);
-		mOpenQueue.Enqueue (startNode, mHeuristic.EstRemainingTime (mStart, startNode.xlf, 
-			startNode.xrf, mDest));
+		mStartNodes = mHeuristic.GetStartNodes (mGraph, mStart);
+		foreach (EdgeNode startNode in mStartNodes) {
+			mOpenQueue.Enqueue (startNode, mHeuristic.EstRemainingTime (startNode, mDest));
+		}
 	}
 
 	public IEnumerator<EdgeNode> getQueueEnumerator () {
@@ -57,17 +55,23 @@ public class AStarEdgeSearch {
 		EdgeNode curr = end;
 		while (curr != null && curr.edgePath != null) {
 			chain.Add (curr.edgePath);
+
+			if (mStartNodes.Contains (curr)) break;
+			if (!mBestHeuristics.ContainsKey (curr.edgePath)) break;
+
 			EdgeHeuristicRange<EdgeNode> ranges = mBestHeuristics [curr.edgePath];
-			if (ranges == null) break;
 			float xli, xri;
 			curr.edgePath.GetStartRange (out xli, out xri);
+
 			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, EdgeNode pnode) {
 				if (pnode == null) return Mathf.Infinity;
-				return pnode.g + mHeuristic.GetWalkTime (pnode.xlf, pnode.xrf, xli, xri);
+				float rank = pnode.g + mHeuristic.GetWalkTime (pnode.xlf, pnode.xrf, xli, xri);
+				return rank;
 			});
 			float rxl, rxr;
 			EdgeNode node;
 			ranges.getRangeAtIndex (idx, out rxl, out rxr, out node);
+
 			curr = node;
 		}
 		chain.Reverse ();
@@ -101,11 +105,11 @@ public class AStarEdgeSearch {
 			return false;
 		}
 		Log.logger.Log (Log.AI_SEARCH, "continue - current edge " + bestNode.edge);
-		if (!mEdgePaths.ContainsKey (bestNode.edge)) {
+		if (!mGraph.paths.ContainsKey (bestNode.edge)) {
 			Log.logger.Log (Log.AI_SEARCH, "no paths from edge!");
 			return true;
 		}
-		List<EdgePath> neighborPaths = mEdgePaths [bestNode.edge];
+		List<EdgePath> neighborPaths = mGraph.paths [bestNode.edge];
 		Log.logger.Log (Log.AI_SEARCH, neighborPaths.Count + " paths");
 		foreach (EdgePath neighborPath in neighborPaths) {
 			processNeighborPath (bestNode, neighborPath);
@@ -146,11 +150,11 @@ public class AStarEdgeSearch {
 		float tentativeG = parentNode.g + walkTime + 
 			neighborPath.GetTravelTime () * neighborPath.GetPenaltyMult ();
 
-		float xlf, xrf;
-		getTaperedEndRange (neighborPath, xli, xri, out xlf, out xrf);
-
 		float exlf, exrf;
 		neighborPath.GetEndRange (out exlf, out exrf);
+
+		float xlf, xrf;
+		getTaperedEndRange (neighborPath, xli, xri, out xlf, out xrf);
 		Log.logger.Log (Log.AI_SEARCH, "tapered end range: " + xlf + ", " + xrf);
 
 		if (!mBestHeuristics.ContainsKey (neighborPath)) {
@@ -162,10 +166,10 @@ public class AStarEdgeSearch {
 		if (!newRange) {
 			Log.logger.Log (Log.AI_SEARCH, "  did not add new heuristic");
 			return;
-		}
+		} 
 		EdgeNode node = new EdgeNode (neighborPath, neighborPath.GetEndEdge (), xlf, xrf, tentativeG);
 
-		float f = tentativeG + mHeuristic.EstRemainingTime (neighborPath.GetEndEdge (), xlf, xrf, mDest);
+		float f = tentativeG + mHeuristic.EstRemainingTime (node, mDest);
 		Log.logger.Log (Log.AI_SEARCH, "  new node! " + f);
 		mOpenQueue.Enqueue (node, f);
 	}

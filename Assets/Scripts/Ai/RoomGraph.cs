@@ -4,19 +4,21 @@ using System.Collections.Generic;
 
 public class RoomGraph {
 
-	public readonly Room room;
 	public readonly List<Edge> edges;
 	public readonly List<Rect> ladders;
 	public readonly Dictionary<Edge, List<EdgePath>> paths;
 
 	public readonly Dictionary<Rect, Eppy.Tuple<Edge, Edge>> ladderEdges;
 
-	public RoomGraph (WalkerParams wp, Room room) {
+	public RoomGraph (WalkerParams wp, Room room) : this (wp, buildEdges (room), buildLadderRects (room)) {}
 
-		this.room = room;
+	public RoomGraph (WalkerParams wp, List<Edge> edges, List<Rect> ladders = null) {
+		edges = (edges != null ? edges : new List<Edge> ());
+		ladders = (ladders != null ? ladders : new List<Rect> ());
 
-		edges = buildEdges (room);
-		ladders = buildLadderRects (room);
+		this.edges = edges;
+		this.ladders = ladders;
+
 		paths = new Dictionary<Edge, List<EdgePath>> ();
 		addJumpPaths (wp, edges, paths);
 		addLadderPaths (wp, edges, ladders, paths);

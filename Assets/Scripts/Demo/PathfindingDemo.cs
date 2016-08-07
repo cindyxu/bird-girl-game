@@ -53,8 +53,8 @@ public class PathfindingDemo : MonoBehaviour {
 			walker.transform.position.x + walkerCollider.size.x/2f, 
 			walker.transform.position.y);
 
-		mRenderSearch = new RenderSearch (walkerCollider, targetCollider, mWp, startEdge, 
-			walker.transform.position.x - walkerCollider.size.x/2f, 
+		mRenderSearch = new RenderSearch (walkerCollider, targetCollider, mWp,
+			((Vector2) walker.transform.position) - walkerCollider.size, 
 			((Vector2) targetCollider.transform.position) - mWp.size / 2, mEdges);
 	}
 
