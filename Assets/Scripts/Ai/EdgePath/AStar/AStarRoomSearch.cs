@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.Assertions;
 using Priority_Queue;
 
-public class AStarEdgeSearch {
+public class AStarRoomSearch {
 
 	private readonly FastPriorityQueue<EdgeNode> mOpenQueue;
 	private readonly Dictionary<EdgePath, EdgeHeuristicRange<EdgeNode>> mBestHeuristics = 
@@ -15,18 +15,18 @@ public class AStarEdgeSearch {
 	private readonly Vector2 mDest;
 
 	private readonly WalkerParams mWp;
-	private readonly WalkerHeuristic mHeuristic;
+	private readonly IAStarEvaluator mEvaluator;
 
 	private List<EdgeNode> mStartNodes;
 	private List<EdgePath> mPathChain;
 
-	public AStarEdgeSearch (RoomGraph graph, WalkerParams wp, 
+	public AStarRoomSearch (RoomGraph graph, WalkerParams wp, 
 		Vector2 start, Vector2 dest) {
 
 		Log.logger.Log (Log.AI_SEARCH, "<b>starting Astar: from " + start + " to " + dest + ",</b>");
 
 		mWp = wp;
-		mHeuristic = new WalkerHeuristic (wp);
+		mEvaluator = new AStarHumanoidEvaluator (wp);
 		mGraph = graph;
 		mOpenQueue = new FastPriorityQueue<EdgeNode> (graph.paths.Count * graph.paths.Count);
 		mStart = start;
@@ -36,9 +36,9 @@ public class AStarEdgeSearch {
 	}
 
 	private void startSearch () {
-		mStartNodes = mHeuristic.GetStartNodes (mGraph, mStart);
+		mStartNodes = mEvaluator.GetStartNodes (mGraph, mStart);
 		foreach (EdgeNode startNode in mStartNodes) {
-			mOpenQueue.Enqueue (startNode, mHeuristic.EstRemainingTime (startNode, mDest));
+			mOpenQueue.Enqueue (startNode, mEvaluator.EstRemainingTime (startNode, mDest));
 		}
 	}
 
@@ -65,7 +65,7 @@ public class AStarEdgeSearch {
 
 			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, EdgeNode pnode) {
 				if (pnode == null) return Mathf.Infinity;
-				float rank = pnode.g + mHeuristic.GetWalkTime (pnode.xlf, pnode.xrf, xli, xri);
+				float rank = pnode.g + mEvaluator.GetWalkTime (pnode.xlf, pnode.xrf, xli, xri);
 				return rank;
 			});
 			float rxl, rxr;
@@ -94,7 +94,7 @@ public class AStarEdgeSearch {
 
 		EdgeNode bestNode = mOpenQueue.Dequeue ();
 
-		if (mHeuristic.ReachedDest (bestNode, mDest)) {
+		if (mEvaluator.ReachedDest (bestNode, mDest)) {
 			Log.logger.Log (Log.AI_SEARCH, "<b>found best path!</b>");
 			result = mPathChain = reconstructChain (bestNode);
 			string s = "";
@@ -146,7 +146,7 @@ public class AStarEdgeSearch {
 		neighborPath.GetStartRange (out exli, out exri);
 		Log.logger.Log (Log.AI_SEARCH, "tapered start range: " + xli + ", " + xri);
 
-		float walkTime = mHeuristic.GetWalkTime (parentNode.xlf, parentNode.xrf, xli, xri);
+		float walkTime = mEvaluator.GetWalkTime (parentNode.xlf, parentNode.xrf, xli, xri);
 		float tentativeG = parentNode.g + walkTime + 
 			neighborPath.GetTravelTime () * neighborPath.GetPenaltyMult ();
 
@@ -169,7 +169,7 @@ public class AStarEdgeSearch {
 		} 
 		EdgeNode node = new EdgeNode (neighborPath, neighborPath.GetEndEdge (), xlf, xrf, tentativeG);
 
-		float f = tentativeG + mHeuristic.EstRemainingTime (node, mDest);
+		float f = tentativeG + mEvaluator.EstRemainingTime (node, mDest);
 		Log.logger.Log (Log.AI_SEARCH, "  new node! " + f);
 		mOpenQueue.Enqueue (node, f);
 	}

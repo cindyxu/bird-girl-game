@@ -17,7 +17,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
@@ -38,7 +38,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
@@ -61,7 +61,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
@@ -80,7 +80,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		
 		List<EdgePath> result;
@@ -99,7 +99,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		
 		List<EdgePath> result;
@@ -119,7 +119,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		
 		List<EdgePath> result;
@@ -139,7 +139,7 @@ public class AStarEdgeSearchTest {
 		List<Rect> ladders = new List<Rect> { ladder };
 
 		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (4, 0), new Vector2 (4, 5));
 
 		List<EdgePath> result;
@@ -161,7 +161,7 @@ public class AStarEdgeSearchTest {
 		List<Rect> ladders = new List<Rect> { ladder };
 
 		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (0, 3), new Vector2 (4, 5));
 
 		List<EdgePath> result;
@@ -185,7 +185,7 @@ public class AStarEdgeSearchTest {
 		List<Rect> ladders = new List<Rect> { ladder0, ladder1 };
 
 		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (0, 0), new Vector2 (0, 8));
 
 		List<EdgePath> result;
@@ -209,7 +209,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (right);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 
 		List<EdgePath> result;
@@ -230,7 +230,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 		
 		List<EdgePath> result;
@@ -251,7 +251,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (down);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 
 		List<EdgePath> result;
@@ -272,7 +272,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 
 		List<EdgePath> result;
@@ -310,7 +310,7 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, wp,
+		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
 			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
 
 		List<EdgePath> result;

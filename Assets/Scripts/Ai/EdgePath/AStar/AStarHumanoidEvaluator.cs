@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class WalkerHeuristic {
+public class AStarHumanoidEvaluator : IAStarEvaluator {
 
 	private WalkerParams mWp;
 
-	public WalkerHeuristic (WalkerParams wp) {
+	public AStarHumanoidEvaluator (WalkerParams wp) {
 		mWp = wp;
 	}
 

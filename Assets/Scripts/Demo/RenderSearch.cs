@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 public class RenderSearch {
 
-	private AStarEdgeSearch mSearch;
+	private AStarRoomSearch mSearch;
 	private List<GameObject> mDrawLines = new List<GameObject> ();
 
 	public RenderSearch (BoxCollider2D walker, BoxCollider2D target, WalkerParams wp, Vector2 start, 
 		Vector2 dest, List<Edge> edges) {
 		RoomGraph graph = new RoomGraph (wp, edges);
-		mSearch = new AStarEdgeSearch (graph, wp, start, dest); 
+		mSearch = new AStarRoomSearch (graph, wp, start, dest); 
 	}
 
 	public void StepSearch () {

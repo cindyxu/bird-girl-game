@@ -13,7 +13,7 @@ public class WalkerHeuristicTest {
 		List<Edge> edges = new List<Edge> { startEdge };
 		Vector2 pos = new Vector2 (0, 0);
 
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		RoomGraph graph = new RoomGraph (wp, edges);
 
 		List<EdgeNode> nodes = heuristic.GetStartNodes (graph, pos);
@@ -28,7 +28,7 @@ public class WalkerHeuristicTest {
 		List<Edge> edges = new List<Edge> { startEdge };
 		Vector2 pos = new Vector2 (-1, 0);
 
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		RoomGraph graph = new RoomGraph (wp, edges);
 
 		List<EdgeNode> nodes = heuristic.GetStartNodes (graph, pos);
@@ -47,7 +47,7 @@ public class WalkerHeuristicTest {
 
 		Vector2 pos = new Vector2 (0, -1);
 
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		RoomGraph graph = new RoomGraph (wp, edges, ladders);
 
 		List<EdgeNode> nodes = heuristic.GetStartNodes (graph, pos);
@@ -72,28 +72,28 @@ public class WalkerHeuristicTest {
 	[Test]
 	public void GetWalkTime_goalToRight_getsCorrectWalkTime()
 	{
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		Assert.AreEqual (1f / wp.walkSpd, heuristic.GetWalkTime (0, 1, 2, 3));
 	}
 
 	[Test]
 	public void GetWalkTime_goalToLeft_getsCorrectWalkTime()
 	{
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		Assert.AreEqual (1f / wp.walkSpd, heuristic.GetWalkTime (0, 1, -2, -1));
 	}
 
 	[Test]
 	public void GetWalkTime_goalOverlaps_getsNoWalkTime()
 	{
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		Assert.AreEqual (0, heuristic.GetWalkTime (0, 1, 0.5f, 1.5f));
 	}
 
 	[Test]
 	public void EstTotalTime_nearAndFarRight_prefersNear()
 	{
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (3, 0, 4, 0);
 		Vector2 dest = new Vector2 (6, 0);
@@ -106,7 +106,7 @@ public class WalkerHeuristicTest {
 	[Test]
 	public void EstTotalTime_nearAndFarLeft_prefersNear()
 	{
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (-3, 0, -2, 0);
 		Vector2 dest = new Vector2 (-6, 0);
@@ -118,7 +118,7 @@ public class WalkerHeuristicTest {
 	[Test]
 	public void EstTotalTime_nearAndFarUp_prefersNear()
 	{
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (0, 2, 1, 2);
 		Vector2 dest = new Vector2 (0, 4);
@@ -130,7 +130,7 @@ public class WalkerHeuristicTest {
 	[Test]
 	public void EstTotalTime_nearAndFarDown_prefersNear()
 	{
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (0, -1, 1, -1);
 		Vector2 dest = new Vector2 (0, -2);
@@ -142,7 +142,7 @@ public class WalkerHeuristicTest {
 	[Test]
 	public void EstTotalTime_closeEnoughToJumpTo_hasNoPreference()
 	{
-		WalkerHeuristic heuristic = new WalkerHeuristic (wp);
+		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
 		Edge startEdge0 = new Edge (0, 0, 1, 0);
 		Edge startEdge1 = new Edge (2, 0, 3, 0);
 		Vector2 dest = new Vector2 (4, 0);

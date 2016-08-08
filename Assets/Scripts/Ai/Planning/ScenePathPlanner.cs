@@ -30,7 +30,7 @@ public class ScenePathPlanner {
 		Vector2 pos = mAWFacade.GetPosition ();
 		if (mAWFacade.GetEdge () != null) pos.y = mAWFacade.GetEdge ().y0;
 
-		AStarEdgeSearch search = new AStarEdgeSearch (graph, mWp, pos, destPos);
+		AStarRoomSearch search = new AStarRoomSearch (graph, mWp, pos, destPos);
 		List<EdgePath> result;
 		while (search.Step (out result)) ;
 
