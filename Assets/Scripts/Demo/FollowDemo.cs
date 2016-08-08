@@ -10,37 +10,54 @@ public class FollowDemo : MonoBehaviour {
 	public HumanoidInhabitant walker;
 	public GameObject cursor;
 
+	private Ladder[] mLadders;
+
 	void Start () {
 		walker.GetFacade ().SetKeyBindingManager (keybindingManager);
 		walker.RequestEnablePlayerControl (true);
+
+		mLadders = FindObjectsOfType<Ladder> ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-		Collider2D walkerCollider = walker.GetComponent<Collider2D> ();
+		BoxCollider2D walkerCollider = walker.GetComponent<BoxCollider2D> ();
 
 		if (Input.GetMouseButtonDown (0)) {
-			Vector3 movePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+			Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+			Vector2? movePos = null;
 
-			Debug.Log ("clicked at " + movePos.x + ", " + movePos.y);
-
-			RaycastHit2D[] hits = Physics2D.RaycastAll (movePos, Vector2.down);
-			foreach (RaycastHit2D hit in hits) {
-				if (hit.collider != null && hit.collider != walkerCollider) {
-					Vector2 pt = new Vector2 (movePos.x - walker.GetFacade ().GetSize ().x / 2,
-						             hit.collider.transform.position.y);
-					walker.RequestMoveTo ("walk", delegate (out Room room, out Vector2 pos, out float dist) {
-						pos = pt;
-						room = this.room;
-						dist = 0.5f;
-					}, delegate {
-						//				Debug.Log ("reached destination!");
-					});
+			foreach (Ladder ladder in mLadders) {
+				Bounds bounds = ladder.GetComponent<BoxCollider2D> ().bounds;
+				if (bounds.Contains ((Vector2) mousePos)) {
+					float tx = Mathf.Min (mousePos.x, bounds.max.x - walkerCollider.size.x);
+					movePos = new Vector2? (new Vector2 (tx, mousePos.y));
 					break;
 				}
 			}
-			cursor.transform.position = new Vector3 (movePos.x, movePos.y, 0);
+
+			if (!movePos.HasValue) {
+				RaycastHit2D[] hits = Physics2D.RaycastAll (mousePos, Vector2.down);
+				foreach (RaycastHit2D hit in hits) {
+					if (hit.collider != null && hit.collider != walkerCollider) {
+						movePos = new Vector2? (new Vector2 (mousePos.x - walker.GetFacade ().GetSize ().x / 2,
+							hit.collider.transform.position.y));
+						break;
+					}
+				}
+			}
+
+			if (movePos.HasValue) {
+				walker.RequestMoveTo ("walk", delegate (out Room room, out Vector2 pos, out float dist) {
+					pos = movePos.Value;
+					room = this.room;
+					dist = 0.5f;
+				}, delegate {
+					//				Debug.Log ("reached destination!");
+				});
+			}
+			cursor.transform.position = new Vector3 (mousePos.x, mousePos.y, 0);
 		};
 	}
 

@@ -33,6 +33,10 @@ public class SortedEdgeCollidable {
 		}
 	}
 
+	public void Reset () {
+		mCurrentEdge = null;
+	}
+
 	public SortedEdge GetCurrentEdge() {
 		return mCurrentEdge;
 	}

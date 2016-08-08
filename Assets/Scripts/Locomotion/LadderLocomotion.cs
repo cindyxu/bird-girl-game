@@ -60,11 +60,11 @@ public class LadderLocomotion : Locomotion {
 	}
 
 	public override void HandleTriggerStay2D(Collider2D other) {
-		if (other == mCurrentLadder.bottomCollider && mInputCatcher.GetDown()) {
+		if (other == mCurrentLadder.bottomCollider && mInputCatcher.GetDown ()) {
 			onLadderEndReached (-1);
 		}
 
-		else if (other == mCurrentLadder.topCollider && mInputCatcher.GetUp()) {
+		else if (other == mCurrentLadder.topCollider && mInputCatcher.GetUp ()) {
 			OnClimbToTop ();
 		}
 	}

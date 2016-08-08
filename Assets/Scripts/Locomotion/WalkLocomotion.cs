@@ -113,5 +113,10 @@ public class WalkLocomotion : Locomotion {
 	void OnSortedEdgeChanged (SortedEdge sortedEdge) {
 		if (onGrounded != null) onGrounded (sortedEdge);
 	}
+
+	public override void Disable() {
+		mSortedEdgeCollidable.Reset ();
+	}
+
 }
 

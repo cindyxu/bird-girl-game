@@ -37,12 +37,11 @@ public class RoomPathPlanner {
 		mWp = wp;
 		mChain = chain;
 		mAWFacade = aWFacade;
-
-		initializePilot ();
 	}
 
 	public void StartObserving () {
 		mAWFacade.onGrounded += OnGrounded;
+		initializePilot ();
 	}
 
 	public void StopObserving () {
@@ -99,7 +98,7 @@ public class RoomPathPlanner {
 			if (edge == currPath.GetEndEdge ()) {
 				Log.logger.Log (Log.AI_PLAN, "now at " + mPathIdx + " / " + mChain.Count);
 				mPathIdx++;
-				mWalkPilot = resolveWalkPlanner ();
+				mWalkPilot = createWalkPilot ();
 			} else {
 				mWalkPilot = null;
 				mStatus = Status.FAILED;
@@ -110,13 +109,15 @@ public class RoomPathPlanner {
 	}
 
 	private void initializePilot () {
-
 		// if we're on a ladder now ...
 		if (mAWFacade.GetLadder ().HasValue) {
+			EdgePath currPath = mChain [mPathIdx];
+			Log.logger.Log (Log.AI_PLAN, "climbing it " + currPath.GetEndEdge ());
 			mLadderPilot = createLadderPilot ();
 
 		} else {
-			mWalkPilot = resolveWalkPlanner ();
+			Log.logger.Log (Log.AI_PLAN, "walking it");
+			mWalkPilot = createWalkPilot ();
 		}
 	}
 
@@ -185,7 +186,7 @@ public class RoomPathPlanner {
 		}
 	}
 
-	private WalkPilot resolveWalkPlanner () {
+	private WalkPilot createWalkPilot () {
 		Vector2 pos = mAWFacade.GetPosition ();
 		if (mPathIdx < mChain.Count) {
 			EdgePath nextPath = mChain [mPathIdx];
@@ -199,6 +200,8 @@ public class RoomPathPlanner {
 		}
 	}
 
+	// while traversing this path,
+	// we want to try getting as close to the next path as possible.
 	private void getAnticipatedTargetRange (out float xlt, out float xrt) {
 		if (mPathIdx + 1 < mChain.Count) {
 			mChain [mPathIdx + 1].GetStartRange (out xlt, out xrt);

@@ -40,7 +40,6 @@ public class InputCatcher {
 	}
 
 	public void OnUpPress() {
-		Debug.Log ("up");
 		mUpPress = mUp = true;
 	}
 
