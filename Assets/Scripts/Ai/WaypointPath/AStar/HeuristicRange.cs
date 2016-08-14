@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class EdgeHeuristicRange<T> where T : IComparable {
+public class HeuristicRange<T> where T : IComparable {
 
 	public interface IRankable {
 		float getRank ();
@@ -26,7 +26,7 @@ public class EdgeHeuristicRange<T> where T : IComparable {
 	private readonly List<Range> mBestHeuristics = 
 		new List<Range> ();
 
-	public EdgeHeuristicRange (float r) {
+	public HeuristicRange (float r) {
 		mBestHeuristics.Add (new Range (0, r, default (T), false));
 	}
 

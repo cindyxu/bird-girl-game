@@ -26,14 +26,13 @@ public class JumpPilot {
 			mScanAreas.Insert (0, scanArea);
 			scanArea = scanArea.parent;
 		}
-
-		updateScanIdx (wp.jumpSpd, x, mJumpPath.GetStartEdge ().y0);
+		updateScanIdx (wp.jumpSpd, x, mJumpPath.GetStartPoint ().GetRect ().y);
 	}
 
 	public void OnUpdate (float x, float y, float vy) {
 		updateScanIdx (vy, x, y);
 
-		if (mJumpPath.IsDropPath () && y > mJumpPath.GetStartEdge ().y0 - 0.1f) {
+		if (mJumpPath.IsDropPath () && y > mJumpPath.GetStartPoint ().GetRect ().y - 0.1f) {
 			mDir = 0;
 		} else {
 			if (mTDir < 0) {

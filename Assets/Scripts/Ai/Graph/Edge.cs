@@ -1,21 +1,14 @@
 ﻿using System;
 using UnityEngine;
 
-public class Edge {
+public class Edge : IWaypoint {
 
-	public static int SortByLeftAsc(Edge edge1, Edge edge2) {
-		return edge1.left.CompareTo (edge2.left);
-	}
-
-	public static int SortByBottomAsc(Edge edge1, Edge edge2) {
-		return edge1.bottom.CompareTo (edge2.bottom);
-	}
-
-	public Edge (float x0, float y0, float x1, float y1) {
+	public Edge (float x0, float y0, float x1, float y1, RoomGraph room = null) {
 		this.x0 = x0;
 		this.x1 = x1;
 		this.y0 = y0;
 		this.y1 = y1;
+		this.room = room;
 
 		if (Mathf.Abs (y0 - y1) > Mathf.Abs (x0 - x1)) isVert = true;
 		else isHorz = true;
@@ -29,6 +22,14 @@ public class Edge {
 		right = Mathf.Max (this.x0, this.x1);
 		bottom = Mathf.Min (this.y0, this.y1);
 		top = Mathf.Max (this.y0, this.y1);
+	}
+
+	public Rect GetRect () {
+		return new Rect (left, bottom, right - left, top - bottom);
+	}
+
+	public RoomGraph GetRoom () {
+		return room;
 	}
 
 	public void SplitVert(float x, out Edge e0, out Edge e1) {
@@ -56,19 +57,28 @@ public class Edge {
 		return "Edge: " + x0 + ", " + y0 + ", " + x1 + ", " + y1;
 	}
 
-	public float x0;
-	public float x1;
-	public float y0;
-	public float y1;
-	public bool isHorz;
-	public bool isVert;
-	public bool isLeft;
-	public bool isRight;
-	public bool isDown;
-	public bool isUp;
-	public float bottom;
-	public float left;
-	public float right;
-	public float top;
+	public static int SortByLeftAsc(Edge edge1, Edge edge2) {
+		return edge1.left.CompareTo (edge2.left);
+	}
+
+	public static int SortByBottomAsc(Edge edge1, Edge edge2) {
+		return edge1.bottom.CompareTo (edge2.bottom);
+	}
+
+	public readonly float x0;
+	public readonly float x1;
+	public readonly float y0;
+	public readonly float y1;
+	public readonly bool isHorz;
+	public readonly bool isVert;
+	public readonly bool isLeft;
+	public readonly bool isRight;
+	public readonly bool isDown;
+	public readonly bool isUp;
+	public readonly float bottom;
+	public readonly float left;
+	public readonly float right;
+	public readonly float top;
+	public RoomGraph room;
 }
 

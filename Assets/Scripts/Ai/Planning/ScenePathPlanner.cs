@@ -21,24 +21,39 @@ public class ScenePathPlanner {
 	private void initializePath () {
 
 		// pretend we're in the right room for now
-		Vector2 destPos;
 		Room destRoom;
+		Vector2 destPos;
 		float minDist;
 		mGetDest (out destRoom, out destPos, out minDist);
 
 		RoomGraph graph = mAWFacade.GetRoomGraph ();
+
+		IWaypoint startPoint = null;
 		Vector2 pos = mAWFacade.GetPosition ();
-		if (mAWFacade.GetEdge () != null) pos.y = mAWFacade.GetEdge ().y0;
+		if (mAWFacade.GetLadder () != null) startPoint = mAWFacade.GetLadder ();
+		else if (mAWFacade.GetEdge () != null) {
+			startPoint = mAWFacade.GetEdge ();
+			pos.y = mAWFacade.GetEdge ().y0;
+		}
+		Range startRange = new Range (pos.x, pos.x + mWp.size.x, pos.y);
 
-		AStarRoomSearch search = new AStarRoomSearch (graph, mWp, pos, destPos);
-		List<EdgePath> result;
-		while (search.Step (out result)) ;
+		IWaypoint destPoint = graph.GetLadder (destPos);
+		if (destPoint == null) {
+			destPoint = EdgeUtil.FindUnderEdge (graph.edges, destPos.x, destPos.x + mWp.size.x, destPos.y);
+			if (destPoint != null) destPos.y = destPoint.GetRect ().y;
+		}
+		Range destRange = new Range (destPos.x, destPos.x + mWp.size.x, destPos.y);
 
-		if (result != null) {
-			setRoomPathPlanner (new RoomPathPlanner (mWp, result, destPos.x - minDist, 
-				destPos.x + mWp.size.x + minDist, destPos.y, mAWFacade));
+		if (startPoint != null && destPoint != null) {
+			AStarSearch search = new AStarSearch (graph, mWp, startPoint, startRange, destPoint, destRange);
+			List<WaypointPath> result;
+			while (search.Step (out result)) ;
+
+			if (result != null) {
+				setRoomPathPlanner (new RoomPathPlanner (mWp, result, destPos.x - minDist, 
+					destPos.x + mWp.size.x + minDist, destPos.y, mAWFacade));
+			} else setRoomPathPlanner (null);
 		} else setRoomPathPlanner (null);
-
 	}
 
 	public void OnUpdate () {

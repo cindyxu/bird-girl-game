@@ -8,98 +8,36 @@ public class WalkerHeuristicTest {
 	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, 10, -50, -100);
 
 	[Test]
-	public void GetStartNodes_grounded_returnsEdgeNode () {
-		Edge startEdge = new Edge (0, 0, 1, 0);
-		List<Edge> edges = new List<Edge> { startEdge };
-		Vector2 pos = new Vector2 (0, 0);
-
-		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		RoomGraph graph = new RoomGraph (wp, edges);
-
-		List<EdgeNode> nodes = heuristic.GetStartNodes (graph, pos);
-
-		Assert.AreEqual (1, nodes.Count);
-		Assert.AreEqual (startEdge, nodes [0].edge);
-	}
-
-	[Test]
-	public void GetStartNodes_notGrounded_returnsEmpty () {
-		Edge startEdge = new Edge (0, 0, 1, 0);
-		List<Edge> edges = new List<Edge> { startEdge };
-		Vector2 pos = new Vector2 (-1, 0);
-
-		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		RoomGraph graph = new RoomGraph (wp, edges);
-
-		List<EdgeNode> nodes = heuristic.GetStartNodes (graph, pos);
-
-		Assert.IsEmpty (nodes);
-	}
-
-	[Test]
-	public void GetStartNodes_onLadder_returnsTwoEdgeNodes () {
-		Edge topEdge = new Edge (0, 0, 1, 0);
-		Edge bottomEdge = new Edge (0, -2, 1, -2);
-		Rect ladder = new Rect (0, -2, 1, 2);
-
-		List<Edge> edges = new List<Edge> { topEdge, bottomEdge };
-		List<Rect> ladders = new List<Rect> { ladder };
-
-		Vector2 pos = new Vector2 (0, -1);
-
-		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-
-		List<EdgeNode> nodes = heuristic.GetStartNodes (graph, pos);
-
-		Assert.AreEqual (2, nodes.Count);
-		if (nodes[0].edge.Equals (bottomEdge)) {
-			Assert.AreEqual (nodes[0].edgePath.GetStartEdge (), topEdge);
-			Assert.AreEqual (nodes[0].edgePath.GetEndEdge (), bottomEdge);
-			Assert.AreEqual (nodes[1].edge, topEdge);
-			Assert.AreEqual (nodes[1].edgePath.GetStartEdge (), bottomEdge);
-			Assert.AreEqual (nodes[1].edgePath.GetEndEdge (), topEdge);
-		} else {
-			Assert.AreEqual (nodes[0].edge, topEdge);
-			Assert.AreEqual (nodes[0].edgePath.GetStartEdge (), bottomEdge);
-			Assert.AreEqual (nodes[0].edgePath.GetEndEdge (), topEdge);
-			Assert.AreEqual (nodes[1].edge, bottomEdge);
-			Assert.AreEqual (nodes[1].edgePath.GetStartEdge (), topEdge);
-			Assert.AreEqual (nodes[1].edgePath.GetEndEdge (), bottomEdge);
-		}
-	}
-
-	[Test]
-	public void GetWalkTime_goalToRight_getsCorrectWalkTime()
+	public void GetTravelTime_goalToRight_getsCorrectWalkTime()
 	{
 		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		Assert.AreEqual (1f / wp.walkSpd, heuristic.GetWalkTime (0, 1, 2, 3));
+		Assert.AreEqual (2f / wp.walkSpd, heuristic.GetTravelTime (new Range (0, 1, 0), new Range (2, 3, 0)));
 	}
 
 	[Test]
-	public void GetWalkTime_goalToLeft_getsCorrectWalkTime()
+	public void GetTravelTime_goalToLeft_getsCorrectWalkTime()
 	{
 		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		Assert.AreEqual (1f / wp.walkSpd, heuristic.GetWalkTime (0, 1, -2, -1));
+		Assert.AreEqual (2f / wp.walkSpd, heuristic.GetTravelTime (new Range (0, 1, 0), new Range (-2, -1, 0)));
 	}
 
 	[Test]
-	public void GetWalkTime_goalOverlaps_getsNoWalkTime()
+	public void GetTravelTime_goalOverlaps_getsNoWalkTime()
 	{
 		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		Assert.AreEqual (0, heuristic.GetWalkTime (0, 1, 0.5f, 1.5f));
+		Assert.AreEqual (0, heuristic.GetTravelTime (new Range (0, 1, 0), new Range (0f, 1.5f, 0)));
 	}
 
 	[Test]
 	public void EstTotalTime_nearAndFarRight_prefersNear()
 	{
 		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		Edge startEdge0 = new Edge (0, 0, 1, 0);
-		Edge startEdge1 = new Edge (3, 0, 4, 0);
-		Vector2 dest = new Vector2 (6, 0);
+		Range startRange0 = new Range (0, 1, 0);
+		Range startRange1 = new Range (3, 4, 0);
+		Range destRange = new Range (6, 7, 0);
 
-		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, dest);
-		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, dest);
+		float est0 = heuristic.EstRemainingTime (startRange0, destRange);
+		float est1 = heuristic.EstRemainingTime (startRange1, destRange);
 		Assert.Less (est1, est0);
 	}
 
@@ -107,11 +45,11 @@ public class WalkerHeuristicTest {
 	public void EstTotalTime_nearAndFarLeft_prefersNear()
 	{
 		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		Edge startEdge0 = new Edge (0, 0, 1, 0);
-		Edge startEdge1 = new Edge (-3, 0, -2, 0);
-		Vector2 dest = new Vector2 (-6, 0);
-		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, dest);
-		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, dest);
+		Range startRange0 = new Range (0, 1, 0);
+		Range startRange1 = new Range (-3, -2, 0);
+		Range destRange = new Range (-6, -5, 0);
+		float est0 = heuristic.EstRemainingTime (startRange0, destRange);
+		float est1 = heuristic.EstRemainingTime (startRange1, destRange);
 		Assert.Less (est1, est0);
 	}
 
@@ -119,11 +57,11 @@ public class WalkerHeuristicTest {
 	public void EstTotalTime_nearAndFarUp_prefersNear()
 	{
 		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		Edge startEdge0 = new Edge (0, 0, 1, 0);
-		Edge startEdge1 = new Edge (0, 2, 1, 2);
-		Vector2 dest = new Vector2 (0, 4);
-		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, dest);
-		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, dest);
+		Range startRange0 = new Range (0, 1, 0);
+		Range startRange1 = new Range (0, 1, 2);
+		Range destRange = new Range (0, 1, 4);
+		float est0 = heuristic.EstRemainingTime (startRange0, destRange);
+		float est1 = heuristic.EstRemainingTime (startRange1, destRange);
 		Assert.Less (est1, est0);
 	}
 
@@ -131,11 +69,11 @@ public class WalkerHeuristicTest {
 	public void EstTotalTime_nearAndFarDown_prefersNear()
 	{
 		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		Edge startEdge0 = new Edge (0, 0, 1, 0);
-		Edge startEdge1 = new Edge (0, -1, 1, -1);
-		Vector2 dest = new Vector2 (0, -2);
-		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, dest);
-		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, dest);
+		Range startRange0 = new Range (0, 1, 0);
+		Range startRange1 = new Range (0, 1, -1);
+		Range destRange = new Range (0, 1, -2);
+		float est0 = heuristic.EstRemainingTime (startRange0, destRange);
+		float est1 = heuristic.EstRemainingTime (startRange1, destRange);
 		Assert.Less (est1, est0);
 	}
 
@@ -143,11 +81,11 @@ public class WalkerHeuristicTest {
 	public void EstTotalTime_closeEnoughToJumpTo_hasNoPreference()
 	{
 		AStarHumanoidEvaluator heuristic = new AStarHumanoidEvaluator (wp);
-		Edge startEdge0 = new Edge (0, 0, 1, 0);
-		Edge startEdge1 = new Edge (2, 0, 3, 0);
-		Vector2 dest = new Vector2 (4, 0);
-		float est0 = heuristic.EstRemainingTime (startEdge0, startEdge0.left, startEdge0.right, dest);
-		float est1 = heuristic.EstRemainingTime (startEdge1, startEdge1.left, startEdge1.right, dest);
+		Range startRange0 = new Range (0, 1, 0);
+		Range startRange1 = new Range (1.5f, 2.5f, 0);
+		Range destRange = new Range (3, 4, 0);
+		float est0 = heuristic.EstRemainingTime (startRange0, destRange);
+		float est1 = heuristic.EstRemainingTime (startRange1, destRange);
 		Assert.AreEqual (est0, est1);
 	}
 }

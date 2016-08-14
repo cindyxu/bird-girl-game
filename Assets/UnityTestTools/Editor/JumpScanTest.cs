@@ -19,7 +19,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.AreEqual (result [0].GetEndEdge (), endEdge);
+		Assert.AreEqual (result [0].GetEndPoint (), endEdge);
 	}
 
 	[Test]
@@ -34,7 +34,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.IsNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == startEdge));
+		Assert.IsNull (result.Find ((JumpPath obj) => obj.GetEndPoint () == startEdge));
 	}
 
 	[Test]
@@ -49,7 +49,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.AreEqual (result [0].GetEndEdge (), endEdge);
+		Assert.AreEqual (result [0].GetEndPoint (), endEdge);
 	}
 
 	[Test]
@@ -66,8 +66,8 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge1));
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge2));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndPoint () == endEdge1));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndPoint () == endEdge2));
 	}
 
 	[Test]
@@ -82,7 +82,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.IsNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge));
+		Assert.IsNull (result.Find ((JumpPath obj) => obj.GetEndPoint () == endEdge));
 	}
 
 	[Test]
@@ -97,7 +97,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndPoint () == endEdge));
 	}
 
 	[Test]
@@ -112,7 +112,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndPoint () == endEdge));
 	}
 
 	[Test]
@@ -127,7 +127,7 @@ public class JumpScanTest {
 		JumpScan scan = new JumpScan (wp, startEdge, 0, wp.jumpSpd, edges);
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
-		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndEdge () == endEdge));
+		Assert.NotNull (result.Find ((JumpPath obj) => obj.GetEndPoint () == endEdge));
 	}
 
 	[Test]
@@ -143,8 +143,8 @@ public class JumpScanTest {
 		while (scan.Step ()) ;
 		List<JumpPath> result = scan.GetPaths ();
 		Assert.AreEqual (2, result.Count);
-		Assert.AreEqual (result [0].GetEndEdge (), endEdge);
-		Assert.AreEqual (result [1].GetEndEdge (), endEdge);
+		Assert.AreEqual (result [0].GetEndPoint (), endEdge);
+		Assert.AreEqual (result [1].GetEndPoint (), endEdge);
 	}
 
 	[Test]

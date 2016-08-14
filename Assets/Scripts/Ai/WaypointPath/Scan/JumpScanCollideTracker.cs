@@ -83,7 +83,7 @@ public class JumpScanCollideTracker {
 				}
 			}
 		}
-		Log.logger.Log ("initialized edges: rising: " + mRisingEdges.Count + ", falling: " + mFallingEdges.Count, Log.AI_SCAN);
+		Log.logger.Log (Log.AI_SCAN, "initialized edges: rising: " + mRisingEdges.Count + ", falling: " + mFallingEdges.Count);
 	}
 
 	private void PopulatePts () {
@@ -194,7 +194,7 @@ public class JumpScanCollideTracker {
 		myb = nyb;
 		mDir = (shift > 0 ? 1 : -1);
 
-//		Debug.Log ("shifted window. up: " + mUpWindow.Count + ", down: " + mDownWindow.Count + ", side: " + mSideWindow.Count);
+		Log.logger.Log (Log.AI_SCAN, "shifted window. up: " + mUpWindow.Count + ", down: " + mDownWindow.Count + ", side: " + mSideWindow.Count);
 
 		return shift;
 	}

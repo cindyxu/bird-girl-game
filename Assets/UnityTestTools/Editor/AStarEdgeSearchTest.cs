@@ -17,13 +17,14 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
-		List<EdgePath> result;
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (dest, result [0].GetEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (dest, result [0].GetEndPoint ());
 	}
 
 	[Test]
@@ -38,15 +39,16 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
-		List<EdgePath> result;
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (mid, result [0].GetEndEdge ());
-		Assert.AreEqual (mid, result [1].GetStartEdge ());
-		Assert.AreEqual (dest, result [1].GetEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (mid, result [0].GetEndPoint ());
+		Assert.AreEqual (mid, result [1].GetStartPoint ());
+		Assert.AreEqual (dest, result [1].GetEndPoint ());
 	}
 
 	[Test]
@@ -54,20 +56,21 @@ public class AStarEdgeSearchTest {
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
-		Edge mid = new Edge (1.5f, 0, 2.5f, 0);
-		Edge dest = new Edge (3, 0, 4, 0);
+		Edge mid = new Edge (2, 0, 3, 0);
+		Edge dest = new Edge (4, 0, 5, 0);
 		edges.Add (start);
 		edges.Add (mid);
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
-		List<EdgePath> result;
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (dest, result [0].GetEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (dest, result [0].GetEndPoint ());
 	}
 
 	[Test]
@@ -80,10 +83,11 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
 		Assert.IsNull (result);
@@ -99,14 +103,15 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (dest, result [0].GetEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (dest, result [0].GetEndPoint ());
 	}
 
 	[Test]
@@ -119,14 +124,15 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (dest, result [0].GetEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (dest, result [0].GetEndPoint ());
 	}
 
 	[Test]
@@ -135,41 +141,47 @@ public class AStarEdgeSearchTest {
 		Edge start = new Edge (0, 0, 5, 0);
 		Edge dest = new Edge (0, 5, 5, 5);
 		List<Edge> edges = new List<Edge> { start, dest };
-		Rect ladder = new Rect (0, 0, 1, 5);
-		List<Rect> ladders = new List<Rect> { ladder };
+		LadderModel ladder = new LadderModel (new Rect (0, 0, 1, 5));
+		List<LadderModel> ladders = new List<LadderModel> { ladder };
 
 		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (4, 0), new Vector2 (4, 5));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (1, result.Count);
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (dest, result [0].GetEndEdge ());
+		foreach (WaypointPath path in result) {
+			Debug.Log ("path : " + path.GetStartPoint () + ", " + path.GetStartRange ());
+		}
+
+		Assert.AreEqual (2, result.Count);
 		Assert.IsInstanceOf (typeof (LadderPath), result [0]);
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (dest, result [1].GetEndPoint ());
+		Assert.IsInstanceOf (typeof (LadderPath), result [1]);
 	}
 
 	[Test]
 	public void OnLadder_GoalAbove_returnsChainToEdge()
 	{
-		Edge start = new Edge (0, 0, 5, 0);
+		Edge bottom = new Edge (0, 0, 5, 0);
 		Edge dest = new Edge (0, 5, 5, 5);
-		List<Edge> edges = new List<Edge> { start, dest };
-		Rect ladder = new Rect (0, 0, 1, 5);
-		List<Rect> ladders = new List<Rect> { ladder };
+		List<Edge> edges = new List<Edge> { bottom, dest };
+		LadderModel ladder = new LadderModel (new Rect (0, 0, 1, 5));
+		List<LadderModel> ladders = new List<LadderModel> { ladder };
 
 		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (0, 3), new Vector2 (4, 5));
+		AStarSearch search = new AStarSearch (graph, wp,
+			ladder, new Range (bottom.left, bottom.left + wp.size.x, 1), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
 		Assert.AreEqual (1, result.Count);
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (dest, result [0].GetEndEdge ());
+		Assert.AreEqual (dest, result [0].GetEndPoint ());
 		Assert.IsInstanceOf (typeof (LadderPath), result [0]);
 	}
 
@@ -177,24 +189,26 @@ public class AStarEdgeSearchTest {
 	public void GoalTwoLaddersAbove_returnsChainToEdge()
 	{
 		Edge start = new Edge (0, 0, 1, 0);
-		Edge bottom = new Edge (0, 5, 1, 5);
-		Edge top = new Edge (0, 10, 1, 10);
-		List<Edge> edges = new List<Edge> { start, bottom, top };
-		Rect ladder0 = new Rect (0, 0, 1, 5);
-		Rect ladder1 = new Rect (0, 5, 1, 5);
-		List<Rect> ladders = new List<Rect> { ladder0, ladder1 };
+		Edge mid = new Edge (0, 5, 1, 5);
+		Edge dest = new Edge (0, 10, 1, 10);
+		List<Edge> edges = new List<Edge> { start, mid, dest };
+		LadderModel ladder0 = new LadderModel (new Rect (0, 0, 1, 5));
+		LadderModel ladder1 = new LadderModel (new Rect (0, 5, 1, 5));
+		List<LadderModel> ladders = new List<LadderModel> { ladder0, ladder1 };
 
 		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (0, 0), new Vector2 (0, 8));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (2, result.Count);
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (bottom, result [0].GetEndEdge ());
-		Assert.AreEqual (top, result [1].GetEndEdge ());
+		Assert.AreEqual (4, result.Count);
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (mid, result [1].GetEndPoint ());
+		Assert.AreEqual (mid, result [2].GetStartPoint ());
+		Assert.AreEqual (dest, result [3].GetEndPoint ());
 	}
 
 	[Test]
@@ -209,13 +223,14 @@ public class AStarEdgeSearchTest {
 		edges.Add (right);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		search.Step (out result) ;
-		EdgeNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.edge, dest);
+		WaypointNode bestNode = search.peekQueue ();
+		Assert.AreEqual (bestNode.waypoint, dest);
 	}
 
 	[Test]
@@ -230,13 +245,14 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		search.Step (out result) ;
-		EdgeNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.edge, dest);
+		WaypointNode bestNode = search.peekQueue ();
+		Assert.AreEqual (bestNode.waypoint, dest);
 	}
 
 	[Test]
@@ -251,13 +267,14 @@ public class AStarEdgeSearchTest {
 		edges.Add (down);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		search.Step (out result) ;
-		EdgeNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.edge, dest);
+		WaypointNode bestNode = search.peekQueue ();
+		Assert.AreEqual (bestNode.waypoint, dest);
 	}
 
 	[Test]
@@ -272,13 +289,14 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		search.Step (out result) ;
-		EdgeNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.edge, dest);
+		WaypointNode bestNode = search.peekQueue ();
+		Assert.AreEqual (bestNode.waypoint, dest);
 	}
 
 	[Test]
@@ -310,18 +328,19 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 
 		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarRoomSearch search = new AStarRoomSearch (graph, wp,
-			new Vector2 (start.x0, start.y0), new Vector2 (dest.x0, dest.y0));
+		AStarSearch search = new AStarSearch (graph, wp,
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<EdgePath> result;
+		List<WaypointPath> result;
 		while (search.Step (out result)) ;
 
-		Assert.AreEqual (start, result [0].GetStartEdge ());
-		Assert.AreEqual (short0, result [0].GetEndEdge ());
-		Assert.AreEqual (short0, result [1].GetStartEdge ());
-		Assert.AreEqual (short1, result [1].GetEndEdge ());
-		Assert.AreEqual (short1, result [2].GetStartEdge ());
-		Assert.AreEqual (dest, result [2].GetEndEdge ());
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (short0, result [0].GetEndPoint ());
+		Assert.AreEqual (short0, result [1].GetStartPoint ());
+		Assert.AreEqual (short1, result [1].GetEndPoint ());
+		Assert.AreEqual (short1, result [2].GetStartPoint ());
+		Assert.AreEqual (dest, result [2].GetEndPoint ());
 	}
 
 }

@@ -9,7 +9,7 @@ public interface IAiWalkerFacade {
 
 	Edge GetEdge ();
 
-	Rect? GetLadder ();
+	LadderModel GetLadder ();
 
 	Vector2 GetPosition ();
 

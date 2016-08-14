@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class JumpPath : EdgePath {
+public class JumpPath : WaypointPath {
 
 	private readonly Edge mStartEdge;
 	private readonly Edge mEndEdge;
@@ -23,11 +23,11 @@ public class JumpPath : EdgePath {
 		return mLeafArea;
 	}
 
-	public Edge GetStartEdge () {
+	public IWaypoint GetStartPoint () {
 		return mStartEdge;
 	}
 
-	public Edge GetEndEdge () {
+	public IWaypoint GetEndPoint () {
 		return mEndEdge;
 	}
 
@@ -47,14 +47,12 @@ public class JumpPath : EdgePath {
 		return mLeafArea.root.end.vy == 0;
 	}
 
-	public void GetStartRange (out float xli, out float xri) {
-		xli = mLeafArea.root.end.xl;
-		xri = mLeafArea.root.end.xr;
+	public Range GetStartRange () {
+		return new Range (mLeafArea.root.end.xl, mLeafArea.root.end.xr, mLeafArea.root.end.y);
 	}
 
-	public void GetEndRange (out float xlf, out float xrf) {
-		xlf = mLeafArea.end.xl;
-		xrf = mLeafArea.end.xr;
+	public Range GetEndRange () {
+		return new Range (mLeafArea.end.xl, mLeafArea.end.xr, mLeafArea.end.y);
 	}
 
 	private float evaluatePenaltyMult (WalkerParams wp) {

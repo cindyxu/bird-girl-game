@@ -2,12 +2,12 @@
 using UnityEditor;
 using NUnit.Framework;
 
-public class EdgeHeuristicRangeTest {
+public class HeuristicRangeTest {
 
 	[Test]
-	public void NewEdgeHeuristic_shouldInitializeRangeToInfinity()
+	public void NewHeuristic_shouldInitializeRangeToInfinity()
 	{
-		EdgeHeuristicRange<float> heuristic = new EdgeHeuristicRange<float> (1);
+		HeuristicRange<float> heuristic = new HeuristicRange<float> (1);
 
 		float xl, xr, g;
 		Assert.IsFalse (heuristic.getRangeAtIndex (0, out xl, out xr, out g));
@@ -16,9 +16,9 @@ public class EdgeHeuristicRangeTest {
 	}
 
 	[Test]
-	public void AddEdgeHeuristic_entireRange_shouldUpdateHeuristicForRange()
+	public void AddHeuristic_entireRange_shouldUpdateHeuristicForRange()
 	{
-		EdgeHeuristicRange<float> heuristic = new EdgeHeuristicRange<float> (1);
+		HeuristicRange<float> heuristic = new HeuristicRange<float> (1);
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (0, 1, 1, out writeRange, out newRange);
 		Assert.IsTrue (writeRange && newRange);
@@ -31,9 +31,9 @@ public class EdgeHeuristicRangeTest {
 	}
 
 	[Test]
-	public void AddEdgeHeuristic_leftSideOfRange_shouldSplitRange()
+	public void AddHeuristic_leftSideOfRange_shouldSplitRange()
 	{
-		EdgeHeuristicRange<float> heuristic = new EdgeHeuristicRange<float> (1);
+		HeuristicRange<float> heuristic = new HeuristicRange<float> (1);
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (0, 0.5f, 1, out writeRange, out newRange);
 		Assert.IsTrue (writeRange && newRange);
@@ -50,9 +50,9 @@ public class EdgeHeuristicRangeTest {
 	}
 
 	[Test]
-	public void AddEdgeHeuristic_rightSideOfRange_shouldSplitRange()
+	public void AddHeuristic_rightSideOfRange_shouldSplitRange()
 	{
-		EdgeHeuristicRange<float> heuristic = new EdgeHeuristicRange<float> (1);
+		HeuristicRange<float> heuristic = new HeuristicRange<float> (1);
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (0.5f, 1, 1, out writeRange, out newRange);
 		Assert.IsTrue (writeRange && newRange);
@@ -69,9 +69,9 @@ public class EdgeHeuristicRangeTest {
 	}
 
 	[Test]
-	public void AddEdgeHeuristic_strictSubRange_shouldSplitRange()
+	public void AddHeuristic_strictSubRange_shouldSplitRange()
 	{
-		EdgeHeuristicRange<float> heuristic = new EdgeHeuristicRange<float> (1);
+		HeuristicRange<float> heuristic = new HeuristicRange<float> (1);
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (0.1f, 0.9f, 1, out writeRange, out newRange);
 		Assert.IsTrue (writeRange && newRange);
@@ -92,9 +92,9 @@ public class EdgeHeuristicRangeTest {
 	}
 
 	[Test]
-	public void AddEdgeHeuristic_betweenRanges_shouldMergeRanges()
+	public void AddHeuristic_betweenRanges_shouldMergeRanges()
 	{
-		EdgeHeuristicRange<float> heuristic = new EdgeHeuristicRange<float> (1);
+		HeuristicRange<float> heuristic = new HeuristicRange<float> (1);
 
 		heuristic.addTentativeHeuristic (0, 0.5f, 2);
 		heuristic.addTentativeHeuristic (0.5f, 1, 2);
@@ -121,9 +121,9 @@ public class EdgeHeuristicRangeTest {
 	}
 
 	[Test]
-	public void AddEdgeHeuristic_entireRange_heuristicWorse_shouldNotAddRange()
+	public void AddHeuristic_entireRange_heuristicWorse_shouldNotAddRange()
 	{
-		EdgeHeuristicRange<float> heuristic = new EdgeHeuristicRange<float> (1);
+		HeuristicRange<float> heuristic = new HeuristicRange<float> (1);
 
 		heuristic.addTentativeHeuristic (0, 0.5f, 1);
 		bool writeRange, newRange;
@@ -132,9 +132,9 @@ public class EdgeHeuristicRangeTest {
 	}
 
 	[Test]
-	public void AddEdgeHeuristic_overlapRange_heuristicWorse_shouldAddSubRange()
+	public void AddHeuristic_overlapRange_heuristicWorse_shouldAddSubRange()
 	{
-		EdgeHeuristicRange<float> heuristic = new EdgeHeuristicRange<float> (1);
+		HeuristicRange<float> heuristic = new HeuristicRange<float> (1);
 
 		heuristic.addTentativeHeuristic (0, 0.5f, 1);
 		bool writeRange, newRange;

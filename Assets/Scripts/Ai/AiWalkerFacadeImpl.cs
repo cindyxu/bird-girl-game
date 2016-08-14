@@ -11,7 +11,7 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 
 	private RoomGraph mRoomGraph;
 
-	private Rect? mLadder;
+	private LadderModel mLadder;
 	private Edge mEdge;
 
 	private InhabitantFacade mFacade;
@@ -32,7 +32,7 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 		return mEdge;
 	}
 
-	public Rect? GetLadder () {
+	public LadderModel GetLadder () {
 		return mLadder;
 	}
 
