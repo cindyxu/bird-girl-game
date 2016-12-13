@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Collections.Generic;
 using NodeCanvas.Framework;
 using ParadoxNotion;
 using ParadoxNotion.Design;
@@ -7,9 +8,7 @@ using UnityEngine;
 
 namespace NodeCanvas.StateMachines{
 
-	/// <summary>
 	/// Use FSMs to create state like behaviours
-	/// </summary>
 	[GraphInfo(
 		packageName = "NodeCanvas",
 		docsURL = "http://nodecanvas.paradoxnotion.com/documentation/",
@@ -18,7 +17,11 @@ namespace NodeCanvas.StateMachines{
 		)]
 	public class FSM : Graph{
 
-		private IUpdatable[] updatableNodes;
+		private bool hasInitialized;
+
+		private List<IUpdatable> updatableNodes;
+		private List<AnyState> anyStates;
+		private List<ConcurrentState> concurentStates;
 
 		private event System.Action<IState> CallbackEnter;
 		private event System.Action<IState> CallbackStay;
@@ -46,21 +49,52 @@ namespace NodeCanvas.StateMachines{
 
 		protected override void OnGraphStarted(){
 
-			GatherDelegates();
+			if (!hasInitialized){
+				
+				hasInitialized = true;
 
-			//collect AnyStates and ConcurentStates
-			updatableNodes = allNodes.OfType<IUpdatable>().ToArray();
-			//enable AnyStates
-			foreach(var anyState in allNodes.OfType<AnyState>()){
-				anyState.Execute(agent, blackboard);
-			}
-			//enable ConcurentStates
-			foreach(var conc in allNodes.OfType<ConcurrentState>()){
-				conc.Execute(agent, blackboard);
+				GatherDelegates();
+				
+				updatableNodes  = new List<IUpdatable>();
+				anyStates       = new List<AnyState>();
+				concurentStates = new List<ConcurrentState>();
+
+				for (var i = 0; i < allNodes.Count; i++){
+					var node = allNodes[i];
+					if (node is IUpdatable){
+						updatableNodes.Add((IUpdatable)node);
+					}
+					if (node is AnyState){
+						anyStates.Add((AnyState)node);
+						(node as AnyState).Execute(agent, blackboard);
+					}
+					if (node is ConcurrentState){
+						concurentStates.Add((ConcurrentState)node);
+						(node as ConcurrentState).Execute(agent, blackboard);
+					}
+				}
+			
+			} else {
+
+				//Trigger AnyStates
+				for (var i = 0; i < anyStates.Count; i++){
+					anyStates[i].Execute(agent, blackboard);
+				}
+
+				//Trigger ConcurrentStates
+				for (var i = 0; i < concurentStates.Count; i++){
+					concurentStates[i].Execute(agent, blackboard);
+				}
+
 			}
 
-			//enter the last or start state
+			//enter the last or "start" state
 			EnterState(previousState == null? (FSMState)primeNode : previousState);
+		}
+
+		protected override void OnGraphUnpaused(){
+			//enter the last or "start" state
+			EnterState(previousState == null? (FSMState)primeNode : previousState);			
 		}
 
 		protected override void OnGraphUpdate(){
@@ -73,13 +107,16 @@ namespace NodeCanvas.StateMachines{
 
 			//do this first. This automaticaly stops the graph if the current state is finished and has no transitions
 			if (currentState.status != Status.Running && currentState.outConnections.Count == 0){
-				Stop(true);
-				return;
+				if ( updatableNodes == null || updatableNodes.Count == 0 || !updatableNodes.Any(n => n is AnyState) ){
+					Stop(true);
+					return;
+				}
 			}
 
 			//Update AnyStates and ConcurentStates
-			for (var i = 0; i < updatableNodes.Length; i++)
+			for (var i = 0; i < updatableNodes.Count; i++){
 				updatableNodes[i].Update();
+			}
 
 			//Update current state
 			currentState.Update();
@@ -130,8 +167,9 @@ namespace NodeCanvas.StateMachines{
 				currentState.Reset();
 
 				#if UNITY_EDITOR //Done for visualizing in editor
-				for (var i = 0; i < currentState.inConnections.Count; i++)
-					currentState.inConnections[i].connectionStatus = Status.Resting;
+				for (var i = 0; i < currentState.inConnections.Count; i++){
+					currentState.inConnections[i].status = Status.Resting;
+				}
 				#endif
 			}
 
@@ -172,12 +210,13 @@ namespace NodeCanvas.StateMachines{
 		//Gather and creates delegates from MonoBehaviours on agents that implement required methods
 		void GatherDelegates(){
 
-			foreach (var _mono in agent.gameObject.GetComponents<MonoBehaviour>()){
-                
-				var mono = _mono;
-				var enterMethod = mono.GetType().RTGetMethod("OnStateEnter");
-				var stayMethod = mono.GetType().RTGetMethod("OnStateUpdate");
-				var exitMethod = mono.GetType().RTGetMethod("OnStateExit");
+			var monos = agent.gameObject.GetComponents<MonoBehaviour>();
+			for (var i = 0; i < monos.Length; i++){
+				var mono = monos[i];
+				var args = new System.Type[]{typeof(IState)};
+				var enterMethod = mono.GetType().RTGetMethod("OnStateEnter", args);
+				var stayMethod = mono.GetType().RTGetMethod("OnStateUpdate", args);
+				var exitMethod = mono.GetType().RTGetMethod("OnStateExit", args);
 
 				if (enterMethod != null){
 					try { CallbackEnter += enterMethod.RTCreateDelegate<System.Action<IState>>(mono); } //JIT
@@ -201,13 +240,13 @@ namespace NodeCanvas.StateMachines{
 		////////////////////////////////////////
 		#if UNITY_EDITOR
 		
-		[UnityEditor.MenuItem("Tools/ParadoxNotion/NodeCanvas/Create/State Machine", false, 0)]
+		[UnityEditor.MenuItem("Tools/ParadoxNotion/NodeCanvas/Create/State Machine Asset", false, 0)]
 		public static void Editor_CreateGraph(){
 			var newGraph = EditorUtils.CreateAsset<FSM>(true);
 			UnityEditor.Selection.activeObject = newGraph;
 		}
 
-		[UnityEditor.MenuItem("Assets/Create/ParadoxNotion/NodeCanvas/State Machine")]
+		[UnityEditor.MenuItem("Assets/Create/ParadoxNotion/NodeCanvas/State Machine Asset")]
 		public static void Editor_CreateGraphFix(){
 			var path = EditorUtils.GetAssetUniquePath("FSM.asset");
 			var newGraph = EditorUtils.CreateAsset<FSM>(path);

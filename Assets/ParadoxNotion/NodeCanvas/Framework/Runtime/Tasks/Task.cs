@@ -3,24 +3,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using NodeCanvas.Framework.Internal;
 using ParadoxNotion;
 using ParadoxNotion.Design;
 using ParadoxNotion.Serialization;
-using ParadoxNotion.Serialization.FullSerializer;
 using ParadoxNotion.Services;
 using UnityEngine;
 
 
 namespace NodeCanvas.Framework{
 
-	///The base class for all Actions and Conditions. You dont actually use or derive this class. Instead derive from ActionTask and ConditionTask
-
-	#if UNITY_EDITOR //handles missing Tasks
-	[fsObject(Processor = typeof(fsTaskProcessor))]
-	#endif
+	///*RECOVERY PROCESSOR IS INSTEAD APPLIED RESPECTIVELY IN ACTIONTASK - CONDITIONTASK*
 
     [Serializable] [SpoofAOT]
+	///The base class for all Actions and Conditions. You dont actually use or derive this class. Instead derive from ActionTask and ConditionTask
 	abstract public partial class Task {
 
 
@@ -44,7 +39,8 @@ namespace NodeCanvas.Framework{
 			}
 		}
 
-		///If the field is deriving Component then it will be retrieved from the agent. The field is also considered Required for correct initialization
+		///If the field type this attribute is used, derives Component then it will be retrieved from the agent.
+		///The field is also considered Required for correct initialization.
 		[AttributeUsage(AttributeTargets.Field)]
 		protected class GetFromAgentAttribute : Attribute{}
 
@@ -117,6 +113,7 @@ namespace NodeCanvas.Framework{
 
 
 		///Create a new Task of type assigned to the target ITaskSystem
+		public static T Create<T>(ITaskSystem newOwnerSystem) where T:Task { return (T)Create(typeof(T), newOwnerSystem); }
 		public static Task Create(Type type, ITaskSystem newOwnerSystem){
 			
 			var newTask = (Task)Activator.CreateInstance(type);
@@ -167,7 +164,7 @@ namespace NodeCanvas.Framework{
 
 			ownerSystem = newOwnerSystem;
 
-			//setting the bb in editor to update bbfields. in runtime, bbfields are updated when the task init.
+			//setting the bb in editor to update bbfields. in build runtime, bbfields are updated when the task init.
 			#if UNITY_EDITOR && CONVENIENCE_OVER_PERFORMANCE
 			blackboard = newOwnerSystem.blackboard;
 			#endif
@@ -180,12 +177,12 @@ namespace NodeCanvas.Framework{
 		}
 
 		///The owner system's assigned agent
-		private Component ownerAgent{
+		public Component ownerAgent{
 			get	{return ownerSystem != null? ownerSystem.agent : null;}
 		}
 
 		///The owner system's assigned blackboard
-		private IBlackboard ownerBlackboard{
+		public IBlackboard ownerBlackboard{
 			get	{return ownerSystem != null? ownerSystem.blackboard : null;}
 		}
 
@@ -299,7 +296,7 @@ namespace NodeCanvas.Framework{
 			}
 		}
 
-		///The name of the blackboard variable selected if the agent is overriden and set to a blackboard variable
+		///The name of the blackboard variable selected if the agent is overriden and set to a blackboard variable or direct assignment.
 		public string overrideAgentParameterName{
 			get{return overrideAgent != null? overrideAgent.name : null;}
 		}
@@ -311,7 +308,15 @@ namespace NodeCanvas.Framework{
 				if (current != null){
 					return current;
 				}
-				return agentIsOverride? ((Component)overrideAgent.value) : (ownerAgent != null && agentType != null? ownerAgent.GetComponent(agentType) : null);
+
+				var result = agentIsOverride? (Component)overrideAgent.value : ownerAgent;
+				if (result != null && agentType != null && !agentType.RTIsAssignableFrom(result.GetType()) ){
+					if ( agentType.RTIsSubclassOf(typeof(Component)) || agentType.RTIsInterface() ){
+						result = result.GetComponent(agentType);
+					}
+				}
+
+				return result;
 			}
 		}
 
@@ -330,6 +335,10 @@ namespace NodeCanvas.Framework{
 				}
 			}
 		}
+
+		///This contains the first warning encountered relevant to task correct execution.
+		///This is mostly used in editor.
+		public string firstWarningMessage{get; private set;}
 
 		//////////
 
@@ -362,25 +371,17 @@ namespace NodeCanvas.Framework{
 			//set blackboard with normal setter first
 			blackboard = newBB;
 
+			/// DIVERGENCE /// MORI /// emilio.saffi /// Xcode was catching EXE_BAD_ACCESS
 			if (agentIsOverride){
-				try
-				{
-					if (current.gameObject == ((Component)overrideAgent.value).gameObject ){
-						return isActive = true;
-					}
-					return isActive = Initialize( (Component)overrideAgent.value, agentType );	
-				}
-				catch { return isActive = Initialize( (Component)overrideAgent.value, agentType ); }
+				newAgent = (Component)overrideAgent.value;
 			}
 
-			try
-			{
-				if (current.gameObject == newAgent.gameObject){
-					return isActive = true;
-				}
-				return isActive = Initialize(newAgent, agentType);
+			if (current != null && newAgent != null && current.gameObject == newAgent.gameObject){
+				return isActive = true;
 			}
-			catch { return isActive = Initialize(newAgent, agentType); }
+
+			return isActive = Initialize(newAgent, agentType);
+			/// DIVERGENCE /// MORI /// emilio.saffi /// Xcode was catching EXE_BAD_ACCESS
 		}
 
 
@@ -391,7 +392,12 @@ namespace NodeCanvas.Framework{
 			UnRegisterAllEvents();
 
 			//"Transform" the agent to the agentType
-			newAgent = (newType != null && newType != typeof(Component) && newAgent != null)? newAgent.GetComponent(newType) : newAgent;
+			if (newAgent != null && agentType != null && !agentType.RTIsAssignableFrom(newAgent.GetType()) ){
+				if ( agentType.RTIsSubclassOf(typeof(Component)) || agentType.RTIsInterface() ){
+					newAgent = newAgent.GetComponent(agentType);
+				}
+			}
+
 
 			//Set as current even if null
 			current = newAgent;
@@ -512,15 +518,20 @@ namespace NodeCanvas.Framework{
 
 
 
-		//Gather errors for user convernience. Basicaly used in the editor, but could be used in runtime as well.
-		public string GetError(){
+		//Gather warnings for user convernience. Basicaly used in the editor, but could be used in runtime as well.
+		public string GetWarning(){
+			firstWarningMessage = Internal_GetWarning();
+			return firstWarningMessage;
+		}
+
+		string Internal_GetWarning(){
 
 			if (obsolete != string.Empty){
-				return ( (string.Format("The Task is obsolete '{0}': <b>'{1}'</b>", name, obsolete)) );
+				return string.Format("Task is obsolete: '{0}'.", obsolete);
 			}
 
 			if (agent == null && agentType != null){
-				return ("Null Agent, but the task requires one");
+				return string.Format("'{0}' target is currently null.", agentType.Name);
 			}
 
 			var fields = this.GetType().RTGetFields();
@@ -529,17 +540,17 @@ namespace NodeCanvas.Framework{
 				if (field.RTGetAttribute<RequiredFieldAttribute>(true) != null){
 					var value = field.GetValue(this);
 					if (value == null || value.Equals(null)){
-						return ("Required field in task is null");
+						return string.Format("Required field '{0}' is currently null.", field.Name.SplitCamelCase());
 					}
 					if (field.FieldType == typeof(string) && string.IsNullOrEmpty( (string)value )){
-						return ("Required string field in task is empty");
+						return string.Format("Required string field '{0}' is currently null or empty.", field.Name.SplitCamelCase());
 					}
 					if (typeof(BBParameter).RTIsAssignableFrom(field.FieldType)){
 						var bbParam = value as BBParameter;
 						if (bbParam == null){
-							return ("Null BBParameter Object!"); //this should never happen, but it did.
+							return string.Format("BBParameter '{0}' is null.", field.Name.SplitCamelCase());
 						} else if (bbParam.isNull){
-							return ("Required BBParameter field in task resolves to null");
+							return string.Format("Required parameter '{0}' is currently null.", field.Name.SplitCamelCase());
 						}
 					}
 				}

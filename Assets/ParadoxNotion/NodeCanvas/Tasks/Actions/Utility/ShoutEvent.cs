@@ -28,14 +28,8 @@ namespace NodeCanvas.Tasks.Actions{
 		}
 
 		protected override void OnUpdate(){
-			
-			if (elapsedTime >= completionTime.value){
-				EndAction();
-				return;
-			}
 
 			traveledDistance = Mathf.Lerp(0, shoutRange.value, elapsedTime/completionTime.value );
-
 			foreach (var owner in owners){
 				var distance = (agent.position - owner.transform.position).magnitude;
 				if ( distance <= traveledDistance && !receivedOwners.Contains(owner) ){
@@ -43,12 +37,17 @@ namespace NodeCanvas.Tasks.Actions{
 					receivedOwners.Add(owner);
 				}
 			}
+
+			if (elapsedTime >= completionTime.value){
+				EndAction();
+			}
 		}
 
 		public override void OnDrawGizmosSelected(){
 			if (agent != null){
 				Gizmos.color = new Color(1,1,1,0.2f);
-				Gizmos.DrawWireSphere(agent.position, isRunning? traveledDistance : shoutRange.value);
+				Gizmos.DrawWireSphere(agent.position, traveledDistance);
+				Gizmos.DrawWireSphere(agent.position, shoutRange.value);
 			}			
 		}
 	}

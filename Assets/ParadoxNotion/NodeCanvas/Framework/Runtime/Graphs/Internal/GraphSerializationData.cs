@@ -1,26 +1,27 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace NodeCanvas.Framework.Internal{
 
-	///The object used to serialize and deserialize graphs. This class serves no other purpose
+	///The model used to serialize and deserialize graphs. This class serves no other purpose
 	[System.Serializable]
 	public class GraphSerializationData {
 
-		private readonly float SerializationVersion = 2.3f;
+		private readonly float SerializationVersion = 2.6f;
 
 		public float version;
 		public System.Type type;
-		public string name;
-		public string comments;
-		public Vector2 translation = new Vector2(-5000, -5000);
-		public float zoomFactor = 1f;
-		public List<Node> nodes;
-		public List<Connection> connections;
-		public Node primeNode;
-		public List<CanvasGroup> canvasGroups;
-		public BlackboardSource localBlackboard;
+		public string name                      = string.Empty;
+		public string comments                  = string.Empty;
+		public Vector2 translation              = new Vector2(-5000, -5000);
+		public float zoomFactor                 = 1f;
+		public List<Node> nodes                 = new List<Node>();
+		public List<Connection> connections     = new List<Connection>();
+		public Node primeNode                   = null;
+		public List<CanvasGroup> canvasGroups   = null;
+		public BlackboardSource localBlackboard = null;
+
+		public object derivedData;
 
 		//required
 		public GraphSerializationData(){}
@@ -38,12 +39,9 @@ namespace NodeCanvas.Framework.Internal{
 			this.canvasGroups    = graph.canvasGroups;
 			this.localBlackboard = graph.localBlackboard;
 
+			//connections are serialized seperately and not part of their parent node
 			var structConnections = new List<Connection>();
 			for (var i = 0; i < nodes.Count; i++){
-				if (nodes[i] is ISerializationCallbackReceiver){
-					(nodes[i] as ISerializationCallbackReceiver).OnBeforeSerialize();
-				}
-
 				for (var j = 0; j < nodes[i].outConnections.Count; j++){
 					structConnections.Add(nodes[i].outConnections[j]);
 				}
@@ -51,26 +49,30 @@ namespace NodeCanvas.Framework.Internal{
 
 			this.connections = structConnections;
 			this.primeNode   = graph.primeNode;
+
+			//serialize derived data
+			this.derivedData = graph.OnDerivedDataSerialization();
 		}
 
 		///MUST reconstruct before using the data
 		public void Reconstruct(Graph graph){
 
-			//check serialization versions here in the future?
+			//check serialization versions here in the future if needed
 
-			//re-link node connections
+			//re-link connections for deserialization
 			for (var i = 0; i < this.connections.Count; i++){
 				connections[i].sourceNode.outConnections.Add(connections[i]);
 				connections[i].targetNode.inConnections.Add(connections[i]);
 			}
 
-			//re-set the node's owner and on after deserialize for nodes that need it
+			//re-set the node's owner and ID
 			for (var i = 0; i < this.nodes.Count; i++){
 				nodes[i].graph = graph;
-				if (nodes[i] is ISerializationCallbackReceiver){
-					(nodes[i] as ISerializationCallbackReceiver).OnAfterDeserialize();
-				}
+				nodes[i].ID = i + 1;
 			}
+
+			//deserialize derived data
+			graph.OnDerivedDataDeserialization(derivedData);
 		}
 	}
 }

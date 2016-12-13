@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace NodeCanvas.DialogueTrees{
 
-	[Name("✫ Multiple Choice")]
+	[Name("Multiple Choice")]
 	[Description("Prompt a Dialogue Multiple Choice. A choice will be available if the connection's condition is true or there is no condition on that connection. The Actor selected is used for the Condition checks as well as will Say the selection if the option is checked.")]
 	public class MultipleChoiceNode : DTNode, ISubTasksContainer{
 
@@ -27,7 +27,7 @@ namespace NodeCanvas.DialogueTrees{
 
 
 		public Task[] GetTasks(){
-			return availableChoices != null? availableChoices.Select(c => c.condition).ToArray() : null;
+			return availableChoices != null? availableChoices.Select(c => c.condition).ToArray() : new Task[0];
 		}
 
 

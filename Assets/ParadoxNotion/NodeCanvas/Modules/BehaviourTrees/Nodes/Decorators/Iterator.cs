@@ -24,6 +24,9 @@ namespace NodeCanvas.BehaviourTrees{
 		public BBParameter<IList> targetList;
 		[BlackboardOnly]
 		public BBObjectParameter current;
+		[BlackboardOnly]
+		public BBParameter<int> storeIndex;
+
 		public BBParameter<int> maxIteration = -1;
 
 		public TerminationConditions terminationCondition = TerminationConditions.None;
@@ -37,22 +40,27 @@ namespace NodeCanvas.BehaviourTrees{
 		
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){
 
-			if (decoratedConnection == null)
+			if (decoratedConnection == null){
 				return Status.Resting;
+			}
 
-			if (list == null || list.Count == 0)
+			if (list == null || list.Count == 0){
 				return Status.Failure;
+			}
 
 			for (int i = currentIndex; i < list.Count; i++){
 
 				current.value = list[i];
+				storeIndex.value = i;
 				status = decoratedConnection.Execute(agent, blackboard);
 				
-				if (status == Status.Success && terminationCondition == TerminationConditions.FirstSuccess)
+				if (status == Status.Success && terminationCondition == TerminationConditions.FirstSuccess){
 					return Status.Success;
+				}
 				
-				if (status == Status.Failure && terminationCondition == TerminationConditions.FirstFailure)
+				if (status == Status.Failure && terminationCondition == TerminationConditions.FirstFailure){
 					return Status.Failure;
+				}
 
 				if (status == Status.Running){
 					currentIndex = i;

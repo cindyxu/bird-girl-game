@@ -1,15 +1,19 @@
-﻿using System.Linq;
+﻿using UnityEngine;
+using System.Linq;
 using ParadoxNotion.Design;
-using UnityEngine;
+using ParadoxNotion.Serialization;
+using ParadoxNotion.Serialization.FullSerializer;
 
 namespace NodeCanvas.Framework.Internal{
 
     ///Missing node types are deserialized into this on deserialization and can load back if type is found
     [DoNotList]
-	sealed public class MissingConnection : Connection {
+	sealed public class MissingConnection : Connection, IMissingRecoverable {
 
-		public string missingType;
-		public string recoveryState;
+		[fsProperty]
+		public string missingType{get;set;}
+		[fsProperty]
+		public string recoveryState{get;set;}
 
 		////////////////////////////////////////
 		///////////GUI AND EDITOR STUFF/////////

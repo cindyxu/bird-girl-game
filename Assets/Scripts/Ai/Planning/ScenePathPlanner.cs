@@ -46,18 +46,32 @@ public class ScenePathPlanner {
 
 		if (startPoint != null && destPoint != null) {
 			AStarSearch search = new AStarSearch (graph, mWp, startPoint, startRange, destPoint, destRange);
-			List<WaypointPath> result;
+			List<IWaypointPath> result;
 			while (search.Step (out result)) ;
 
 			if (result != null) {
-				setRoomPathPlanner (new RoomPathPlanner (mWp, result, destPos.x - minDist, 
-					destPos.x + mWp.size.x + minDist, destPos.y, mAWFacade));
+				setRoomPathPlanner (new RoomPathPlanner (mWp, mAWFacade, result, destPoint, destRange));
 			} else setRoomPathPlanner (null);
 		} else setRoomPathPlanner (null);
 	}
 
 	public void OnUpdate () {
-		if (mRoomPathPlanner != null) mRoomPathPlanner.OnUpdate ();
+	}
+
+	public bool FeedInput (InputCatcher inputCatcher) {
+		if (mRoomPathPlanner == null) return false;
+		RoomPathPlanner.Status status = mRoomPathPlanner.FeedInput (inputCatcher);
+		if (status.Equals (RoomPathPlanner.Status.FAILED)) {
+			initializePath ();
+		} else if (status.Equals (RoomPathPlanner.Status.DONE)) {
+			Log.logger.Log (Log.AI_PLAN, "done planning!");
+			return true;
+		}
+		return false;
+	}
+
+	public RoomPathPlanner GetCurrentRoomPathPlanner () {
+		return mRoomPathPlanner;
 	}
 
 	private void setRoomPathPlanner (RoomPathPlanner planner) {
@@ -68,16 +82,5 @@ public class ScenePathPlanner {
 		if (mRoomPathPlanner != null) {
 			mRoomPathPlanner.StartObserving ();
 		}
-	}
-
-	public bool FeedInput (InputCatcher inputCatcher) {
-		if (mRoomPathPlanner == null) return false;
-		RoomPathPlanner.Status status = mRoomPathPlanner.FeedInput (inputCatcher);
-		if (status.Equals (RoomPathPlanner.Status.FAILED)) {
-			initializePath ();
-		} else if (status.Equals (RoomPathPlanner.Status.DONE)) {
-			return true;
-		}
-		return false;
 	}
 }

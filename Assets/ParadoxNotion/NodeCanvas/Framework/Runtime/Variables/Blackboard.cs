@@ -12,6 +12,9 @@ namespace NodeCanvas.Framework{
 	/// </summary>
     public class Blackboard : MonoBehaviour, ISerializationCallbackReceiver, IBlackboard{
 
+		public event System.Action<Variable> onVariableAdded;
+		public event System.Action<Variable> onVariableRemoved;
+
 		[SerializeField]
 		private string _serializedBlackboard = null;
 		[SerializeField]
@@ -24,7 +27,7 @@ namespace NodeCanvas.Framework{
 
 
 		//serialize blackboard variables to json
-		public void OnBeforeSerialize(){
+		void ISerializationCallbackReceiver.OnBeforeSerialize(){
 			if (_objectReferences != null && _objectReferences.Any(o => o != null)){
 				hasDeserialized = false;
 			}
@@ -37,7 +40,7 @@ namespace NodeCanvas.Framework{
 
 
 		//deserialize blackboard variables from json
-		public void OnAfterDeserialize(){
+		void ISerializationCallbackReceiver.OnAfterDeserialize(){
 			if (hasDeserialized && JSONSerializer.applicationPlaying) return; //avoid double call that Unity does (bug?)
 			hasDeserialized = true;
 			_blackboard = JSONSerializer.Deserialize<BlackboardSource>(_serializedBlackboard, _objectReferences);
@@ -80,7 +83,29 @@ namespace NodeCanvas.Framework{
 
 		///Add a new variable of name and type
 		public Variable AddVariable(string name, Type type){
-			return _blackboard.AddVariable(name, type);
+			var variable = _blackboard.AddVariable(name, type);
+			if (onVariableAdded != null){
+				onVariableAdded(variable);
+			}
+			return variable;
+		}
+
+		///Add a new variable of name and value
+		public Variable AddVariable(string name, object value){
+			var variable = _blackboard.AddVariable(name, value);
+			if (onVariableAdded != null){
+				onVariableAdded(variable);
+			}
+			return variable;
+		}
+
+		///Delete the variable with specified name
+		public Variable RemoveVariable(string name){
+			var variable = _blackboard.RemoveVariable(name);
+			if (onVariableRemoved != null){
+				onVariableRemoved(variable);
+			}
+			return variable;
 		}
 
 		///Get a Variable of name and optionaly type
@@ -152,7 +177,7 @@ namespace NodeCanvas.Framework{
 		}
 
 		///Deserialize the blackboard from json
-		//We deserialize ON TOP of existing variables so that outside references to them are stay intact.
+		//We deserialize ON TOP of existing variables so that outside references to them stay intact.
 		public bool Deserialize(string json){
 			var bb = JSONSerializer.Deserialize<BlackboardSource>(json, _objectReferences);
 			if (bb == null){

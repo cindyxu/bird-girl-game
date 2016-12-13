@@ -9,6 +9,7 @@ namespace NodeCanvas.BehaviourTrees{
 	[Category("Composites")]
 	[Description("Select a child to execute based on it's chance to be selected and return Success if it returns Success, otherwise pick another.\nReturns Failure if no child returns Success or a direct 'Failure Chance' is introduced")]
 	[Icon("ProbabilitySelector")]
+	[Color("b3ff7f")]
 	public class ProbabilitySelector : BTComposite {
 
 		public List<BBParameter<float>> childWeights = new List<BBParameter<float>>();
@@ -19,7 +20,7 @@ namespace NodeCanvas.BehaviourTrees{
 		private List<int> failedIndeces = new List<int>();
 
 		public override string name{
-			get {return string.Format("<color=#b3ff7f>{0}</color>", base.name.ToUpper());}
+			get {return base.name.ToUpper();}
 		}
 
 		public override void OnChildConnected(int index){

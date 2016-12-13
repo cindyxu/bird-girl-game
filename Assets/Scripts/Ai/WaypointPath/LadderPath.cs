@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class LadderPath : WaypointPath {
+public class LadderPath : IWaypointPath {
 
 	private readonly LadderModel mLadder;
 

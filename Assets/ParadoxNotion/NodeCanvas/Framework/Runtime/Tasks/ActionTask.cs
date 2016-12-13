@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using ParadoxNotion.Services;
+using ParadoxNotion.Serialization;
+using ParadoxNotion.Serialization.FullSerializer;
+using NodeCanvas.Framework.Internal;
 using UnityEngine;
 
 
@@ -9,15 +12,14 @@ namespace NodeCanvas.Framework{
     ///Base class for all actions. Extend this to create your own. T is the agentType required by the action.
     ///Generic version to define the AgentType instead of using the [AgentType] attribute. T is the agentType required by the Action.
 	abstract public class ActionTask<T> : ActionTask where T:Component{
-
-		sealed public override Type agentType{
-			get {return typeof(T);}
-		}
-
-		new public T agent{
-			get { return base.agent as T; }
-		}		
+		sealed public override Type agentType{ get {return typeof(T);} }
+		new public T agent{	get { return base.agent as T; } }		
 	}
+
+
+	#if UNITY_EDITOR //handles missing types
+	[fsObject(Processor = typeof(fsRecoveryProcessor<ActionTask, MissingAction>))]
+	#endif
 
 	///Base class for all actions. Extend this to create your own.
 	abstract public class ActionTask : Task{
@@ -112,6 +114,9 @@ namespace NodeCanvas.Framework{
 			startedTime = Time.time;
 			status = Status.Running;
 			OnExecute();
+			if (status == Status.Running){
+				OnUpdate();
+			}
 			latch = false;
 			return status;
 		}

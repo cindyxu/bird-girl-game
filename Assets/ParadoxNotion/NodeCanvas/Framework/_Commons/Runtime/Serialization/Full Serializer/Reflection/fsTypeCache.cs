@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -7,6 +8,25 @@ namespace ParadoxNotion.Serialization.FullSerializer.Internal {
     /// Caches type name to type lookups. Type lookups occur in all loaded assemblies.
     /// </summary>
     public static class fsTypeCache {
+
+        //PARADOXNOTION ADDITION
+        //Just use ReflectionTools.GetType implementation to avoid duplicate code here.
+        public static Type GetType(string name) { return GetType(name, false, null); }
+        public static Type GetType(string name, Type fallbackAssignable) { return GetType(name, true, fallbackAssignable); }
+        static Type GetType(string name, bool fallbackNoNamespace, Type fallbackAssignable) {
+            return ReflectionTools.GetType(name, fallbackNoNamespace, fallbackAssignable);
+/*
+            if (string.IsNullOrEmpty(name)) { return null; }
+            Type type;
+            if (_cachedTypes.TryGetValue(name, out type) == false) {
+                if (TryIndirectTypeLookup(name, out type) == false) {}
+                _cachedTypes[name] = type;
+            }
+            return type;
+*/
+        }
+
+/*
         /// <summary>
         /// Cache from fully qualified type name to type instances.
         /// </summary>
@@ -55,7 +75,7 @@ namespace ParadoxNotion.Serialization.FullSerializer.Internal {
             _cachedTypes = new Dictionary<string, Type>();
         }
 #endif
-
+/*
         /// <summary>
         /// Does a direct lookup for the given type, ie, goes directly to the assembly identified by
         /// assembly name and finds it there.
@@ -68,7 +88,7 @@ namespace ParadoxNotion.Serialization.FullSerializer.Internal {
             if (assemblyName != null) {
                 Assembly assembly;
                 if (_assembliesByName.TryGetValue(assemblyName, out assembly)) {
-                    type = assembly.GetType(typeName, /*throwOnError:*/ false);
+                    type = assembly.GetType(typeName, false);
                     return type != null;
                 }
             }
@@ -122,41 +142,8 @@ namespace ParadoxNotion.Serialization.FullSerializer.Internal {
         public static void Reset() {
             _cachedTypes = new Dictionary<string, Type>();
         }
+*/
 
-        /// <summary>
-        /// Find a type with the given name. An exception is thrown if no type with the given name
-        /// can be found. This method searches all currently loaded assemblies for the given type. If the type cannot
-        /// be found, then null will be returned.
-        /// </summary>
-        /// <param name="name">The fully qualified name of the type.</param>
-        public static Type GetType(string name) {
-            return GetType(name, null);
-        }
-
-        /// <summary>
-        /// Find a type with the given name. An exception is thrown if no type with the given name
-        /// can be found. This method searches all currently loaded assemblies for the given type. If the type cannot
-        /// be found, then null will be returned.
-        /// </summary>
-        /// <param name="name">The fully qualified name of the type.</param>
-        /// <param name="assemblyHint">A hint for the assembly to start the search with. Use null if unknown.</param>
-        public static Type GetType(string name, string assemblyHint) {
-            if (string.IsNullOrEmpty(name)) {
-                return null;
-            }
-
-            Type type;
-            if (_cachedTypes.TryGetValue(name, out type) == false) {
-                // if both the direct and indirect type lookups fail, then throw an exception
-                if (TryDirectTypeLookup(assemblyHint, name, out type) == false &&
-                    TryIndirectTypeLookup(name, out type) == false) {
-                }
-
-                _cachedTypes[name] = type;
-            }
-
-            return type;
-        }
     }
 }
 

@@ -72,6 +72,11 @@ namespace NodeCanvas.DialogueTrees{
 			actorName = EditorUtils.StringPopup(actorName, DLGTree.definedActorParameterNames, false, false);
 			GUI.backgroundColor = Color.white;					
 		}
+
+		protected override UnityEditor.GenericMenu OnContextMenu(UnityEditor.GenericMenu menu){
+			menu.AddItem(new GUIContent("Breakpoint"), isBreakpoint, ()=>{ isBreakpoint = !isBreakpoint; });
+			return menu;
+		}
 		
 		#endif
 	}

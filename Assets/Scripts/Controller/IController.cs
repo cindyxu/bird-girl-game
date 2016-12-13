@@ -7,5 +7,6 @@ public interface IController {
 	bool RequestFreeze ();
 	bool RequestFinishRequest ();
 	bool EnablePlayerControl (bool enable);
+	InputFeeder GetInputFeeder ();
 }
 

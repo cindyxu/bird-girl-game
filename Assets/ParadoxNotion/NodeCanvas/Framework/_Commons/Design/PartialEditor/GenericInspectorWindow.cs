@@ -52,6 +52,7 @@ namespace ParadoxNotion.Design{
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
+
 			GUILayout.Space(10);
 			scrollPos = GUILayout.BeginScrollView(scrollPos);
 			value = EditorUtils.GenericField(targetType.FriendlyName(), value, targetType, null);

@@ -10,6 +10,7 @@ namespace NodeCanvas.BehaviourTrees{
 	[Category("Composites")]
 	[Description("Execute all child nodes once but simultaneously and return Success or Failure depending on the selected ParallelPolicy.\nIf set to Dynamic, child nodes are repeated until the Policy set is met, or until all children have had a chance to complete at least once.")]
 	[Icon("Parallel")]
+	[Color("ff64cb")]
 	public class Parallel : BTComposite{
 
 		public enum ParallelPolicy
@@ -25,7 +26,7 @@ namespace NodeCanvas.BehaviourTrees{
 		private readonly List<Connection> finishedConnections = new List<Connection>();
 
 		public override string name{
-			get {return string.Format("<color=#ff64cb>{0}</color>", base.name.ToUpper());}
+			get {return base.name.ToUpper();}
 		}
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){
@@ -37,7 +38,7 @@ namespace NodeCanvas.BehaviourTrees{
 					continue;
 				}
 
-				if (outConnections[i].connectionStatus != Status.Running && finishedConnections.Contains(outConnections[i])){
+				if (outConnections[i].status != Status.Running && finishedConnections.Contains(outConnections[i])){
 					outConnections[i].Reset();
 				}
 
@@ -83,7 +84,7 @@ namespace NodeCanvas.BehaviourTrees{
 
 		void ResetRunning(){
 			for (var i = 0; i < outConnections.Count; i++){
-				if (outConnections[i].connectionStatus == Status.Running){
+				if (outConnections[i].status == Status.Running){
 					outConnections[i].Reset();
 				}
 			}

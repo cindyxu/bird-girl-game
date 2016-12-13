@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections;
+using ParadoxNotion.Serialization;
+using ParadoxNotion.Serialization.FullSerializer;
+using NodeCanvas.Framework.Internal;
 using UnityEngine;
 
 
@@ -8,15 +11,14 @@ namespace NodeCanvas.Framework{
     ///Base class for all Conditions. Conditions dont span multiple frames like actions and return true or false immediately on execution. Derive this to create your own.
     ///Generic version to define the AgentType instead of using the [AgentType] attribute. T is the agentType required by the Condition.
 	abstract public class ConditionTask<T> : ConditionTask where T:Component{
-	
-		sealed public override Type agentType{
-			get {return typeof(T);}
-		}
-
-		new public T agent{
-			get { return base.agent as T; }
-		}		
+		sealed public override Type agentType{ get {return typeof(T);} }
+		new public T agent{	get { return base.agent as T; }	}		
 	}
+
+
+	#if UNITY_EDITOR //handles missing types
+	[fsObject(Processor = typeof(fsRecoveryProcessor<ConditionTask, MissingCondition>))]
+	#endif
 
 	///Base class for all Conditions. Conditions dont span multiple frames like actions and return true or false immediately on execution. Derive this to create your own
 	abstract public class ConditionTask : Task{

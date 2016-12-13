@@ -108,7 +108,7 @@ namespace NodeCanvas.Tasks.Actions{
 
 			if (!Application.isPlaying && GUILayout.Button("Select Static Method")){
 				var menu = new UnityEditor.GenericMenu();
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object))){
 					foreach(var _m in t.GetMethods(BindingFlags.Static | BindingFlags.Public).OrderBy(m => !m.IsSpecialName) ){
 						var m = _m;
 						if (m.IsGenericMethod)

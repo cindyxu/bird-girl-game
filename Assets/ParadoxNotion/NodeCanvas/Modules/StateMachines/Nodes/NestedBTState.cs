@@ -64,7 +64,20 @@ namespace NodeCanvas.StateMachines{
 
 			nestedBT.repeat = (executionMode == BTExecutionMode.Repeat);
 			nestedBT.updateInterval = 0;
-			nestedBT.StartGraph(graphAgent, graphBlackboard, OnFinish);
+			nestedBT.StartGraph(graphAgent, graphBlackboard, false, OnFinish);
+		}
+
+		protected override void OnUpdate(){
+			
+			nestedBT.UpdateGraph();
+
+			if (!string.IsNullOrEmpty(successEvent) && nestedBT.rootStatus == Status.Success){
+				nestedBT.Stop(true);
+			}
+
+			if (!string.IsNullOrEmpty(failureEvent) && nestedBT.rootStatus == Status.Failure){
+				nestedBT.Stop(false);
+			}	
 		}
 
 		void OnFinish(bool success){
@@ -77,7 +90,7 @@ namespace NodeCanvas.StateMachines{
 					SendEvent(new EventData(failureEvent));
 				}
 				
-				Finish();
+				Finish(success);
 			}
 		}
 

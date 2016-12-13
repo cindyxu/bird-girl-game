@@ -19,7 +19,7 @@ namespace NodeCanvas.Tasks.Conditions{
 		private string eventName = null;
 
 		public override Type agentType{
-			get {return targetType ?? typeof(Transform);}
+			get {return targetType != null? targetType : typeof(Transform);}
 		}
 		
 		protected override string info{
@@ -38,11 +38,13 @@ namespace NodeCanvas.Tasks.Conditions{
 				return "No Event Selected";
 
 			var eventInfo = agentType.RTGetEvent(eventName);
-			if (eventInfo == null)
+			if (eventInfo == null){
 				return "Event was not found";
+			}
 
-			System.Action pointer = ()=> { Raised(); };
-			eventInfo.AddEventHandler( agent, pointer );
+			var methodInfo = this.GetType().RTGetMethod("Raised");
+			var handler = methodInfo.RTCreateDelegate(eventInfo.EventHandlerType, this);
+			eventInfo.AddEventHandler(agent, handler);
 			return null;
 		}
 
@@ -74,7 +76,7 @@ namespace NodeCanvas.Tasks.Conditions{
 					}
 					menu.AddSeparator("/");
 				}
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component))){
 					menu = EditorUtils.GetEventSelectionMenu(t, null, Selected, menu);
 				}
 
@@ -127,11 +129,13 @@ namespace NodeCanvas.Tasks.Conditions{
 				return "No Event Selected";			
 
 			var eventInfo = agentType.RTGetEvent(eventName);
-			if (eventInfo == null)
+			if (eventInfo == null){
 				return "Event was not found";
+			}
 
-			System.Action<T> pointer = (v)=> { Raised(v); };
-			eventInfo.AddEventHandler( agent, pointer );
+			var methodInfo = this.GetType().RTGetMethod("Raised");
+			var handler = methodInfo.RTCreateDelegate(eventInfo.EventHandlerType, this);
+			eventInfo.AddEventHandler(agent, handler);
 			return null;
 		}
 
@@ -165,7 +169,7 @@ namespace NodeCanvas.Tasks.Conditions{
 					}
 					menu.AddSeparator("/");
 				}
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component))){
 					menu = EditorUtils.GetEventSelectionMenu(t, typeof(T), Selected, menu);
 				}
 

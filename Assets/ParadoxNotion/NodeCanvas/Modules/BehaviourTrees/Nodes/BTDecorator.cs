@@ -36,8 +36,8 @@ namespace NodeCanvas.BehaviourTrees{
 		#if UNITY_EDITOR
 			
 		protected override UnityEditor.GenericMenu OnContextMenu(UnityEditor.GenericMenu menu){
-			menu = ParadoxNotion.Design.EditorUtils.GetTypeSelectionMenu(typeof(BTDecorator), (t)=>{ ReplaceWith(t); }, menu, "Replace");
 			menu = base.OnContextMenu(menu);
+			menu = ParadoxNotion.Design.EditorUtils.GetTypeSelectionMenu(typeof(BTDecorator), (t)=>{ ReplaceWith(t); }, menu, "Replace");
 			return menu;
 		}		
 

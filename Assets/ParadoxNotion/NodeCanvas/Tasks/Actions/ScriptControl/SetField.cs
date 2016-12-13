@@ -66,12 +66,12 @@ namespace NodeCanvas.Tasks.Actions{
 
 				var menu = new UnityEditor.GenericMenu();
 				if (agent != null){
-					foreach(var comp in agent.GetComponents(typeof(Component)).Where(c => c.hideFlags == 0) ){
+					foreach(var comp in agent.GetComponents(typeof(Component)).Where(c => c.hideFlags != HideFlags.HideInInspector) ){
 						menu = EditorUtils.GetFieldSelectionMenu(comp.GetType(), typeof(object), FieldSelected, menu);
 					}
 					menu.AddSeparator("/");
 				}
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component))){
 					menu = EditorUtils.GetFieldSelectionMenu(t, typeof(object), FieldSelected, menu);
 				}
 				if ( NodeCanvas.Editor.NCPrefs.useBrowser){ menu.ShowAsBrowser("Select Field", this.GetType()); }

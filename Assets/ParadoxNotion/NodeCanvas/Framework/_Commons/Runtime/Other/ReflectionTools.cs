@@ -10,8 +10,10 @@ namespace ParadoxNotion{
 	///Helper extension methods to work with NETFX_CORE as well as some other reflection helper extensions and utilities
 	public static class ReflectionTools {
 
-		private static List<Assembly> _loadedAssemblies;
-		private static List<Assembly> loadedAssemblies{
+		private const BindingFlags flagsEverything = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+
+		private static Assembly[] _loadedAssemblies;
+		private static Assembly[] loadedAssemblies{
         	get
         	{
         		if (_loadedAssemblies == null){
@@ -32,17 +34,15 @@ namespace ParadoxNotion{
 				                Assembly asm = Assembly.Load(name);
 				                _loadedAssemblies.Add(asm);
 				            }
-				            catch (BadImageFormatException)
-				            {
-				                // Thrown reflecting on C++ executable files for which the C++ compiler stripped the relocation addresses
-				                continue;
-				            }
+				            catch { continue; }
 				        }
 				    }
 
+				    _loadedAssemblies = _loadedAssemblies.ToArray();
+
 	        		#else
 
-	        		_loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+	        		_loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
 	        		#endif
 	        	}
@@ -51,57 +51,222 @@ namespace ParadoxNotion{
         	}
         }
 
-		private static IEnumerable GetBaseTypes(Type type){
-			
-			yield return type;
-			Type baseType;
-
-			#if NETFX_CORE
-			baseType = type.GetTypeInfo().BaseType;
-			#else
-			baseType = type.BaseType;
-			#endif
-
-			if (baseType != null){
-				foreach (var t in GetBaseTypes(baseType)){
-					yield return t;
-				}
-			}
-		}
-
 		//Alternative to Type.GetType to work with FullName instead of AssemblyQualifiedName when looking up a type by string
-		public static Type GetType(string typeName){
+		//This also handles Generics and their arguments, assembly changes and namespace changes to some extend.
+		private static Dictionary<string, Type> typeMap = new Dictionary<string, Type>();
+		public static Type GetType(string typeFullName, bool fallbackNoNamespace = false, Type fallbackAssignable = null){
+
+			if (string.IsNullOrEmpty(typeFullName)){
+				return null;
+			}
 
 			Type type = null;
-			type = Type.GetType(typeName);
+			if (typeMap.TryGetValue(typeFullName, out type)){
+				return type;
+			}
+
+			//direct look up
+			type = GetTypeDirect(typeFullName);
+            if (type != null){
+            	return typeMap[typeFullName] = type;
+            }			
+
+			LateLog(string.Format("<b>(Type Request)</b> Trying Fallback Type match for type '{0}'...\n<i>(This happens if the type can't be resolved by it's full assembly/namespace name)</i>", typeFullName), UnityEngine.LogType.Warning);
+
+            //handle generics now
+            type = TryResolveGenericType(typeFullName, fallbackNoNamespace, fallbackAssignable);
+            if (type != null){
+            	LateLog(string.Format("<b>(Type Request)</b> Fallback Type Resolved to '{0}'", type.FullName));
+            	return typeMap[typeFullName] = type;
+            }
+
+            //make use of DeserializeFromAttribute
+            type = TryResolveDeserializeFromAttribute(typeFullName);
+            if (type != null){
+            	LateLog(string.Format("<b>(Type Request)</b> Fallback Type Resolved to '{0}'", type.FullName));
+            	return typeMap[typeFullName] = type;
+            }
+
+            if (fallbackNoNamespace){
+	            //get type regardless namespace
+	            type = TryResolveWithoutNamespace(typeFullName, fallbackAssignable);
+	            if (type != null){
+	            	LateLog(string.Format("<b>(Type Request)</b> Fallback Type Resolved to '{0}'", type.FullName));
+	            	//we store the found type's.FullName in the cache (instead of provided name), so that other types dont fail.
+	            	return typeMap[type.FullName] = type;
+		        }
+		    }
+
+		    LateLog(string.Format("<b>(Type Request)</b> Type with name '{0}' could not be resolved.", typeFullName), UnityEngine.LogType.Error);
+
+            return typeMap[typeFullName] = null;
+		}
+
+		//Utility to log in delay. This is not because GetType above (where this is used), can be called in OnAfterDeserialized.
+		//As such using DebugLog is not possible without this trick.
+		static void LateLog(object logMessage, UnityEngine.LogType logType = UnityEngine.LogType.Log){
+			#if UNITY_EDITOR
+			UnityEditor.EditorApplication.delayCall += ()=> { UnityEngine.Debug.logger.Log(logType, logMessage); };
+			#endif
+		}
+
+		//direct type look up with it's FullName
+		static Type GetTypeDirect(string typeFullName){
+			var type = Type.GetType(typeFullName);
 			if (type != null){
 				return type;
 			}
 
-            foreach (var asm in loadedAssemblies) {
-                type = asm.GetType(typeName);
+            for (var i = 0; i < loadedAssemblies.Length; i++){
+            	var asm = loadedAssemblies[i];
+                try {type = asm.GetType(typeFullName);}
+                catch { continue; }
                 if (type != null) {
                     return type;
                 }
             }
 
-            //worst case scenario
-            foreach(var t in GetAllTypes()){
-            	if (t.Name == typeName){
-            		return t;
-            	}
-            }
-
             return null;
 		}
 
-		///Get every single type in loaded assemblies
-		public static Type[] GetAllTypes(){
-			var result = new List<Type>();
-			foreach (var asm in loadedAssemblies){
-				result.AddRange(asm.GetTypes());
+		//Resolve generic types by their .FullName or .ToString
+		//Remark: a generic's type .FullName returns a string where it's arguments only are instead printed as AssemblyQualifiedName.
+        static Type TryResolveGenericType(string typeFullName, bool fallbackNoNamespace = false, Type fallbackAssignable = null){
+
+        	//ensure that it is a generic type implementation, not a definition
+        	if (typeFullName.Contains('`') == false || typeFullName.Contains('[') == false){
+        		return null;
+        	}
+
+            try //big try/catch block cause maybe there is a bug. Hopefully not.
+            {
+                var quoteIndex = typeFullName.IndexOf('`');
+                var genericTypeDefName = typeFullName.Substring(0, quoteIndex + 2);
+                var genericTypeDef = GetType(genericTypeDefName, fallbackNoNamespace, fallbackAssignable);
+                if (genericTypeDef == null){
+                    return null;
+                }
+
+                int argCount = Convert.ToInt32( typeFullName.Substring(quoteIndex + 1, 1) );
+                var content = typeFullName.Substring(quoteIndex + 2, typeFullName.Length - quoteIndex - 2);
+                string[] split = null;
+                if (content.StartsWith("[[")){ //this means that assembly qualified name is contained. Name was generated with FullName.
+                    var startIndex = typeFullName.IndexOf("[[") + 2;
+                    var endIndex = typeFullName.LastIndexOf("]]");
+                    content = typeFullName.Substring(startIndex, endIndex - startIndex);
+                    split = content.Split(new string[]{"],["}, argCount, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                } else { //this means that the name was generated with type.ToString().
+                    var startIndex = typeFullName.IndexOf('[') + 1;
+                    var endIndex = typeFullName.LastIndexOf(']');
+                    content = typeFullName.Substring(startIndex, endIndex - startIndex);
+                    split = content.Split(new char[]{','}, argCount, StringSplitOptions.RemoveEmptyEntries).ToArray();
+
+                }
+
+                var argTypes = new Type[argCount];
+                for (var i = 0; i < split.Length; i++){
+                    var subName = split[i];
+                    if (!subName.Contains('`') && subName.Contains(',')){ //remove assembly info since we work with FullName, but only if it's not yet another generic.
+                        subName = subName.Substring(0, subName.IndexOf(','));
+                    }
+					
+					#if !NETFX_CORE
+					Type constrainType = null;
+					if (fallbackNoNamespace){
+						var arg = genericTypeDef.RTGetGenericArguments()[i];
+						var constrains = arg.GetGenericParameterConstraints();
+						constrainType = constrains.Length == 0? typeof(object) : constrains[0];
+	                }
+					var argType = GetType(subName, fallbackNoNamespace, constrainType);
+
+					#else
+
+					var argType = GetType(subName);
+
+					#endif
+
+                    if (argType == null){
+                        return null;
+                    }
+                    argTypes[i] = argType;
+                }
+
+                return genericTypeDef.RTMakeGenericType(argTypes);                
+            }
+
+            catch (Exception e)
+            {
+                LateLog("<b>(Type Request)</b> BUG (Please report this): " + e.Message, UnityEngine.LogType.Error);
+                return null;
+            }
+        }
+
+        //uterly slow, but only happens when we have a null type
+        static Type TryResolveDeserializeFromAttribute(string typeName){
+            var allTypes = GetAllTypes();
+            for (var i = 0; i < allTypes.Length; i++){
+            	var t = allTypes[i];
+            	var att = t.RTGetAttribute<Serialization.DeserializeFromAttribute>(false);
+            	if (att != null && att.previousTypeNames.Any(n => n == typeName)){
+            		return t;
+            	}
+            }
+            return null;
+        }
+
+		//fallback type look up with it's FullName. This is slow.
+		static Type TryResolveWithoutNamespace(string typeName, Type fallbackAssignable = null){
+
+            //dont handle generic implementations this way (still handles definitions though).
+            if (typeName.Contains('`') && typeName.Contains('[')){
+            	return null;
+            }
+
+            //remove assembly info if any
+            if (typeName.Contains(',')){
+            	typeName = typeName.Substring(0, typeName.IndexOf(','));
+            }
+
+            //ensure strip namespace
+    		if (typeName.Contains('.')){
+	    		var dotIndex = typeName.LastIndexOf('.') + 1;
+				typeName = typeName.Substring(dotIndex, typeName.Length - dotIndex);
 			}
-			return result.ToArray();
+
+            //check all types
+            var allTypes = GetAllTypes();
+            for (var i = 0; i < allTypes.Length; i++){
+            	var t = allTypes[i];
+            	if (t.Name == typeName && (fallbackAssignable == null || fallbackAssignable.RTIsAssignableFrom(t)) ){
+            		return t;
+            	}
+            }
+	        return null;
+		}
+
+
+		///Get every single type in loaded assemblies
+		private static Type[] _allTypes;
+		public static Type[] GetAllTypes(){
+			if (_allTypes != null){
+				return _allTypes;
+			}
+
+			var result = new List<Type>();
+			for (var i = 0; i < loadedAssemblies.Length; i++){
+				var asm = loadedAssemblies[i];
+				try {result.AddRange(asm.RTGetExportedTypes());}
+				catch { continue; }
+			}
+			return _allTypes = result.ToArray();
+		}
+
+		private static Type[] RTGetExportedTypes(this Assembly asm){
+			#if NETFX_CORE
+			return asm.ExportedTypes.ToArray();
+			#else
+			return asm.GetExportedTypes();
+			#endif
 		}
 
 		///Get a friendly name for the type
@@ -117,8 +282,8 @@ namespace ParadoxNotion{
 
 			var s = trueSignature? t.FullName : t.Name;
 			if (!trueSignature){
-				s = s.Replace("Single", "Float");
-				s = s.Replace("Int32", "Integer");
+				if (s == "Single"){ s = "Float"; }
+				if (s == "Int32"){ s = "Integer"; }
 			}
 
 			if ( t.RTIsGenericParameter() ){
@@ -127,7 +292,8 @@ namespace ParadoxNotion{
 
 			if ( t.RTIsGenericType() ){
 				
-				s = (trueSignature? t.Namespace + "." : "") + t.Name;
+				// s = (trueSignature? t.Namespace + "." : "") + t.Name;
+				s = trueSignature? t.FullName : t.Name;
 
 				var args= t.RTGetGenericArguments();
 				
@@ -136,8 +302,9 @@ namespace ParadoxNotion{
 					s = s.Replace("`" + args.Length.ToString(), "");
 
 					s += "<";
-					for (var i= 0; i < args.Length; i++)
+					for (var i= 0; i < args.Length; i++){
 						s += (i == 0? "":", ") + args[i].FriendlyName(trueSignature);
+					}
 					s += ">";
 				}
 			}
@@ -157,14 +324,10 @@ namespace ParadoxNotion{
 			return finalName;
 		}
 
-		///Determines whether the field is read only
-		public static bool IsReadOnly(this FieldInfo field){
-			return field.IsInitOnly || field.IsLiteral;
-		}
 
 		public static Type RTReflectedType(this Type type){
 			#if NETFX_CORE
-			return type.GetTypeInfo().DeclaringType;
+			return type.GetTypeInfo().DeclaringType; //no way to get ReflectedType here that I know of...
 			#else
 			return type.ReflectedType;
 			#endif			
@@ -260,61 +423,33 @@ namespace ParadoxNotion{
 			#endif
 		}
 
-		public static FieldInfo RTGetField(this Type type, string name, bool includePrivate = false){
+		public static FieldInfo RTGetField(this Type type, string name){
 			#if NETFX_CORE
-			var fields = GetBaseTypes(type).OfType<Type>().Select(baseType => baseType.GetTypeInfo().DeclaredFields).ToList();
-			foreach (FieldInfo f in fields){
-				if (f.Name == name){
-					if (f.IsPrivate && includePrivate)
-						return f;
-					if (f.IsPublic)
-						return f;
-				}
-			}
-			return null;
+			return type.GetRuntimeFields().FirstOrDefault(f => f.Name == name);
 			#else
-			if (includePrivate)
-				return type.GetField(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-			return type.GetField(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
+			return type.GetField(name, flagsEverything);
 			#endif
 		}
 
 		public static PropertyInfo RTGetProperty(this Type type, string name){
 			#if NETFX_CORE
-			return GetBaseTypes(type).OfType<Type>().Select(baseType => baseType.GetTypeInfo().GetDeclaredProperty(name)).FirstOrDefault(property => property != null);
+			return type.GetRuntimeProperties().FirstOrDefault(p => p.Name == name);
 			#else
-			return type.GetProperty(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
+			return type.GetProperty(name, flagsEverything);
 			#endif
 		}
 
-		public static MethodInfo RTGetMethod(this Type type, string name, bool includePrivate = false){
-
+		public static MethodInfo RTGetMethod(this Type type, string name){
 			#if NETFX_CORE
-			var methods = GetBaseTypes(type).OfType<Type>().Select(baseType => baseType.GetTypeInfo().DeclaredMethods).ToList();
-			foreach (MethodInfo[] m in methods){
-				foreach (MethodInfo j in m){
-					if (j.Name == name){
-						if (j.IsPrivate && includePrivate)
-							return j;
-						if (j.IsPublic)
-							return j;
-					}
-				}
-			}
-			return null;
-
+			return type.GetRuntimeMethods().FirstOrDefault(m => m.Name == name);
 			#else
-			if (includePrivate){
-				return type.GetMethod(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			}
-			return type.GetMethod(name, BindingFlags.Instance | BindingFlags.Public);
+			return type.GetMethod(name, flagsEverything);
 			#endif
 		}
 
 		public static MethodInfo RTGetMethod(this Type type, string name, Type[] paramTypes){
 			#if NETFX_CORE
-			return type.GetMethod(name, paramTypes);
-			// return type.GetTypeInfo().GetMethod(name, paramTypes);
+			return type.GetRuntimeMethod(name, paramTypes);
 			#else
 			return type.GetMethod(name, paramTypes);
 			#endif
@@ -322,9 +457,17 @@ namespace ParadoxNotion{
 
 		public static EventInfo RTGetEvent(this Type type, string name){
 			#if NETFX_CORE
-			return GetBaseTypes(type).OfType<Type>().Select(baseType => baseType.GetTypeInfo().GetDeclaredEvent(name)).FirstOrDefault(method => method != null);
+			return type.GetRuntimeEvents().FirstOrDefault(e => e.Name == name);
 			#else
-			return type.GetEvent(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public);
+			return type.GetEvent(name, flagsEverything);
+			#endif			
+		}
+
+		public static MethodInfo RTGetDelegateMethodInfo(this Delegate del){
+			#if NETFX_CORE
+			return del.GetMethodInfo();
+			#else
+			return del.Method;
 			#endif			
 		}
 
@@ -337,12 +480,9 @@ namespace ParadoxNotion{
 			if (!_typeFields.TryGetValue(type, out fields)){
 
 				#if NETFX_CORE
-				var fieldsList = new List<FieldInfo>();
-				foreach (Type t in GetBaseTypes(type).OfType<Type>())
-					fieldsList.AddRange(t.GetTypeInfo().DeclaredFields);
-				fields = fieldsList.ToArray();
+				fields = type.GetRuntimeFields().ToArray();
 				#else
-				fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				fields = type.GetFields(flagsEverything);
 				#endif
 
 				_typeFields[type] = fields;
@@ -353,24 +493,17 @@ namespace ParadoxNotion{
 
 		public static PropertyInfo[] RTGetProperties(this Type type){
 			#if NETFX_CORE
-			var props = new List<PropertyInfo>();
-			foreach (Type t in GetBaseTypes(type).OfType<Type>())
-				props.AddRange(t.GetTypeInfo().DeclaredProperties);
-			return props.ToArray();
+			return type.GetRuntimeProperties().ToArray();
 			#else
-			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			return type.GetProperties(flagsEverything);
 			#endif
 		}
 
 		public static MethodInfo[] RTGetMethods(this Type type){
-
 			#if NETFX_CORE
-			var methods = new List<MethodInfo>();
-			foreach (Type t in GetBaseTypes(type).OfType<Type>())
-				methods.AddRange(t.GetTypeInfo().DeclaredMethods);
-			return methods.ToArray();
+			return type.GetRuntimeMethods().ToArray();
 			#else
-			return type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+			return type.GetMethods(flagsEverything);
 			#endif
 		}
 
@@ -431,69 +564,51 @@ namespace ParadoxNotion{
 			#endif
         }
 
+        ///Utility to determine obsolete members quicker. Also handles property accessor methods.
+        public static bool IsObsolete(this MemberInfo member){
+        	if (member is MethodInfo){
+        		var m = (MethodInfo)member;
+	            if (m.Name.StartsWith("get_") || m.Name.StartsWith("set_")){
+	                member = m.DeclaringType.RTGetProperty(m.Name.Replace("get_", "").Replace("set_", "") );
+	            }
+        	}
+        	return member.RTGetAttribute<System.ObsoleteAttribute>(true) != null;
+        }
 
+		///Determines whether the field is read only
+		public static bool IsReadOnly(this FieldInfo field){
+			return field.IsInitOnly || field.IsLiteral;
+		}
 
+        //BaseDefinition for PropertyInfos.
+	    public static PropertyInfo GetBaseDefinition(this PropertyInfo propertyInfo) {
 
-/* 	    //NOT USED anymore, but kept cause it might be usefull in the future
+	    	#if NETFX_CORE
 
-	    ///Creates a delegate of T for a MethodInfo with casted method parameters and return type to the specified delegate T types
-	    public static T BuildDelegate<T>(MethodInfo method, params object[] missingParamValues) {
-	        
-	        var queueMissingParams = new Queue<object>(missingParamValues);
-	        var dgtMi = typeof(T).RTGetMethod("Invoke");
-	        var dgtRet = dgtMi.ReturnType;
-	        var dgtParams = dgtMi.GetParameters();
+	    	throw new NotImplementedException();
 
-	        var paramsOfDelegate = (dgtParams as IEnumerable<ParameterInfo>).Select(tp => Expression.Parameter(tp.ParameterType, tp.Name)).ToArray();
+	    	#else
 
-	        var methodParams = method.GetParameters();
-
-	        if (method.IsStatic)
-	        {
-	            var paramsToPass = (methodParams as IEnumerable<ParameterInfo>).Select((p, i) => CreateParam(paramsOfDelegate, i, p, queueMissingParams)).ToArray();
-
-	            var call = Expression.Call(method, paramsToPass);
-	            var convertCall = Expression.Convert(call, typeof(object));
-	            Expression<T> expr = null;
-	            if (dgtRet == typeof(void)){
-	            	expr = Expression.Lambda<T>(call, paramsOfDelegate);
-            	} else {
-            		expr = Expression.Lambda<T>(convertCall, paramsOfDelegate);
-            	}
-
-	            return expr.Compile();
+	        var method = propertyInfo.GetAccessors(true)[0];
+	        if (method == null){
+	            return null;
 	        }
-	        else
-	        {
-	            var paramThis = Expression.Convert(paramsOfDelegate[0], method.DeclaringType);
-	            var paramsToPass = methodParams.Select((p, i) => CreateParam(paramsOfDelegate, i + 1, p, queueMissingParams)).ToArray();
-
-	            var call = Expression.Call(paramThis, method, paramsToPass);
-	            var convertCall = Expression.Convert(call, typeof(object));
-	            Expression<T> expr = null;
-	            if (dgtRet == typeof(void)){
-		            expr = Expression.Lambda<T>(call, paramsOfDelegate);
-            	} else {
-            		expr = Expression.Lambda<T>(convertCall, paramsOfDelegate);
-            	}
-
-	            return expr.Compile();
+	 
+	        var baseMethod = method.GetBaseDefinition();
+	        if (baseMethod == method){
+	            return propertyInfo;
 	        }
+	 
+	        var arguments = propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray();
+	        return baseMethod.DeclaringType.GetProperty(propertyInfo.Name, flagsEverything, null, propertyInfo.PropertyType, arguments, null);
+
+	        #endif
 	    }
 
-	    private static Expression CreateParam(ParameterExpression[] paramsOfDelegate, int i, ParameterInfo callParamType, Queue<object> queueMissingParams) {
-	        if (i < paramsOfDelegate.Length)
-	            return Expression.Convert(paramsOfDelegate[i], callParamType.ParameterType);
-
-	        if (queueMissingParams.Count > 0)
-	            return Expression.Constant(queueMissingParams.Dequeue());
-
-	        if (callParamType.ParameterType.RTIsValueType() )
-	            return Expression.Constant(Activator.CreateInstance(callParamType.ParameterType));
-
-	        return Expression.Constant(null);
+	    //BaseDefinition for FieldInfo. Not exactly correct but here for consistency.
+	    public static FieldInfo GetBaseDefinition(this FieldInfo fieldInfo){
+	    	return fieldInfo.DeclaringType.RTGetField(fieldInfo.Name);
 	    }
-*/
 
 	}
 }

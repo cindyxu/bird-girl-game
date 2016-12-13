@@ -15,15 +15,10 @@ namespace NodeCanvas.Tasks.Actions{
 			get {return "Wait " + waitTime + " sec.";}
 		}
 
-		protected override void OnExecute(){
-			if (waitTime.value == 0){
-				EndAction();
-			}
-		}
-
 		protected override void OnUpdate(){
-			if (elapsedTime >= waitTime.value)
+			if (elapsedTime >= waitTime.value){
 				EndAction(finishStatus == CompactStatus.Success? true : false);
+			}
 		}
 	}
 }

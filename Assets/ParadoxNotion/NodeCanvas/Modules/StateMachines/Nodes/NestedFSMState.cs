@@ -14,7 +14,7 @@ namespace NodeCanvas.StateMachines{
 	public class NestedFSMState : FSMState, IGraphAssignable{
 
 		[SerializeField]
-		private BBParameter<FSM> _nestedFSM = null;
+		protected BBParameter<FSM> _nestedFSM = null; //protected so that derived user types can be reflected correctly
 		private Dictionary<FSM, FSM> instances = new Dictionary<FSM, FSM>();
 
 		public FSM nestedFSM{
@@ -38,17 +38,23 @@ namespace NodeCanvas.StateMachines{
 			}
 
 			CheckInstance();
-			nestedFSM.StartGraph(graphAgent, graphBlackboard, Finish);
+			nestedFSM.StartGraph(graphAgent, graphBlackboard, false, Finish);
+		}
+
+		protected override void OnUpdate(){
+			nestedFSM.UpdateGraph();
 		}
 
 		protected override void OnExit(){
-			if (IsInstance(nestedFSM) && (nestedFSM.isRunning || nestedFSM.isPaused) )
+			if (IsInstance(nestedFSM) && (nestedFSM.isRunning || nestedFSM.isPaused) ){
 				nestedFSM.Stop();
+			}
 		}
 
 		protected override void OnPause(){
-			if (IsInstance(nestedFSM))
+			if (IsInstance(nestedFSM)){
 				nestedFSM.Pause();
+			}
 		}
 
 		bool IsInstance(FSM fsm){

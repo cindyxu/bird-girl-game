@@ -45,6 +45,15 @@ namespace ParadoxNotion.Design{
 		}
 	}	
 
+	///When a class is associated with a color (provide in hex string without "#")
+	[AttributeUsage(AttributeTargets.Class)]
+	public class ColorAttribute : Attribute{
+		public string hexColor;
+		public ColorAttribute(string hexColor){
+			this.hexColor = hexColor;
+		}
+	}	
+
 	///Makes the int field show as layerfield
 	[AttributeUsage(AttributeTargets.Field)]
 	public class LayerFieldAttribute : Attribute{}
@@ -111,7 +120,7 @@ namespace ParadoxNotion.Design{
 	[AttributeUsage(AttributeTargets.Field)]
 	public class RequiredFieldAttribute : Attribute{}
 
-	//A very internal marker attributes to be used with generic types to designate that list types should also be shown
+	//A very internal marker attribute to be used with generic types to designate that list types should also be shown
 	//List types are not appended by default for user convenience
 	[AttributeUsage(AttributeTargets.Class)]
 	public class AppendListTypesAttribute : Attribute{}

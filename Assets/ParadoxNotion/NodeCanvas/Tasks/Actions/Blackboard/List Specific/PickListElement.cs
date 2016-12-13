@@ -13,6 +13,10 @@ namespace NodeCanvas.Tasks.Actions{
 		[BlackboardOnly]
         public BBParameter<T> saveAs;
 
+        protected override string info{
+        	get {return string.Format("{0} = {1} [{2}]", saveAs, targetList, index);}
+        }
+
 		protected override void OnExecute(){
 
 			if (index.value < 0 || index.value >= targetList.value.Count){

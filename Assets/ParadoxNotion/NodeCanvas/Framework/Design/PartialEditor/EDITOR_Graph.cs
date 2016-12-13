@@ -36,7 +36,7 @@ namespace NodeCanvas.Framework{
 					Debug.LogWarning("You can't view sub-graphs in play mode until they are initialized, to avoid editing asset references accidentally");
 					return;
 				}
-				
+
 				Undo.RecordObject(this, "Change View");
 				if (value != null){
 					value.currentChildGraph = null;
@@ -49,10 +49,12 @@ namespace NodeCanvas.Framework{
 		public static object currentSelection{
 			get
 			{
-				if (multiSelection.Count > 1)
+				if (multiSelection.Count > 1){
 					return null;
-				if (multiSelection.Count == 1)
+				}
+				if (multiSelection.Count == 1){
 					return multiSelection[0];
+				}
 				return _currentSelection;
 			}
 			set
@@ -70,11 +72,11 @@ namespace NodeCanvas.Framework{
 			get {return _multiSelection;}
 			set
 			{
-				if (value.Count == 1){
+				if (value != null && value.Count == 1){
 					currentSelection = value[0];
 					value.Clear();
 				}
-				_multiSelection = value;
+				_multiSelection = value != null? value : new List<object>();
 			}
 		}
 
@@ -90,33 +92,39 @@ namespace NodeCanvas.Framework{
             get { return this.GetType().Name.GetCapitals(); }
         }
 
+        private float screenWidth{ //for retina
+        	get {return EditorGUIUtility.currentViewWidth;}
+        }
+
+        private float screenHeight{
+        	get {return Screen.height;}
+        }
+
 		///
 
 		///Clears the whole graph
 		public void ClearGraph(){
 			canvasGroups = null;
-			foreach (var node in allNodes.ToArray())
+			foreach (var node in allNodes.ToArray()){
 				RemoveNode(node);
+			}
 		}
 
-		//This is called while within Begin/End windows and ScrollArea from the GraphEditor. This is the main function that calls others
+		//This is called while within Begin/End windows from the GraphEditor.
 		public void ShowNodesGUI(Event e, Rect drawCanvas, bool fullDrawPass, Vector2 canvasMousePos, float zoomFactor){
 
 			GUI.color = Color.white;
 			GUI.backgroundColor = Color.white;
 
-			UpdateNodeIDs(false);
-
-			//first pass: Nodes
 			for (var i = 0; i < allNodes.Count; i++){
-				if (fullDrawPass || drawCanvas.Overlaps(allNodes[i].nodeRect)){
-					allNodes[i].ShowNodeGUI(canvasMousePos, zoomFactor);
+
+				//ensure IDs are updated
+				if (allNodes[i].ID != i + 1){
+					UpdateNodeIDs(true);
+					break;
 				}
-			}
 
-			//second pass: Connections
-			for (var i = 0; i < allNodes.Count; i++){
-				allNodes[i].DrawNodeConnections(canvasMousePos, zoomFactor);
+				allNodes[i].ShowNodeGUI(drawCanvas, fullDrawPass, canvasMousePos, zoomFactor);
 			}
 
 			if (primeNode != null){
@@ -192,28 +200,20 @@ namespace NodeCanvas.Framework{
 				var menu = new GenericMenu();
 
 				//Bind
-				if (!Application.isPlaying && owner != null && !owner.graphIsLocal){
+				if (!Application.isPlaying && owner != null && !owner.graphIsBound){
 					menu.AddItem(new GUIContent("Bind To Owner"), false, ()=>
 					{
-						if (EditorUtility.DisplayDialog("Bind To Owner", "This will create a local copy of the graph binded to the owner.\nIt will allow you to assign direct scene references in the graph.\nContinue?", "YES", "NO")){
-							var newGraph = (Graph)EditorUtils.AddScriptableComponent(owner.gameObject, owner.graphType);
-							newGraph.hideFlags = HideFlags.HideInInspector;
-							
-							EditorUtility.CopySerialized(owner.graph, newGraph);
-							newGraph.Validate();
-
-							Undo.RegisterCreatedObjectUndo(newGraph, "New Local Graph");
+						if (EditorUtility.DisplayDialog("Bind Graph", "This will make a local copy of the graph, bound to the owner.\n\nThis allows you to make local changes and assign scene object references directly.\n\nNote that you can also use scene object references through the use of Blackboard Variables.\n\nBind Graph?", "YES", "NO")){
 							Undo.RecordObject(owner, "New Local Graph");
-							owner.graph = newGraph;
+							owner.SetBoundGraphReference(owner.graph);
 							EditorUtility.SetDirty(owner);
-							EditorUtility.SetDirty(newGraph);
 						}
 					});
 				}
 				else menu.AddDisabledItem(new GUIContent("Bind To Owner"));
 
 				//Save to asset
-				if (owner != null && owner.graphIsLocal){
+				if (owner != null && owner.graphIsBound){
 					menu.AddItem(new GUIContent("Save To Asset"), false, ()=>
 					{
 						var newGraph = (Graph)EditorUtils.CreateAsset(this.GetType(), true);
@@ -228,10 +228,11 @@ namespace NodeCanvas.Framework{
 
 				//Create defined vars
 				if (blackboard != null){
-					menu.AddItem(new GUIContent("Create Defined Blackboard Variables"), false, ()=>
+					menu.AddItem(new GUIContent("Promote Defined Parameters To Variables"), false, ()=>
 					{
-						if (EditorUtility.DisplayDialog("Create Defined Variables", "This will fill the current Blackboard for each defined variable parameter in the graph.\nContinue?", "YES", "NO"))
+						if (EditorUtility.DisplayDialog("Promote Defined Parameters", "This will fill the current Blackboard with a Variable for each defined Parameter in the graph.\nContinue?", "YES", "NO")){
 							CreateDefinedParameterVariables(blackboard);
+						}
 					});
 				}
 				else menu.AddDisabledItem(new GUIContent("Create Defined Blackboard Variables"));
@@ -251,6 +252,7 @@ namespace NodeCanvas.Framework{
 				menu.AddItem (new GUIContent ("Show Summary Info"), NCPrefs.showTaskSummary, ()=> {NCPrefs.showTaskSummary = !NCPrefs.showTaskSummary;});
 				menu.AddItem (new GUIContent ("Log Events"), NCPrefs.logEvents, ()=>{ NCPrefs.logEvents = !NCPrefs.logEvents; });
 				menu.AddItem (new GUIContent ("Grid Snap"), NCPrefs.doSnap, ()=> {NCPrefs.doSnap = !NCPrefs.doSnap;});
+				menu.AddItem (new GUIContent ("Breakpoints Pause Editor"), NCPrefs.breakpointPauseEditor, ()=> {NCPrefs.breakpointPauseEditor = !NCPrefs.breakpointPauseEditor;});
 				if (autoSort){
 					menu.AddItem (new GUIContent ("Automatic Hierarchical Move"), NCPrefs.hierarchicalMove, ()=> {NCPrefs.hierarchicalMove = !NCPrefs.hierarchicalMove;});
 				}
@@ -258,7 +260,8 @@ namespace NodeCanvas.Framework{
 				menu.AddItem (new GUIContent ("Connection Style/Stepped"), NCPrefs.connectionStyle == NCPrefs.ConnectionStyle.Stepped, ()=> {NCPrefs.connectionStyle = NCPrefs.ConnectionStyle.Stepped;});
 				menu.AddItem (new GUIContent ("Connection Style/Straight"), NCPrefs.connectionStyle == NCPrefs.ConnectionStyle.Straight, ()=> {NCPrefs.connectionStyle = NCPrefs.ConnectionStyle.Straight;});
 				//menu.AddItem (new GUIContent ("Use External Inspector"), NCPrefs.useExternalInspector, ()=> {NCPrefs.useExternalInspector = !NCPrefs.useExternalInspector;});
-				menu.AddItem( new GUIContent("Open Preferred Types Editor..."), false, ()=>{PreferedTypesEditorWindow.ShowWindow();} );
+				// menu.AddItem( new GUIContent("Open Preferred Types Editor..."), false, ()=>{PreferedTypesEditorWindow.ShowWindow();} );
+				menu.AddDisabledItem(new GUIContent("Open Preferred Types Editor..."));
 				menu.ShowAsContext();
 			}
 			/////////
@@ -266,9 +269,9 @@ namespace NodeCanvas.Framework{
 			GUILayout.Space(10);
 
 			////CLICK SELECT
-			if (agent != null && GUILayout.Button("Select Owner", EditorStyles.toolbarButton, GUILayout.Width(80))){
-				Selection.activeObject = agent;
-				EditorGUIUtility.PingObject(agent);
+			if (owner != null && GUILayout.Button("Select Owner", EditorStyles.toolbarButton, GUILayout.Width(80))){
+				Selection.activeObject = owner;
+				EditorGUIUtility.PingObject(owner);
 			}
 
 			if (EditorUtility.IsPersistent(this) && GUILayout.Button("Select Graph", EditorStyles.toolbarButton, GUILayout.Width(80))){
@@ -311,6 +314,11 @@ namespace NodeCanvas.Framework{
 
 		void HandleEvents(Event e, Vector2 canvasMousePos){
 
+			//we also undo graph pans
+			if (e.type == EventType.MouseDown && e.button == 2){
+	    		Undo.RegisterCompleteObjectUndo(this, "Graph Pan");
+	    	}
+
 			//variable is set as well, so that  nodes know if they can be clicked
 			var inspectorWithScrollbar = new Rect(inspectorRect.x, inspectorRect.y, inspectorRect.width + 14, inspectorRect.height);
 			allowClick = !inspectorWithScrollbar.Contains(e.mousePosition) && !blackboardRect.Contains(e.mousePosition);
@@ -318,22 +326,72 @@ namespace NodeCanvas.Framework{
 				return;
 			}
 
+			//Shortcuts
+			if (e.type == EventType.KeyUp && GUIUtility.keyboardControl == 0){
+				
+				//Delete
+				if (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace){
 
-			//Tilt '`' and 'space' opens up the compelte context menu browser
+					if (multiSelection != null && multiSelection.Count > 0){
+						foreach (var obj in multiSelection.ToArray()){
+							if (obj is Node){
+								RemoveNode(obj as Node);
+							}
+							if (obj is Connection){
+								RemoveConnection(obj as Connection);
+							}
+						}
+						multiSelection = null;
+					}
+
+					if (selectedNode != null){
+						RemoveNode(selectedNode);
+						currentSelection = null;
+					}
+
+					if (selectedConnection != null){
+						RemoveConnection(selectedConnection);
+						currentSelection = null;
+					}
+					e.Use();
+				}
+
+				//Duplicate
+				if (e.keyCode == KeyCode.D && e.control){
+					if (multiSelection != null && multiSelection.Count > 0){
+						var newNodes = CopyNodesToGraph(multiSelection.OfType<Node>().ToList(), this);
+						multiSelection = newNodes.Cast<object>().ToList();
+					}
+					if (selectedNode != null){
+						currentSelection = selectedNode.Duplicate(this);
+					}
+					//Connections can't be duplicated by themselves. They do so as part of multiple node duplication though.
+					e.Use();
+				}
+			}
+
+
+			//Tilt '`' or 'space' opens up the compelte context menu browser
 			if (e.type == EventType.KeyDown && !e.shift && (e.keyCode == KeyCode.BackQuote || e.keyCode == KeyCode.Space) ){
 				CompleteContextMenu.Show( GetAddNodeMenu(canvasMousePos), e.mousePosition, string.Format("Add {0} Node", this.GetType().FriendlyName()), baseNodeType );
 			}
 
 
-			//right click canvas context menu. Basicaly for adding new nodes
+			//Right click canvas context menu. Basicaly for adding new nodes.
 			if (e.type == EventType.ContextClick){
 				
 				var menu = GetAddNodeMenu(canvasMousePos);
 
 				if (Node.copiedNodes != null && Node.copiedNodes[0].GetType().IsSubclassOf(baseNodeType)){
-					
+					menu.AddSeparator("/");
 					if (Node.copiedNodes.Length == 1){
-						menu.AddItem(new GUIContent(string.Format("Paste Node ({0})", Node.copiedNodes[0].GetType().Name )), false, ()=> { var newNode = Node.copiedNodes[0].Duplicate(this); newNode.nodePosition = canvasMousePos; });
+						menu.AddItem(new GUIContent(string.Format("Paste Node ({0})", Node.copiedNodes[0].GetType().Name )), false, ()=>
+							{
+								var newNode = Node.copiedNodes[0].Duplicate(this);
+								newNode.nodePosition = canvasMousePos;
+								currentSelection = newNode;
+							});
+
 					} else if (Node.copiedNodes.Length > 1){
 						menu.AddItem(new GUIContent(string.Format("Paste Nodes ({0})", Node.copiedNodes.Length.ToString() )), false, ()=>
 						{
@@ -343,6 +401,7 @@ namespace NodeCanvas.Framework{
 							for (var i = 1; i < newNodes.Count; i++){
 								newNodes[i].nodePosition -= diff;
 							}
+							multiSelection = newNodes.Cast<object>().ToList();
 						});
 					}
 				}
@@ -375,7 +434,7 @@ namespace NodeCanvas.Framework{
 
 			if (NCPrefs.showComments && !string.IsNullOrEmpty(graphComments)){
 				GUI.backgroundColor = new Color(1f,1f,1f,0.3f);
-				GUI.Box(new Rect(10, Screen.height - 100, 330, 60), graphComments, (GUIStyle)"textArea");
+				GUI.Box(new Rect(10, screenHeight - 100, 330, 60), graphComments, (GUIStyle)"textArea");
 				GUI.backgroundColor = Color.white;
 			}
 		}
@@ -402,7 +461,7 @@ namespace NodeCanvas.Framework{
 			if (NCPrefs.showNodePanel){
 
 				var lastSkin = GUI.skin;
-				var viewRect = new Rect(inspectorRect.x, inspectorRect.y, inspectorRect.width + 18, Screen.height - inspectorRect.y - 30);
+				var viewRect = new Rect(inspectorRect.x, inspectorRect.y, inspectorRect.width + 18, screenHeight - inspectorRect.y - 30);
 				nodeInspectorScrollPos = GUI.BeginScrollView(viewRect, nodeInspectorScrollPos, inspectorRect);
 
 				GUILayout.BeginArea(inspectorRect, title, (GUIStyle)"editorPanel");
@@ -447,7 +506,8 @@ namespace NodeCanvas.Framework{
 				return;
 			}
 
-			blackboardRect.x = Screen.width - 350;
+			blackboardRect.x = screenWidth - 350;
+
 			blackboardRect.y = 30;
 			blackboardRect.width = 330;
 			
@@ -461,7 +521,7 @@ namespace NodeCanvas.Framework{
 			if (NCPrefs.showBlackboard){
 
 				var lastSkin = GUI.skin;
-				var viewRect = new Rect(blackboardRect.x, blackboardRect.y, blackboardRect.width + 16, Screen.height - blackboardRect.y - 30);
+				var viewRect = new Rect(blackboardRect.x, blackboardRect.y, blackboardRect.width + 16, screenHeight - blackboardRect.y - 30);
 				var r = new Rect(blackboardRect.x - 3, blackboardRect.y, blackboardRect.width, blackboardRect.height);
 				blackboardInspectorScrollPos = GUI.BeginScrollView(viewRect, blackboardInspectorScrollPos, r);
 
@@ -501,20 +561,20 @@ namespace NodeCanvas.Framework{
  		//Handles Drag&Drop operations
 		void AcceptDrops(Event e, Vector2 canvasMousePos){
 
-			if (!allowClick){
-				return;
-			}
+			if (allowClick){
 
-			if (e.type == EventType.DragUpdated && DragAndDrop.objectReferences.Length == 1){
-				DragAndDrop.visualMode = DragAndDropVisualMode.Link;
-			}
+				if (DragAndDrop.objectReferences != null && DragAndDrop.objectReferences.Length == 1){
 
-			if (e.type == EventType.DragPerform){
-				if (DragAndDrop.objectReferences.Length != 1){
-					return;
+					if (e.type == EventType.DragUpdated){
+						DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+					}
+
+					if (e.type == EventType.DragPerform){
+						var value = DragAndDrop.objectReferences[0];
+						DragAndDrop.AcceptDrag();
+						OnDropAccepted(value, canvasMousePos);
+					}
 				}
-				DragAndDrop.AcceptDrag();
-				OnDropAccepted(DragAndDrop.objectReferences[0], canvasMousePos);
 			}
 		}
 
@@ -523,6 +583,13 @@ namespace NodeCanvas.Framework{
 
 		///Handle what happens when blackboard variable is drag&droped in graph
 		virtual protected void OnVariableDropInGraph(Variable variable, Event e, Vector2 canvasMousePos){}
+
+		[ContextMenu("Delete")]
+		public void Delete(){
+			if (EditorUtility.DisplayDialog("Delete Graph Object", "Area you sure you want to delete this Graph?", "Yes", "No!")){
+				Undo.DestroyObjectImmediate(this);
+			}
+		}
 	}
 }
 

@@ -22,22 +22,22 @@ namespace NodeCanvas.Tasks.Actions{
 		}
 
 		protected override void OnExecute(){
-			Debug.Log(log.value);
+			Debug.Log(string.Format("(<b>{0}</b>) {1}", agent.gameObject.name, log.value), agent.gameObject);
 			if (secondsToRun > 0){
-				MonoManager.AddOnGUIMethod(OnGUI);
-			} else {
-				EndAction(finishStatus == CompactStatus.Success? true : false );
+				MonoManager.current.onGUI += OnGUI;
 			}
 		}
 
 		protected override void OnStop(){
-			if (secondsToRun > 0)
-				MonoManager.RemoveOnGUIMethod(OnGUI);
+			if (secondsToRun > 0){
+				MonoManager.current.onGUI -= OnGUI;
+			}
 		}
 
 		protected override void OnUpdate(){
-			if (elapsedTime >= secondsToRun)
+			if (elapsedTime >= secondsToRun){
 				EndAction(finishStatus == CompactStatus.Success? true : false );
+			}
 		}
 
 

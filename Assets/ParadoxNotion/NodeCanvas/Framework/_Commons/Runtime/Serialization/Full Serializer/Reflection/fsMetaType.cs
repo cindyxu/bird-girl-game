@@ -50,7 +50,7 @@ namespace ParadoxNotion.Serialization.FullSerializer {
                     Generator = Expression.Lambda<Func<object>>(Expression.New(reflectedType)).Compile();
                 }
             }
-            catch{Generator = null;}
+            catch {Generator = null;}
 #endif
         }
 

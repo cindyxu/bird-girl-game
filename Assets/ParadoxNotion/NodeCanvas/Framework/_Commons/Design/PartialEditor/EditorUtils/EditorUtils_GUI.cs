@@ -20,8 +20,6 @@ namespace ParadoxNotion.Design{
 
 	partial class EditorUtils {
 
-		private static Dictionary<Color, Texture2D> textures = new Dictionary<Color, Texture2D>();
-
         private static Texture2D _tex;
         private static Texture2D tex
         {
@@ -33,19 +31,6 @@ namespace ParadoxNotion.Design{
                 }
                 return _tex;
             }
-        }
-
-        ///Get a colored 1x1 texture
-        public static Texture2D GetTexture(Color color){
-        	
-        	if (textures.ContainsKey(color))
-    			return textures[color];
-
-        	var newTexture = new Texture2D(1,1);
-        	newTexture.SetPixel(0, 0, color);
-        	newTexture.Apply();
-        	textures[color] = newTexture;
-        	return newTexture;
         }
 
 		//a cool label :-P (for headers)
@@ -148,7 +133,7 @@ namespace ParadoxNotion.Design{
 
 
 		//For generic automatic editors. Passing a MemberInfo will also check for attributes
-		public static object GenericField(string name, object value, Type t, MemberInfo member = null, object instance = null){
+		public static object GenericField(string name, object value, Type t, MemberInfo member = null, object context = null){
 
 			if (t == null){
 				GUILayout.Label("NO TYPE PROVIDED!");
@@ -197,14 +182,14 @@ namespace ParadoxNotion.Design{
 					name = nameAtt.name;
 				}
 
-				if (instance != null){
+				if (context != null){
 					var showAtt = attributes.FirstOrDefault(a => a is ShowIfAttribute) as ShowIfAttribute;
 					if (showAtt != null){
-						var targetField = instance.GetType().GetField(showAtt.fieldName);
+						var targetField = context.GetType().GetField(showAtt.fieldName);
 						if (targetField == null || targetField.FieldType != typeof(bool)){
 							GUILayout.Label(string.Format("[ShowIf] Error: bool \"{0}\" does not exist.", showAtt.fieldName));
 						} else {
-							if ((bool)targetField.GetValue(instance) != showAtt.show){
+							if ((bool)targetField.GetValue(context) != showAtt.show){
 								return value;
 							}
 						}
@@ -215,35 +200,44 @@ namespace ParadoxNotion.Design{
 
 			//Before everything check BBParameter
 			if (typeof(BBParameter).IsAssignableFrom(t)){
-				return BBParameterField(name, (BBParameter)value, false, member);
+				return BBParameterField(name, (BBParameter)value, false, member, context);
 			}
 
 
-			//Cutstom object drawers
+			//Custom object drawers
 			var objectDrawer = GetCustomDrawer(t);
 			if (objectDrawer != null && !(objectDrawer is NoDrawer) ){
-				return objectDrawer.DrawGUI(name, value, member as FieldInfo, null, instance);
+/*
+				var field = member as FieldInfo;
+				if (field != null && typeof(BBParameter).IsAssignableFrom(field.FieldType) ){
+					var bbParam = field.GetValue(context);
+					context = bbParam;
+					member = bbParam.GetType().GetField("_value", BindingFlags.Instance | BindingFlags.NonPublic);
+				}
+*/
+				return objectDrawer.DrawGUI(name, value, member as FieldInfo, null, context);
 			}
 
-			//Cutstom attribute drawers
-			foreach(CustomDrawerAttribute att in attributes.OfType<CustomDrawerAttribute>()){
+			//Custom attribute drawers
+			foreach(var att in attributes.OfType<CustomDrawerAttribute>()){
 				var attributeDrawer = GetCustomDrawer(att.GetType());
 				if (attributeDrawer != null && !(attributeDrawer is NoDrawer)){
-					return attributeDrawer.DrawGUI(name, value, member as FieldInfo, att, instance);
+					return attributeDrawer.DrawGUI(name, value, member as FieldInfo, att, context);
 				}
 			}
 		
 
 			//Then check UnityObjects
             if ( typeof(UnityObject).IsAssignableFrom(t) ) {
-                if (t == typeof(Component) && (Component)value != null)
+                if (t == typeof(Component) && (Component)value != null){
                     return ComponentField(name, (Component)value, typeof(Component));
-                return EditorGUILayout.ObjectField(name, (UnityObject)value, t, true);
+                }
+                return EditorGUILayout.ObjectField(name, (UnityObject)value, t, typeof(Component).IsAssignableFrom(t) || t == typeof(GameObject) );
 		    }
 
 		    //Force UnityObject field?
 		    if (member != null && attributes.Any(a => a is ForceObjectFieldAttribute)){
-		    	return EditorGUILayout.ObjectField(name, value as UnityObject, t, true );
+		    	return EditorGUILayout.ObjectField(name, value as UnityObject, t, typeof(Component).IsAssignableFrom(t) || t == typeof(GameObject) );
 		    }
 
 			//Restricted popup values?
@@ -254,7 +248,7 @@ namespace ParadoxNotion.Design{
 						try
 						{
 							var typeName = popAtt.staticPath.Substring(0, popAtt.staticPath.LastIndexOf("."));
-							var type = ReflectionTools.GetType( typeName );
+							var type = ReflectionTools.GetType( typeName, /*fallback?*/false );
 							var start = popAtt.staticPath.LastIndexOf(".") + 1;
 							var end = popAtt.staticPath.Length;
 							var propName = popAtt.staticPath.Substring(start, end - start);
@@ -276,7 +270,7 @@ namespace ParadoxNotion.Design{
 
 		    //Check Type of Type
 			if (t == typeof(Type)){
-				return Popup<Type>(name, (Type)value, UserTypePrefs.GetPreferedTypesList(typeof(object), false) );
+				return Popup<Type>(name, (Type)value, UserTypePrefs.GetPreferedTypesList(typeof(object), true) );
 			}
 
 			//Check abstract
@@ -384,10 +378,10 @@ namespace ParadoxNotion.Design{
 			}
 
 			if (typeof(IList).IsAssignableFrom(t))
-				return ListEditor(name, (IList)value, t, instance);
+				return ListEditor(name, (IList)value, t, context);
 
 			if (typeof(IDictionary).IsAssignableFrom(t))
-				return DictionaryEditor(name, (IDictionary)value, t, instance);
+				return DictionaryEditor(name, (IDictionary)value, t, context);
 
 
 			//show nested class members recursively

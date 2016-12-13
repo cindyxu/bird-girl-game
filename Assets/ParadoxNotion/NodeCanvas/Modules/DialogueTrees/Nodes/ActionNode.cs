@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace NodeCanvas.DialogueTrees{
 
-	[Name("Action")]
+	[Name("Task Action")]
 	[Description("Execute an Action Task for the Dialogue Actor selected.")]
 	public class ActionNode : DTNode, ITaskAssignable<ActionTask>{
 
@@ -26,8 +26,9 @@ namespace NodeCanvas.DialogueTrees{
 
 		protected override Status OnExecute(Component agent, IBlackboard bb){
 
-			if (action == null)
+			if (action == null){
 				return Error("Action is null on Dialogue Action Node");
+			}
 
 			status = Status.Running;
 			StartCoroutine(UpdateAction(finalActor.transform));
@@ -35,7 +36,6 @@ namespace NodeCanvas.DialogueTrees{
 		}
 
 		IEnumerator UpdateAction(Component actionAgent){
-
 			while(status == Status.Running){
 				var actionStatus = action.ExecuteAction(actionAgent, graphBlackboard);
 				if (actionStatus != Status.Running){

@@ -67,7 +67,8 @@ namespace TileEditor
 
                 TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(path);
                 importer.isReadable = true;
-                importer.textureFormat = TextureImporterFormat.RGBA32;
+                // importer.textureFormat = TextureImporterFormat.RGBA32;
+				importer.textureCompression = TextureImporterCompression.Uncompressed;
                 AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
 
                 Debug.Log(Path.GetPathRoot(tpPath));

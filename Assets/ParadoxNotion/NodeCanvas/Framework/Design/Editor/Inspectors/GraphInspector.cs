@@ -34,7 +34,9 @@ namespace NodeCanvas.Editor{
             UndoManager.CheckDirty(this);
         }
 
-        void ShowBasicGUI(){
+
+        //name, description, edit button
+        public void ShowBasicGUI(){
 
             GUILayout.Space(10);
             graph.name = EditorGUILayout.TextField("Name", graph.name);
@@ -42,12 +44,14 @@ namespace NodeCanvas.Editor{
             EditorUtils.TextFieldComment(graph.graphComments);
 
             GUI.backgroundColor = new Color(0.8f,0.8f,1);
-            if (GUILayout.Button(string.Format("EDIT {0}", graph.GetType().Name.SplitCamelCase().ToUpper() )))
+            if (GUILayout.Button(string.Format("EDIT {0}", graph.GetType().Name.SplitCamelCase().ToUpper() ))){
                 GraphEditor.OpenWindow(graph);
+            }
             GUI.backgroundColor = Color.white;
         }
 
-        void ShowJsonImportExport(){
+        //Json import/export button
+        public void ShowJsonImportExport(){
 
 #if !UNITY_WEBPLAYER
 
@@ -78,7 +82,8 @@ namespace NodeCanvas.Editor{
         }
 
 
-        void ShowDefinedParametersGUI(){
+        //List of defined parameters in graph
+        public void ShowDefinedParametersGUI(){
 
             var varInfo = new Dictionary<string, System.Type>();
             var occurencies = new Dictionary<string, int>();
@@ -92,8 +97,9 @@ namespace NodeCanvas.Editor{
                 }
 
                 varInfo[bbVar.name] = bbVar.varType;
-                if (!occurencies.ContainsKey(bbVar.name))
+                if (!occurencies.ContainsKey(bbVar.name)){
                     occurencies[bbVar.name] = 0;
+                }
                 occurencies[bbVar.name] ++;
             }
 
@@ -109,24 +115,27 @@ namespace NodeCanvas.Editor{
             GUI.color = Color.yellow;
             GUILayout.Label("Name");
             GUI.color = Color.white;
-            foreach (var name in varInfo.Keys)
+            foreach (var name in varInfo.Keys){
                 GUILayout.Label(name);
+            }
             GUILayout.EndVertical();
 
             GUILayout.BeginVertical(GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true));
             GUI.color = Color.yellow;            
             GUILayout.Label("Type");
             GUI.color = Color.white;
-            foreach (var type in varInfo.Values)
+            foreach (var type in varInfo.Values){
                 GUILayout.Label(type.FriendlyName());
+            }
             GUILayout.EndVertical();
 
             GUILayout.BeginVertical(GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true));
             GUI.color = Color.yellow;
             GUILayout.Label("Occurencies");
             GUI.color = Color.white;
-            foreach (var occ in occurencies.Values)
+            foreach (var occ in occurencies.Values){
                 GUILayout.Label(occ.ToString());
+            }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
 

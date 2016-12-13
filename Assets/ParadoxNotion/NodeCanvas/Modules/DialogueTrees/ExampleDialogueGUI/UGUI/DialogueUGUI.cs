@@ -20,17 +20,21 @@ namespace NodeCanvas.DialogueTrees.UI.Examples{
 
 
 		//Options...
+		[Header("Input Options")]
 		public bool skipOnInput;
 		public bool waitForInput;
 
 		//Group...
+		[Header("Subtitles")]
 		public RectTransform subtitlesGroup;
 		public Text actorSpeech;
 		public Text actorName;
 		public Image actorPortrait;
+		public RectTransform waitInputIndicator;
 		public SubtitleDelays subtitleDelays = new SubtitleDelays();
 
 		//Group...
+		[Header("Multiple Choice")]
 		public RectTransform optionsGroup;
 		public Button optionButton;
 		private Dictionary<Button, int> cachedButtons;
@@ -51,10 +55,19 @@ namespace NodeCanvas.DialogueTrees.UI.Examples{
 			DialogueTree.OnMultipleChoiceRequest += OnMultipleChoiceRequest;
 		}
 
+		void OnDisable(){
+			DialogueTree.OnDialogueStarted       -= OnDialogueStarted;
+			DialogueTree.OnDialoguePaused        -= OnDialoguePaused;
+			DialogueTree.OnDialogueFinished      -= OnDialogueFinished;
+			DialogueTree.OnSubtitlesRequest      -= OnSubtitlesRequest;
+			DialogueTree.OnMultipleChoiceRequest -= OnMultipleChoiceRequest;
+		}
+
 		void Start(){
 			subtitlesGroup.gameObject.SetActive(false);
 			optionsGroup.gameObject.SetActive(false);
 			optionButton.gameObject.SetActive(false);
+			waitInputIndicator.gameObject.SetActive(false);
 			originalSubsPosition = subtitlesGroup.transform.position;
 		}
 
@@ -70,6 +83,14 @@ namespace NodeCanvas.DialogueTrees.UI.Examples{
 		void OnDialogueFinished(DialogueTree dlg){
 			subtitlesGroup.gameObject.SetActive(false);
 			optionsGroup.gameObject.SetActive(false);
+			if (cachedButtons != null){
+				foreach (var tempBtn in cachedButtons.Keys){
+					if (tempBtn != null){
+						Destroy(tempBtn.gameObject);
+					}
+				}
+				cachedButtons = null;
+			}
 		}
 
 
@@ -147,9 +168,11 @@ namespace NodeCanvas.DialogueTrees.UI.Examples{
 			}
 
 			if (waitForInput){
+				waitInputIndicator.gameObject.SetActive(true);
 				while(!Input.anyKeyDown){
 					yield return null;
 				}
+				waitInputIndicator.gameObject.SetActive(false);
 			}
 
 			yield return null;

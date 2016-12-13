@@ -40,8 +40,9 @@ namespace NodeCanvas.StateMachines{
 
 		protected override void OnUpdate(){
 			if (actionList.ExecuteAction(graphAgent, graphBlackboard) != Status.Running){
-				if (!repeatStateActions)
+				if (!repeatStateActions){
 					Finish();
+				}
 			}
 		}
 
@@ -59,8 +60,9 @@ namespace NodeCanvas.StateMachines{
 		#if UNITY_EDITOR
 
 		protected override void OnNodeGUI(){
-			if (repeatStateActions)
+			if (repeatStateActions){
 				GUILayout.Label("<b>[REPEAT]</b>");
+			}
 			base.OnNodeGUI();
 		}
 
@@ -68,8 +70,9 @@ namespace NodeCanvas.StateMachines{
 
 			ShowBaseFSMInspectorGUI();
 
-			if (actionList == null)
+			if (actionList == null){
 				return;
+			}
 
 			EditorUtils.CoolLabel("Actions");
 			GUI.color = repeatStateActions? GUI.color : new Color(1,1,1,0.5f);

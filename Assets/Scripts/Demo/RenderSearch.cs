@@ -17,7 +17,7 @@ public class RenderSearch {
 	}
 
 	public void StepSearch () {
-		List<WaypointPath> result;
+		List<IWaypointPath> result;
 		mSearch.Step (out result);
 		renderSearch ();
 	}
@@ -31,11 +31,11 @@ public class RenderSearch {
 	}
 
 	private void renderNode (WaypointNode node) {
-		List<WaypointPath> chain = mSearch.reconstructChain (node);
-		foreach (WaypointPath path in chain) {
+		List<IWaypointPath> chain = mSearch.reconstructChain (node);
+		foreach (IWaypointPath path in chain) {
 			Range endRange = path.GetEndRange ();
 			mDrawLines.Add (RenderUtils.CreateLine (endRange.xl, path.GetEndPoint ().GetRect ().yMin, 
-				endRange.xr, path.GetEndPoint ().GetRect ().yMax, Color.yellow));
+				endRange.xr, path.GetEndPoint ().GetRect ().yMax, 0.1f, Color.yellow));
 		}
 	}
 

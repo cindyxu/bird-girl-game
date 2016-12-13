@@ -1,19 +1,23 @@
-﻿using System.Linq;
+﻿using UnityEngine;
+using System.Linq;
 using ParadoxNotion.Design;
-using UnityEngine;
+using ParadoxNotion.Serialization;
+using ParadoxNotion.Serialization.FullSerializer;
 
 namespace NodeCanvas.Framework.Internal{
 
     ///Missing node types are deserialized into this on deserialization and can load back if type is found
     [DoNotList]
 	[Description("Please resolve the MissingNode issue by either replacing the node or importing the missing node type in the project")]
-	sealed public class MissingNode : Node {
+	sealed public class MissingNode : Node, IMissingRecoverable{
 
-		public string missingType;
-		public string recoveryState;
+		[fsProperty]
+		public string missingType{get;set;}
+		[fsProperty]
+		public string recoveryState{get;set;}
 
 		public override string name{
-			get { return string.Format("<color=#ff6457>{0}</color>", "* Missing Node *"); }
+			get { return "<color=#ff6457>* Missing Node *</color>"; }
 		}
 
 		public override System.Type outConnectionType{ get {return null;} }
@@ -35,7 +39,7 @@ namespace NodeCanvas.Framework.Internal{
 		}
 
 		protected override void OnNodeInspectorGUI(){
-			GUILayout.Label(Strip());
+			GUILayout.Label(missingType);
 		}
 
 		string Strip(){

@@ -47,6 +47,7 @@ public class WalkLocomotion : Locomotion {
 		if (mInputCatcher.GetRight()) {
 			velocity.x += mWp.walkSpd;
 		}
+
 		if (mInputCatcher.GetJumpPress () && mSortedEdgeCollidable.GetCurrentEdge () != null) {
 			velocity.y = mWp.jumpSpd;
 			if (onJump != null) onJump ();

@@ -10,6 +10,7 @@ using ParadoxNotion.Serialization;
 namespace NodeCanvas.Framework{
 
 	///ActionList is an ActionTask itself that holds multilple ActionTasks which can be executed either in parallel or in sequence.
+	[DoNotList]
 	public class ActionList : ActionTask{
 
 		public enum ActionsExecutionMode
@@ -64,7 +65,6 @@ namespace NodeCanvas.Framework{
 		protected override void OnExecute(){
 			finishedIndeces.Clear();
 			currentActionIndex = 0;
-			OnUpdate();
 		}
 
 		protected override void OnUpdate(){
@@ -149,7 +149,7 @@ namespace NodeCanvas.Framework{
 			}
 		}
 
-		void AddAction(ActionTask action){
+		public void AddAction(ActionTask action){
 
 			if (action is ActionList){
 				Debug.LogWarning("Adding an ActionList within another ActionList is not allowed for clarity");

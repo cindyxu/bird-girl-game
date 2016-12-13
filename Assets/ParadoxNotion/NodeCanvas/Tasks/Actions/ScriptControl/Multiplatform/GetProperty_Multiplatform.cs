@@ -82,12 +82,12 @@ namespace NodeCanvas.Tasks.Actions{
 			if (!Application.isPlaying && GUILayout.Button("Select Property")){
 				var menu = new UnityEditor.GenericMenu();
 				if (agent != null){
-					foreach(var comp in agent.GetComponents(typeof(Component)).Where(c => c.hideFlags == 0) ){
+					foreach(var comp in agent.GetComponents(typeof(Component)).Where(c => c.hideFlags != HideFlags.HideInInspector) ){
 						menu = EditorUtils.GetMethodSelectionMenu(comp.GetType(), typeof(object), typeof(object), SetMethod, 0, true, true, menu);
 					}
 					menu.AddSeparator("/");
 				}
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component))){
 					menu = EditorUtils.GetMethodSelectionMenu(t, typeof(object), typeof(object), SetMethod, 0, true, true, menu);
 				}
 

@@ -7,6 +7,7 @@ namespace NodeCanvas.StateMachines{
 
 	[Name("Concurrent")]
 	[Description("Execute a number of Action Tasks and in parallel to any other state, as soon as the FSM is started. All Action Tasks will prematurely be stoped if the FSM stops as well.\nThis is not a state per se and thus it has no transitions as well as it can't be Entered by transitions.")]
+	[Color("ff64cb")]
 	public class ConcurrentState : FSMState, IUpdatable, ITaskAssignable{
 
 		[SerializeField]
@@ -30,7 +31,7 @@ namespace NodeCanvas.StateMachines{
 		}
 
 		public override string name{
-			get {return string.Format("<color=#ff64cb>{0}</color>", base.name.ToUpper());}
+			get {return base.name.ToUpper();}
 		}
 
 		public override int maxInConnections{ get {return 0;} }
@@ -44,6 +45,7 @@ namespace NodeCanvas.StateMachines{
 			}
 		}
 
+		protected override void OnEnter(){ Update(); }
 
 		new public void Update(){
 			if (status == Status.Resting || status == Status.Running){

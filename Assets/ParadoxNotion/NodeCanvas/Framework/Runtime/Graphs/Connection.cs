@@ -7,7 +7,7 @@ using UnityEngine;
 namespace NodeCanvas.Framework {
 
 	#if UNITY_EDITOR //handles missing types
-	[fsObject(Processor = typeof(fsConnectionProcessor))]
+	[fsObject(Processor = typeof(fsRecoveryProcessor<Connection, MissingConnection>))]
 	#endif
 
 	///Base class for connections between nodes in a graph
@@ -49,7 +49,7 @@ namespace NodeCanvas.Framework {
 		}
 
 		///The connection status
-		public Status connectionStatus{
+		public Status status{
 			get {return _status;}
 			set {_status = value;}
 		}
@@ -113,8 +113,9 @@ namespace NodeCanvas.Framework {
 			newConnection.SetTarget(newTarget, false);
 
 			var assignable = this as ITaskAssignable;
-			if (assignable != null && assignable.task != null)
+			if (assignable != null && assignable.task != null){
 				(newConnection as ITaskAssignable).task = assignable.task.Duplicate(newSource.graph);
+			}
 
 			newConnection.OnValidate(newSource.outConnections.IndexOf(newConnection), newTarget.inConnections.IndexOf(newConnection));
 			return newConnection;
@@ -143,7 +144,7 @@ namespace NodeCanvas.Framework {
 			}
 			newSource.outConnections.Add(this);
 
-			sourceNode = newSource;			
+			sourceNode = newSource;
 		}
 
 		///Relinks the target node of the connection
@@ -174,23 +175,26 @@ namespace NodeCanvas.Framework {
 		///Execute the conneciton for the specified agent and blackboard.
 		public Status Execute(Component agent, IBlackboard blackboard){
 
-			if (!isActive)
+			if (!isActive){
 				return Status.Resting;
+			}
 
-			connectionStatus = targetNode.Execute(agent, blackboard);
-			return connectionStatus;
+			status = targetNode.Execute(agent, blackboard);
+			return status;
 		}
 
 		///Resets the connection and its targetNode, optionaly recursively
 		public void Reset(bool recursively = true){
 
-			if (connectionStatus == Status.Resting)
+			if (status == Status.Resting){
 				return;
+			}
 
-			connectionStatus = Status.Resting;
+			status = Status.Resting;
 
-			if (recursively)
+			if (recursively){
 				targetNode.Reset(recursively);
+			}
 		}
 	}
 }

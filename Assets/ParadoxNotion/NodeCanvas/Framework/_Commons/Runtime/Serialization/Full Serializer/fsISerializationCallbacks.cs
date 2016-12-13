@@ -1,3 +1,4 @@
+/*
 using System;
 #if !NO_UNITY
 using UnityEngine;
@@ -95,3 +96,5 @@ namespace ParadoxNotion.Serialization.FullSerializer.Internal {
     }
 #endif
 }
+
+*/

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NodeCanvas.Framework;
+using NodeCanvas.Framework.Internal;
 using ParadoxNotion;
 using ParadoxNotion.Design;
 using UnityEditor;
@@ -32,6 +33,8 @@ namespace NodeCanvas.Editor{
 		public static IBlackboard pickedVariableBlackboard{get;set;}
 		public static void ShowVariables(IBlackboard bb, UnityEngine.Object contextParent){
 
+			GUI.skin.label.richText = true;
+			var e = Event.current;
 			var layoutOptions = new GUILayoutOption[]{GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true), GUILayout.Height(16)};
 
 			//Begin undo check
@@ -40,7 +43,7 @@ namespace NodeCanvas.Editor{
 			//Add variable button
 			GUI.backgroundColor = new Color(0.8f,0.8f,1);
 			if (GUILayout.Button("Add Variable")){
-				System.Action<System.Type> SelectVar = (t)=>
+				System.Action<System.Type> AddNewVariable = (t)=>
 				{
 					var name = "my" + t.FriendlyName();
 					while (bb.GetVariable(name) != null){
@@ -49,41 +52,39 @@ namespace NodeCanvas.Editor{
 					bb.AddVariable(name, t);
 				};
 
-				System.Action<PropertyInfo> SelectBoundProp = (p) =>
+				System.Action<PropertyInfo> AddBoundProp = (p) =>
 				{
 					var newVar = bb.AddVariable(p.Name, p.PropertyType);
 					newVar.BindProperty(p);
 				};
 
-				System.Action<FieldInfo> SelectBoundField = (f) =>
+				System.Action<FieldInfo> AddBoundField = (f) =>
 				{
 					var newVar = bb.AddVariable(f.Name, f.FieldType);
 					newVar.BindProperty(f);
 				};
 
 				var menu = new GenericMenu();
-				menu = EditorUtils.GetPreferedTypesSelectionMenu(typeof(object), SelectVar, true, menu, "New");
+				menu = EditorUtils.GetPreferedTypesSelectionMenu(typeof(object), AddNewVariable, true, menu, "New");
 
 				if (bb.propertiesBindTarget != null){
-					foreach (var comp in bb.propertiesBindTarget.GetComponents(typeof(Component)).Where(c => c.hideFlags == 0) ){
-						menu = EditorUtils.GetPropertySelectionMenu(comp.GetType(), typeof(object), SelectBoundProp, false, false, menu, "Bound (Self)/Property");
-						menu = EditorUtils.GetFieldSelectionMenu(comp.GetType(), typeof(object), SelectBoundField, menu, "Bound (Self)/Field");
+					foreach (var comp in bb.propertiesBindTarget.GetComponents(typeof(Component)).Where(c => c.hideFlags != HideFlags.HideInInspector) ){
+						menu = EditorUtils.GetPropertySelectionMenu(comp.GetType(), typeof(object), AddBoundProp, false, false, menu, "Bound (Self)/Property");
+						menu = EditorUtils.GetFieldSelectionMenu(comp.GetType(), typeof(object), AddBoundField, menu, "Bound (Self)/Field");
 					}
 				}
 
-				foreach (var type in UserTypePrefs.GetPreferedTypesList(typeof(object), true)){
-					menu = EditorUtils.GetStaticPropertySelectionMenu(type, typeof(object), SelectBoundProp, false, false, menu, "Bound (Static)/Property");
-					menu = EditorUtils.GetStaticFieldSelectionMenu(type, typeof(object), SelectBoundField, menu, "Bound (Static)/Field");
+				foreach (var type in UserTypePrefs.GetPreferedTypesList(typeof(object))){
+					menu = EditorUtils.GetStaticPropertySelectionMenu(type, typeof(object), AddBoundProp, false, false, menu, "Bound (Static)/Property");
+					menu = EditorUtils.GetStaticFieldSelectionMenu(type, typeof(object), AddBoundField, menu, "Bound (Static)/Field");
 				}
 
 
-
-
 				menu.AddSeparator("/");
-				menu.AddItem(new GUIContent("Separator"), false, ()=>{ SelectVar(typeof(VariableSeperator)); } );
+				menu.AddItem(new GUIContent("Add Header Separator"), false, ()=>{ AddNewVariable(typeof(VariableSeperator)); } );
 
 				menu.ShowAsContext();
-				Event.current.Use();
+				e.Use();
 			}
 
 
@@ -110,6 +111,9 @@ namespace NodeCanvas.Editor{
 				tempStates[bb].list = bb.variables.Values.ToList();
 			}
 
+			//store the names of the variables being used by current graph selection.
+			var usedVariables = GetUsedVariablesBySelectionParameters();
+
 			//The actual variables reorderable list
 			EditorUtils.ReorderableList(tempStates[bb].list, delegate(int i){
 
@@ -119,75 +123,123 @@ namespace NodeCanvas.Editor{
 					return;
 				}
 
+				var isUsed = usedVariables.Contains(data.name);
+				var missingVariableType = data as MissingVariableType;
+
+				GUILayout.Space( data.varType == typeof(VariableSeperator)? 5 : 0 );
+
 				GUILayout.BeginHorizontal();
 
-				//Name of the variable GUI control
-				if (!Application.isPlaying){
+				if (missingVariableType == null){
+					//Name of the variable GUI control
+					if (!Application.isPlaying){
 
-					//The small box on the left to re-order variables
-					GUI.backgroundColor = new Color(1,1,1,0.8f);
-					GUILayout.Box("", GUILayout.Width(6));
-					GUI.backgroundColor = new Color(0.7f,0.7f,0.7f, 0.3f);
+						//The small box on the left to re-order variables
+						GUI.backgroundColor = new Color(1,1,1,0.8f);
+						GUILayout.Box("", GUILayout.Width(6));
+						GUI.backgroundColor = new Color(0.7f,0.7f,0.7f, 0.3f);
 
-					if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition) ){
-						tempStates[bb].isReordering = true;
+						if (e.type == EventType.MouseDown && e.button == 0 && GUILayoutUtility.GetLastRect().Contains(e.mousePosition) ){
+							tempStates[bb].isReordering = true;
+							if (data.varType != typeof(VariableSeperator)){
+								pickedVariable = data;
+								pickedVariableBlackboard = bb;
+							}
+						}
+						
+						//Make name field red if same name exists
+						if (tempStates[bb].list.Where(v => v != data).Select(v => v.name).Contains(data.name)){
+							GUI.backgroundColor = Color.red;
+						}
+
+						GUI.enabled = !data.isProtected;
 						if (data.varType != typeof(VariableSeperator)){
-							pickedVariable = data;
-							pickedVariableBlackboard = bb;
+							data.name = EditorGUILayout.TextField(data.name, layoutOptions);
+							EditorGUI.indentLevel = 0;
+
+						} else {
+
+							var separator = (VariableSeperator)data.value;
+
+							GUI.color = Color.yellow;
+							if (separator.isEditingName){
+								data.name = EditorGUILayout.TextField(data.name, layoutOptions);
+							} else {
+								GUILayout.Label(string.Format("<b>{0}</b>", data.name).ToUpper(), layoutOptions);
+							}
+							GUI.color = Color.white;
+
+							if (!separator.isEditingName){
+								if (e.type == EventType.MouseDown && e.button == 0 && e.clickCount == 2 && GUILayoutUtility.GetLastRect().Contains(e.mousePosition)){
+									separator.isEditingName = true;
+									GUIUtility.keyboardControl = 0;
+								}
+							}
+							
+							if (separator.isEditingName){
+								if ( (e.isKey && e.keyCode == KeyCode.Return) || (e.rawType == EventType.MouseUp && !GUILayoutUtility.GetLastRect().Contains(e.mousePosition) )  ){
+									separator.isEditingName = false;
+									GUIUtility.keyboardControl = 0;
+								}
+							}
+
+							data.value = separator;
+						}
+
+						GUI.enabled = true;
+						GUI.backgroundColor = Color.white;
+
+					} else {
+
+						//Don't allow name edits in play mode. Instead show just a label
+						if (data.varType != typeof(VariableSeperator)){
+							GUI.backgroundColor = new Color(0.7f,0.7f,0.7f);
+							GUI.color = new Color(0.8f,0.8f,1f);
+							GUILayout.Label(data.name, layoutOptions);
+						} else {
+							GUI.color = Color.yellow;
+							GUILayout.Label(string.Format("<b>{0}</b>", data.name.ToUpper()), layoutOptions);
+							GUI.color = Color.white;						
 						}
 					}
-					
-					//Make name field red if same name exists
-					if (tempStates[bb].list.Where(v => v != data).Select(v => v.name).Contains(data.name)){
-						GUI.backgroundColor = Color.red;
-					}
 
-					GUI.enabled = !data.isProtected;
-					if (data.varType != typeof(VariableSeperator)){
-						data.name = EditorGUILayout.TextField(data.name, layoutOptions);
-					} else {
-						GUILayout.Box("------------", layoutOptions);
-					}
-					GUI.enabled = true;
+
+					//reset coloring
+					GUI.color = Color.white;
 					GUI.backgroundColor = Color.white;
 
-				} else {
-
-					//Don't allow name edits in play mode. Instead show just a label
+					//Highlight used variable by selection?
+					if (isUsed){
+						var r = GUILayoutUtility.GetLastRect();
+						r.xMin += 2;
+						r.xMax -= 2;
+						r.yMax -= 4;
+						GUI.Box(r, "", (GUIStyle)"LightmapEditorSelectedHighlight");
+					}
+					
+					//Show the respective data GUI
 					if (data.varType != typeof(VariableSeperator)){
-						GUI.backgroundColor = new Color(0.7f,0.7f,0.7f);
-						GUI.color = new Color(0.8f,0.8f,1f);
-						GUILayout.Label(data.name, layoutOptions);
-						// EditorGUILayout.PrefixLabel(data.name);
+						ShowDataGUI(data, bb, contextParent, layoutOptions);
 					} else {
-						GUI.color = Color.black;
-						GUILayout.Box("------------", layoutOptions);
-						GUI.color = Color.white;						
+						if (!Application.isPlaying && GUILayout.Button("x", GUILayout.Width(17), GUILayout.Height(16))){
+							tempStates[bb].list.Remove(data);
+						}
+						GUILayout.Space(0);
+						GUILayout.Space(0);
 					}
-				}
-				
-				//reset coloring
-				GUI.color = Color.white;
-				GUI.backgroundColor = Color.white;
 
-				//Show the respective data GUI
-				if (data.varType != typeof(VariableSeperator)){
-					ShowDataGUI(data, bb, contextParent, layoutOptions);
 				} else {
-					GUILayout.Space(0);
-					GUILayout.Space(0);
+
+					var internalTypeName = missingVariableType.missingType.Split(new string[]{"[[", "]]"}, System.StringSplitOptions.RemoveEmptyEntries )[1];
+					internalTypeName = internalTypeName.Substring(0, internalTypeName.IndexOf(","));
+					GUILayout.Box("", GUILayout.Width(6));
+					GUILayout.Label(data.name, layoutOptions);
+					GUILayout.Label(string.Format("<color=#ff6457>* {0} *</color>", internalTypeName), layoutOptions);
 				}
 
 				//reset coloring
 				GUI.color = Color.white;
 				GUI.backgroundColor = Color.white;
-				
-				//'X' to delete data
-				if (!Application.isPlaying && GUILayout.Button("X", GUILayout.Width(20), GUILayout.Height(16))){
-					if (EditorUtility.DisplayDialog("Delete Variable '" + data.name + "'", "Are you sure?", "Yes", "No!")){
-						tempStates[bb].list.Remove(data);
-					}
-				}
 
 				GUILayout.EndHorizontal();
 
@@ -197,7 +249,8 @@ namespace NodeCanvas.Editor{
 			GUI.backgroundColor = Color.white;
 			GUI.color = Color.white;
 
-			if ( (GUI.changed && !tempStates[bb].isReordering) || Event.current.rawType == EventType.MouseUp){
+
+			if ( (GUI.changed && !tempStates[bb].isReordering) || e.rawType == EventType.MouseUp){
 				tempStates[bb].isReordering = false;
 				EditorApplication.delayCall += ()=>{ pickedVariable = null; pickedVariableBlackboard = null; };
 				//reconstruct the dictionary
@@ -208,6 +261,70 @@ namespace NodeCanvas.Editor{
 			//Check dirty
 			UndoManager.CheckDirty(contextParent);
 		}
+
+		///Get a list of variable names used by the current selection of the current graph in the NC Editor window.
+		static List<string> GetUsedVariablesBySelectionParameters(){
+			if (Graph.currentSelection == null){
+				return new List<string>();
+			}
+			return GetUsedVariablesBySelectionParameters(Graph.currentSelection);
+		} 
+
+		static List<string> GetUsedVariablesBySelectionParameters(object target){
+
+			var result = new List<string>();
+			if (target == null){
+				return result;
+			}
+
+			result.AddRange( BBParameter.GetObjectBBParameters(target).Select(p => p.name) );
+
+			var task = target as Task;
+			if (task != null){
+				result.AddRange( BBParameter.GetObjectBBParameters(task).Select(p => p.name) );
+				if (!string.IsNullOrEmpty(task.overrideAgentParameterName) ){
+					result.Add(task.overrideAgentParameterName);
+				}
+			}
+
+			var taskActionList = target as ActionList;
+			if (taskActionList != null){
+				for (var i = 0; i < taskActionList.actions.Count; i++){
+					var t = taskActionList.actions[i];
+					result.AddRange( BBParameter.GetObjectBBParameters(t).Select(p => p.name) );
+					if (!string.IsNullOrEmpty(t.overrideAgentParameterName) ){
+						result.Add(t.overrideAgentParameterName);
+					}
+				}
+			}
+
+			var taskConditionList = target as ConditionList;
+			if (taskConditionList != null){
+				for (var i = 0; i < taskConditionList.conditions.Count; i++){
+					var t = taskConditionList.conditions[i];
+					result.AddRange( BBParameter.GetObjectBBParameters(t).Select(p => p.name) );
+					if (!string.IsNullOrEmpty(t.overrideAgentParameterName) ){
+						result.Add(t.overrideAgentParameterName);
+					}
+				}
+			}
+
+			var subContainer = target as ISubTasksContainer;
+			if (subContainer != null){
+				var subTasks = subContainer.GetTasks();
+				for (var i = 0; i < subTasks.Length; i++){
+					result.AddRange(GetUsedVariablesBySelectionParameters(subTasks[i]));
+				}
+			}
+
+			var assignable = target as ITaskAssignable;
+			if (assignable != null && assignable.task != null){
+				result.AddRange(GetUsedVariablesBySelectionParameters(assignable.task));
+			}
+
+			return result;
+		}
+
 
 		static void ShowDataGUI(Variable data, IBlackboard bb, UnityEngine.Object contextParent, GUILayoutOption[] layoutOptions){
 
@@ -227,7 +344,7 @@ namespace NodeCanvas.Editor{
 			}
 
 			//Variable options menu
-			if ( !Application.isPlaying && GUILayout.Button(" ", GUILayout.Width(8), GUILayout.Height(16))){
+			if ( !Application.isPlaying && GUILayout.Button("●", GUILayout.Width(17), GUILayout.Height(16))){
 
 				System.Action<PropertyInfo> SelectProp = (p) => {
 					data.BindProperty(p);
@@ -240,13 +357,13 @@ namespace NodeCanvas.Editor{
 				var menu = new GenericMenu();
 
 				if (bb.propertiesBindTarget != null){
-					foreach (var comp in bb.propertiesBindTarget.GetComponents(typeof(Component)).Where(c => c.hideFlags == 0) ){
+					foreach (var comp in bb.propertiesBindTarget.GetComponents(typeof(Component)).Where(c => c.hideFlags != HideFlags.HideInInspector) ){
 						menu = EditorUtils.GetPropertySelectionMenu(comp.GetType(), data.varType, SelectProp, false, false, menu, "Bind (Self)/Property");
 						menu = EditorUtils.GetFieldSelectionMenu(comp.GetType(), data.varType, SelectField, menu, "Bind (Self)/Field");
 					}
 				}
 
-				foreach (var type in UserTypePrefs.GetPreferedTypesList(typeof(object), true)){
+				foreach (var type in UserTypePrefs.GetPreferedTypesList(typeof(object))){
 					menu = EditorUtils.GetStaticPropertySelectionMenu(type, data.varType, SelectProp, false, false, menu, "Bind (Static)/Property");
 					menu = EditorUtils.GetStaticFieldSelectionMenu(type, data.varType, SelectField, menu, "Bind (Static)/Field");
 				}
@@ -254,14 +371,21 @@ namespace NodeCanvas.Editor{
 
 				menu.AddItem(new GUIContent("Protected"), data.isProtected, ()=>{ data.isProtected = !data.isProtected; });
 
-				if (bb.propertiesBindTarget != null){
-					menu.AddSeparator("/");
-					if (data.hasBinding){
-						menu.AddItem(new GUIContent("UnBind"), false, ()=> {data.UnBindProperty();});
-					} else {
-						menu.AddDisabledItem(new GUIContent("UnBind"));
-					}
+				menu.AddSeparator("/");
+				if (data.hasBinding){
+					menu.AddItem(new GUIContent("UnBind"), false, ()=> {data.UnBindProperty();});
+				} else {
+					menu.AddDisabledItem(new GUIContent("UnBind"));
 				}
+
+				menu.AddItem(new GUIContent("Delete Variable"), false, ()=>
+				{
+					if (EditorUtility.DisplayDialog("Delete Variable '" + data.name + "'", "Are you sure?", "Yes", "No")){
+						bb.RemoveVariable(data.name);
+						GUIUtility.hotControl = 0;
+						GUIUtility.keyboardControl = 0;
+					}
+				});
 				
 				menu.ShowAsContext();
 				Event.current.Use();
@@ -275,14 +399,14 @@ namespace NodeCanvas.Editor{
 			var t = data.varType;
 
 			//Check scene object type for UnityObjects. Consider Interfaces as scene object type. Assume that user uses interfaces with UnityObjects
-			var isSceneObjectType = (typeof(Component).IsAssignableFrom(t) || typeof(IScriptableComponent).IsAssignableFrom(t) || t == typeof(GameObject) || t.IsInterface);
+			var isSceneObjectType = (typeof(Component).IsAssignableFrom(t) || t == typeof(GameObject) || t.IsInterface);
 			if (typeof(UnityEngine.Object).IsAssignableFrom(t) || t.IsInterface){
 				return EditorGUILayout.ObjectField((UnityEngine.Object)o, t, isSceneObjectType, layoutOptions);
 			}
 
 		    //Check Type second
 			if (t == typeof(System.Type)){
-				return EditorUtils.Popup<System.Type>(null, (System.Type)o, UserTypePrefs.GetPreferedTypesList(typeof(object), false), layoutOptions );
+				return EditorUtils.Popup<System.Type>(null, (System.Type)o, UserTypePrefs.GetPreferedTypesList(typeof(object), true), layoutOptions );
 			}
 
 			t = o != null? o.GetType() : t;

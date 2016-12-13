@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using ParadoxNotion;
+using ParadoxNotion.Serialization;
 using ParadoxNotion.Serialization.FullSerializer;
 using NodeCanvas.Framework.Internal;
 using UnityEngine;
@@ -8,12 +9,8 @@ using UnityEngine;
 
 namespace NodeCanvas.Framework{
 
-	///This is a special dummy class for variables separator
-	public class VariableSeperator{}
-
-
 	#if UNITY_EDITOR //handles missing variable types
-	[fsObject(Processor = typeof(fsVariableProcessor))]
+	[fsObject(Processor = typeof(fsRecoveryProcessor<Variable, MissingVariableType>))]
 	#endif
 
 	[Serializable]
@@ -24,9 +21,9 @@ namespace NodeCanvas.Framework{
 	    [SerializeField]
 		private string _name;
 		[SerializeField]
-		private bool _protected;
-		[SerializeField]
 		private string _id;
+		[SerializeField]
+		private bool _protected;
 
 		public event Action<string> onNameChanged;
 		public event Action<string, object> onValueChanged;
@@ -67,6 +64,7 @@ namespace NodeCanvas.Framework{
 			set {_protected = value;}
 		}
 
+
 		//we need this since onValueChanged is an event and we can't check != null outside of this class
 		protected bool HasValueChangeEvent(){
 			return onValueChanged != null;
@@ -103,18 +101,11 @@ namespace NodeCanvas.Framework{
 			if (toType.RTIsAssignableFrom(varType)){
 				return ()=>{ return value; };
 			}
-/*
+
 			//convertible to convertible
 			if (typeof(IConvertible).RTIsAssignableFrom(toType) && typeof(IConvertible).RTIsAssignableFrom(varType)){
-				return ()=> { try{return Convert.ChangeType(value, toType);} catch{return Activator.CreateInstance(toType);} };
+				return ()=> { try {return Convert.ChangeType(value, toType);} catch {return Activator.CreateInstance(toType);} };
 			}
-*/
-/*
-			//anything to string
-			//gameobject to component
-			//component to component
-			//component to vector3
-*/
 
 			//gameobject to transform
 			if (toType == typeof(Transform) && varType == typeof(GameObject)){
@@ -136,6 +127,16 @@ namespace NodeCanvas.Framework{
 				return ()=>{ return value != null? (value as Transform).position : Vector3.zero;  };
 			}
 
+			//quaternion to vector3
+			if (toType == typeof(Vector3) && varType == typeof(Quaternion)){
+				return ()=>{ return (Vector3)((Quaternion)value).eulerAngles; };
+			}
+
+			//vector3 to quaternion
+			if (toType == typeof(Quaternion) && varType == typeof(Vector3)){
+				return ()=>{ return (Quaternion)Quaternion.Euler((Vector3)value); };
+			}
+
 			return null;
 		}
 
@@ -148,12 +149,12 @@ namespace NodeCanvas.Framework{
 			if (varType.RTIsAssignableFrom(fromType)){
 				return (o)=>{ value = o; };
 			}
-/*
+
 			//convertible to convertible
 			if (typeof(IConvertible).RTIsAssignableFrom(varType) && typeof(IConvertible).RTIsAssignableFrom(fromType)){
-				return (o)=> { try{value = Convert.ChangeType(o, varType);} catch{value = Activator.CreateInstance(varType);} };
+				return (o)=> { try {value = Convert.ChangeType(o, varType);} catch {value = Activator.CreateInstance(varType);} };
 			}
-*/
+
 			//gameobject to transform
 			if (varType == typeof(Transform) && fromType == typeof(GameObject)){
 				return (o)=> { value = o != null? (o as GameObject).transform : null; };
@@ -174,6 +175,16 @@ namespace NodeCanvas.Framework{
 				return (o)=> { if (value != null) (value as Transform).position = (Vector3)o; };
 			}
 
+			//quaternion to vector3
+			if (varType == typeof(Vector3) && fromType == typeof(Quaternion)){
+				return (o)=>{ value = ((Quaternion)o).eulerAngles; };
+			}
+
+			//vector3 to quaternion
+			if (varType == typeof(Quaternion) && fromType == typeof(Vector3)){
+				return (o)=>{ value = Quaternion.Euler( (Vector3)o ); };
+			}
+
 			return null;
 		}
 
@@ -181,6 +192,8 @@ namespace NodeCanvas.Framework{
 			return name;
 		}
 	}
+
+	
 
 	///The actual Variable
 	[Serializable]
@@ -233,9 +246,10 @@ namespace NodeCanvas.Framework{
 
 				if (setter != null){
 					setter(value);
-				} else {
-					this._value = value;
+					return;
 				}
+
+				this._value = value;
 			}
 		}
 
@@ -275,7 +289,7 @@ namespace NodeCanvas.Framework{
 		    var idx = _propertyPath.LastIndexOf('.');
 		    var typeString = _propertyPath.Substring(0, idx);
 		    var memberString = _propertyPath.Substring(idx + 1);
-		    var type = ReflectionTools.GetType(typeString);
+		    var type = ReflectionTools.GetType(typeString, /*fallback?*/ false);
 
 		    if (type == null){
 		    	Debug.LogError(string.Format("Type '{0}' not found for Blackboard Variable '{1}' Binding", typeString, name), go);
@@ -334,5 +348,14 @@ namespace NodeCanvas.Framework{
 
 	        Debug.LogError(string.Format("A Blackboard Variable '{0}' is due to bind to a property/field named '{1}' that does not exist on type '{2}'. Binding ignored", name, memberString, type.FullName));
 		}
+	}
+
+
+
+	///This is a very special dummy struct for variable header separators
+	public struct VariableSeperator{
+		#if UNITY_EDITOR
+		public bool isEditingName{get;set;}
+		#endif
 	}
 }

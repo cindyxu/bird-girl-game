@@ -72,6 +72,7 @@ namespace NodeCanvas.BehaviourTrees{
 		#if UNITY_EDITOR
 			
 		protected override UnityEditor.GenericMenu OnContextMenu(UnityEditor.GenericMenu menu){
+			menu.AddItem(new UnityEngine.GUIContent("Breakpoint"), isBreakpoint, ()=>{ isBreakpoint = !isBreakpoint; });
 			return ParadoxNotion.Design.EditorUtils.GetTypeSelectionMenu(typeof(BTDecorator), (t)=>{ DecorateWith(t); }, menu, "Decorate");
 		}
 

@@ -46,8 +46,8 @@ namespace NodeCanvas.Tasks.Conditions{
 		protected override bool OnCheck(){ return false; }
 		public void OnCustomEvent(EventData receivedEvent){
 			if (isActive && receivedEvent.name.ToUpper() == eventName.value.ToUpper()){
-				if (receivedEvent is EventData<T>){
-					saveEventValue.value = (receivedEvent as EventData<T>).value;
+				if (receivedEvent.value is T){
+					saveEventValue.value = (T)receivedEvent.value;
 				}
 
 				#if UNITY_EDITOR

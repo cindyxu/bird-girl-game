@@ -13,11 +13,13 @@ namespace NodeCanvas.Framework.Internal{
 	[Serializable]
 	sealed public class BlackboardSource : IBlackboard {
 
+		public event System.Action<Variable> onVariableAdded;
+		public event System.Action<Variable> onVariableRemoved;
+
 		[SerializeField]
 		private string _name;
 		[SerializeField]
 		private Dictionary<string, Variable> _variables = new Dictionary<string, Variable>( StringComparer.Ordinal );
-
 
 		public string name{
 			get {return _name;}
@@ -33,7 +35,7 @@ namespace NodeCanvas.Framework.Internal{
 			get {return null;}
 		}
 
-		///An indexer to access variables on the blackboard. It's recomended to use GetValue<T> instead
+		///An indexer to access variables on the blackboard. It's highly recomended to use GetValue<T> instead
 		public object this[string varName]{
 			get
 			{
@@ -49,7 +51,7 @@ namespace NodeCanvas.Framework.Internal{
 		//required
 		public BlackboardSource(){}
 
-		//Initialize variables data binding for the target game object
+		///Initialize variables data binding for the target game object
 		public void InitializePropertiesBinding(GameObject targetGO, bool callSetter){
 			foreach (var data in variables.Values){
 				data.InitializePropertyBinding(targetGO, callSetter);
@@ -65,8 +67,9 @@ namespace NodeCanvas.Framework.Internal{
 			}
 			
 			var newData = AddVariable(varName, value.GetType());
-			if (newData != null)
+			if (newData != null){
 				newData.value = value;
+			}
 
 			return newData;
 		}
@@ -77,26 +80,36 @@ namespace NodeCanvas.Framework.Internal{
 			if (variables.ContainsKey(varName)){
 				var existing = GetVariable(varName, type);
 				if (existing == null){
-					Debug.LogError(string.Format("<b>Blackboard:</b> Variable with name '{0}' already exists in blackboard '{1}', but is of different type!. Returning null instead of new", varName, this.name));
+					Debug.LogError(string.Format("<b>Blackboard:</b> Variable with name '{0}' already exists in blackboard '{1}', but is of different type! Returning null instead of new.", varName, this.name));
 				} else {
-					Debug.LogWarning(string.Format("<b>Blackboard:</b> Variable with name '{0}' already exists in blackboard '{1}'. Returning existing instead of new", varName, this.name));
+					Debug.LogWarning(string.Format("<b>Blackboard:</b> Variable with name '{0}' already exists in blackboard '{1}'. Returning existing instead of new.", varName, this.name));
 				}
 				return existing;
 			}
 
-			var dataType = typeof(Variable<>).MakeGenericType(new Type[]{type});
+			var dataType = typeof(Variable<>).RTMakeGenericType(new Type[]{type});
 			var newData = (Variable)Activator.CreateInstance(dataType);
 			newData.name = varName;
 			variables[varName] = newData;
+			if (onVariableAdded != null){
+				onVariableAdded(newData);
+			}
 			return newData;
 		}
 
-		///Deletes the Variable of name provided regardless of type
-		public void DeleteVariable(string varName){
-			variables.Remove(varName);
+		///Deletes the Variable of name provided regardless of type and returns the deleted Variable object.
+		public Variable RemoveVariable(string varName){
+			Variable data = null;
+			if (variables.TryGetValue(varName, out data)){
+				variables.Remove(varName);
+				if (onVariableRemoved != null){
+					onVariableRemoved(data);
+				}
+			}
+			return data;
 		}
 
-		///Gets the variable data value from the blackboard with provided name and type T
+		///Gets the variable data value from the blackboard with provided name and type T.
 		public T GetValue<T>(string varName){
 
 			//Try for same T first else get it as an object type value.

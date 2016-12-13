@@ -95,6 +95,8 @@ namespace ParadoxNotion.Serialization.FullSerializer {
             }
         }
 
+
+/*      //PARADOXNOTION ADDITION
         /// <summary>
         /// This function converts legacy serialization data into the new format, so that
         /// the import process can be unified and ignore the old format.
@@ -138,12 +140,20 @@ namespace ParadoxNotion.Serialization.FullSerializer {
                 data.AsDictionary[Key_ObjectReference] = dict[referenceIdString];
             }
         }
+*/
+
         #endregion
 
         #region Utility Methods
         private static void Invoke_OnBeforeSerialize(List<fsObjectProcessor> processors, Type storageType, object instance) {
             for (int i = 0; i < processors.Count; ++i) {
                 processors[i].OnBeforeSerialize(storageType, instance);
+            }
+
+            //PARADOXNOTION ADDITION
+            //!!Call only on non-Unity objects, since they are called back anyways by Unity!!
+            if (instance is UnityEngine.ISerializationCallbackReceiver && !(instance is UnityEngine.Object) ){
+                ((UnityEngine.ISerializationCallbackReceiver)instance).OnBeforeSerialize();
             }
         }
         private static void Invoke_OnAfterSerialize(List<fsObjectProcessor> processors, Type storageType, object instance, ref fsData data) {
@@ -167,6 +177,12 @@ namespace ParadoxNotion.Serialization.FullSerializer {
         private static void Invoke_OnAfterDeserialize(List<fsObjectProcessor> processors, Type storageType, object instance) {
             for (int i = processors.Count - 1; i >= 0; --i) {
                 processors[i].OnAfterDeserialize(storageType, instance);
+            }
+
+            //PARADOXNOTION ADDITION
+            //!!Call only on non-Unity objects, since they are called back anyways by Unity!!
+            if (instance is UnityEngine.ISerializationCallbackReceiver && !(instance is UnityEngine.Object)){
+                ((UnityEngine.ISerializationCallbackReceiver)instance).OnAfterDeserialize();
             }
         }
         #endregion
@@ -295,11 +311,11 @@ namespace ParadoxNotion.Serialization.FullSerializer {
 
             _processors = new List<fsObjectProcessor>();
 
-/*
+/*          //PARADOXNOTION ADDITION
+            //ISerializationCallbacks are called without processors above, so that we can have both processor and callbacks
             _processors = new List<fsObjectProcessor>() {
                 new fsSerializationCallbackProcessor()
             };
-
 #if !NO_UNITY
             _processors.Add(new fsSerializationCallbackReceiverProcessor());
 #endif
@@ -616,12 +632,15 @@ namespace ParadoxNotion.Serialization.FullSerializer {
 
                 // Add the inheritance metadata
                 EnsureDictionary(data);
+
                 data.AsDictionary[Key_InstanceType] = new fsData(instance.GetType().FullName);
             }
 
             return serializeResult;
         }
-/*
+
+
+/*      //PARADOXNOTION ADDITION
         private fsResult InternalSerialize_3_ProcessVersioning(Type overrideConverterType, object instance, out fsData data) {
             // note: We do not have to take a Type parameter here, since at this point in the serialization
             //       algorithm inheritance has *always* been handled. If we took a type parameter, it will
@@ -671,6 +690,7 @@ namespace ParadoxNotion.Serialization.FullSerializer {
                 return fsResult.Success;
             }
 
+            //PARADOXNOTION ADDITION
             // Convert legacy data into modern style data
             // ConvertLegacyData(ref data);
 
@@ -689,6 +709,7 @@ namespace ParadoxNotion.Serialization.FullSerializer {
                 return r;
             }
 
+            //PARADOXNOTION ADDITION
             catch (Exception e)
             {
                 var msg = string.Format("<b>(Deserialization Error)</b>: {0}\n{1}", e.Message, e.StackTrace);
@@ -723,7 +744,8 @@ namespace ParadoxNotion.Serialization.FullSerializer {
             return InternalDeserialize_3_Inheritance(overrideConverterType, data, storageType, ref result, out processors);
             //return InternalDeserialize_2_Version(overrideConverterType, data, storageType, ref result, out processors);
         }
-/*
+
+/*      //PARADOXNOTION ADDITION
         private fsResult InternalDeserialize_2_Version(Type overrideConverterType, fsData data, Type storageType, ref object result, out List<fsObjectProcessor> processors) {
             if (IsVersioned(data)) {
                 // data is versioned, but we might not need to do a migration
@@ -794,7 +816,12 @@ namespace ParadoxNotion.Serialization.FullSerializer {
                     }
 
                     string typeName = typeNameData.AsString;
-                    Type type = fsTypeCache.GetType(typeName);
+                    
+                    //PARADOXNOTION ADDITION
+                    // Type type = fsTypeCache.GetType(typeName);
+                    //Provide storageType for when last resorting to no Namespace match
+                    Type type = fsTypeCache.GetType(typeName, storageType);
+                    
                     if (type == null) {
                         deserializeResult.AddMessage("Unable to locate specified type \"" + typeName + "\"");
                         break;

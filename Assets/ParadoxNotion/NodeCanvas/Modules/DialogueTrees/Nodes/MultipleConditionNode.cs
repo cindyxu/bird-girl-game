@@ -5,7 +5,8 @@ using ParadoxNotion.Design;
 
 namespace NodeCanvas.DialogueTrees{
 
-	[Name("Multiple Condition")]
+	[Name("Multiple Task Condition")]
+	[Category("Flow Control")]
 	[Description("Will continue with the first child node which condition returns true. The Dialogue Actor selected will be used for the checks")]
 	public class MultipleConditionNode : DTNode, ISubTasksContainer{
 

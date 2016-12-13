@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class JumpPath : WaypointPath {
+public class JumpPath : IWaypointPath {
 
 	private readonly Edge mStartEdge;
 	private readonly Edge mEndEdge;
@@ -73,6 +73,9 @@ public class JumpPath : WaypointPath {
 		float xrf = mLeafArea.end.xr;
 		float overlap = Mathf.Min (xrf - mEndEdge.left, mEndEdge.right- xlf);
 		penaltyMult += 4f * Mathf.Max (wp.size.x/2 - overlap, 0);
+
+		// drops are always better than jumps
+		if (IsDropPath()) penaltyMult += 0.01f;
 
 		return penaltyMult;
 	}

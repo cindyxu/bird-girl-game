@@ -13,6 +13,7 @@ namespace ParadoxNotion.Design{
 
 	///Have some commonly stuff used across most inspectors and helper functions. Keep outside of Editor folder since many runtime classes use this in #if UNITY_EDITOR
 	///This is a partial class. Different implementation provide different tools, so that everything is referenced from within one class.
+	[InitializeOnLoad]
 	public static partial class EditorUtils{
 
 		readonly public static Texture2D playIcon     = EditorGUIUtility.FindTexture("d_PlayButton");
@@ -118,7 +119,7 @@ namespace ParadoxNotion.Design{
 						var arg1 = subType.GetGenericArguments()[0];
 						var constrains = arg1.GetGenericParameterConstraints();
 						var constrainType = constrains.Length == 0? typeof(object) : constrains[0];
-						var types = UserTypePrefs.GetPreferedTypesList( constrainType, false );
+						var types = UserTypePrefs.GetPreferedTypesList( constrainType, true );
 						
 						if (extraGenericType != null){
 							types.Add(extraGenericType);
@@ -169,7 +170,8 @@ namespace ParadoxNotion.Design{
 
 			subTypes = new List<Type>();
 
-			foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies().Where(asm => !asm.GetName().Name.Contains("Editor"))) {
+			// foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies().Where(asm => !asm.GetName().Name.Contains("Editor"))) {
+			foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies()) {
 			    try
 			    {
 			        foreach (var t in asm.GetExportedTypes().Where(t => t.IsSubclassOf(baseType))) {

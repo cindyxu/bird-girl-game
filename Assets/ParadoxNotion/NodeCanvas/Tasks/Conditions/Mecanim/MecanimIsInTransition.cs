@@ -6,7 +6,7 @@ using UnityEngine;
 namespace NodeCanvas.Tasks.Conditions{
 
 	[Name("Is In Transition")]
-	[Category("Mecanim")]
+	[Category("Animator")]
 	public class MecanimIsInTransition : ConditionTask<Animator> {
 
 		public BBParameter<int> layerIndex;

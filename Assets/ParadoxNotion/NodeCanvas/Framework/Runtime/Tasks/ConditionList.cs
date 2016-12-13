@@ -10,9 +10,8 @@ using System.Linq;
 
 namespace NodeCanvas.Framework{
 
-	/// <summary>
 	/// ConditionList is a ConditionTask itself that holds many ConditionTasks. It can be set to either require all true or any true.
-	/// </summary>
+	[DoNotList]
     public class ConditionList : ConditionTask{
 
 		public enum ConditionsCheckMode
@@ -44,8 +43,9 @@ namespace NodeCanvas.Framework{
 						continue;
 					}
 
-					if (conditions[i].isActive)
+					if (conditions[i].isActive || (initialActiveConditions != null && initialActiveConditions.Contains(conditions[i])) ){
 						finalText += conditions[i].summaryInfo + (i == conditions.Count -1? "" : "\n" );
+					}
 				}
 				return finalText;
 			}
@@ -117,7 +117,7 @@ namespace NodeCanvas.Framework{
 				condition.OnDrawGizmosSelected();
 		}
 
-		void AddCondition(ConditionTask condition){
+		public void AddCondition(ConditionTask condition){
 
 			if (condition is ConditionList){
 				Debug.LogWarning("Adding a ConditionList within another ConditionList is not allowed for clarity");
@@ -166,8 +166,9 @@ namespace NodeCanvas.Framework{
 				return;
 			}
 
-			if (conditions.Count == 1)
+			if (conditions.Count == 1){
 				return;
+			}
 			
 			EditorUtils.ReorderableList(conditions, delegate(int i){
 
@@ -180,8 +181,9 @@ namespace NodeCanvas.Framework{
 				condition.isActive = EditorGUILayout.Toggle(condition.isActive, GUILayout.Width(18));
 
 				GUI.backgroundColor = condition == currentViewCondition? Color.grey : Color.white;
-				if (GUILayout.Button(EditorUtils.viewIcon, GUILayout.Width(25), GUILayout.Height(18)))
+				if (GUILayout.Button(EditorUtils.viewIcon, GUILayout.Width(25), GUILayout.Height(18))){
 					currentViewCondition = condition == currentViewCondition? null : condition;
+				}
 				EditorGUIUtility.AddCursorRect(GUILayoutUtility.GetLastRect(), MouseCursor.Link);
 				GUI.backgroundColor = Color.white;
 				GUILayout.Label(condition.summaryInfo, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));

@@ -89,7 +89,6 @@ namespace NodeCanvas.BehaviourTrees{
 				for (var i = 0; i < instance.allNodes.Count; i++){
 					instance.allNodes[i].OnGraphStarted();
 				}	
-
 			}
 
             instance.agent = graphAgent;

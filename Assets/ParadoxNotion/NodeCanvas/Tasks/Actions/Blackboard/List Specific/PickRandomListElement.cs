@@ -12,6 +12,10 @@ namespace NodeCanvas.Tasks.Actions{
 		public BBParameter<List<T>> targetList;
 		public BBParameter<T> saveAs;
 
+		protected override string info{
+			get {return string.Format("{0} = Random From {1}", saveAs, targetList);}
+		}
+
 		protected override void OnExecute(){
 
 			if ( targetList.value.Count <= 0 ){

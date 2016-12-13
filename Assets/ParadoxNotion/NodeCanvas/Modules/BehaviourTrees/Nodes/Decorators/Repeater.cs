@@ -32,8 +32,13 @@ namespace NodeCanvas.BehaviourTrees{
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){
 
-			if (decoratedConnection == null)
+			if (decoratedConnection == null){
 				return Status.Resting;
+			}
+
+			if (decoratedConnection.status == Status.Success || decoratedConnection.status == Status.Failure){
+				decoratedConnection.Reset();
+			}
 
 			status = decoratedConnection.Execute(agent, blackboard);
 
@@ -42,28 +47,28 @@ namespace NodeCanvas.BehaviourTrees{
 			    case Status.Resting:
 			        return Status.Running;
 			    case Status.Running:
-			        return status;
+			        return Status.Running;
 			}
 
 		    switch(repeaterMode)
             {
                 case RepeaterMode.RepeatTimes:
 
-		            //repeatTimes.value = Mathf.Max(repeatTimes.value, 1);
-		            if (currentIteration >= repeatTimes.value)
+		            if (currentIteration >= repeatTimes.value){
 		                return status;
+		            }
 
 		            currentIteration ++;
 		            break;
 
 		        case RepeaterMode.RepeatUntil:
 
-		            if ((int)status == (int)repeatUntilStatus)
+		            if ((int)status == (int)repeatUntilStatus){
 		                return status;
+		            }
 		            break;
 		    }
 
-		    decoratedConnection.Reset();
 		    return Status.Running;
 		}
 

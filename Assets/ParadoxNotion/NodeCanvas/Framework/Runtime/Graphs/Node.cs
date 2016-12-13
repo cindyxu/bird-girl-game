@@ -12,12 +12,13 @@ using UnityEngine;
 
 namespace NodeCanvas.Framework{
 
+
 	///The base class for all nodes that can live in a NodeCanvas Graph
 
 	#if UNITY_EDITOR //handles missing Nodes
-	[fsObject(Processor = typeof(fsNodeProcessor))]
+	[fsObject(Processor = typeof(fsRecoveryProcessor<Node, MissingNode>))]
 	#endif
-  
+
     [System.Serializable]
     [ParadoxNotion.Design.SpoofAOT]
 	abstract public partial class Node {
@@ -33,12 +34,14 @@ namespace NodeCanvas.Framework{
 		[SerializeField]
 		private bool _isBreakpoint = false;
 
-		//reconstructed reference OnDeserialization
+		//reconstructed OnDeserialization
 		private Graph _graph;
-		//reconstructed reference OnDeserialization
+		//reconstructed OnDeserialization
 		private List<Connection> _inConnections = new List<Connection>();
-		//reconstructed reference OnDeserialization
+		//reconstructed OnDeserialization
 		private List<Connection> _outConnections = new List<Connection>();
+		//reconstructed OnDeserialization
+		private int _ID;
 
 		[System.NonSerialized]
 		private Status _status = Status.Resting;
@@ -46,8 +49,6 @@ namespace NodeCanvas.Framework{
 		private string _nodeName;
 		[System.NonSerialized]
 		private string _nodeDescription;
-		[System.NonSerialized]
-		private int _ID;
 
 		/////
 
@@ -60,6 +61,24 @@ namespace NodeCanvas.Framework{
 		public Graph graph{
 			get {return _graph;}
 			set {_graph = value;}
+		}
+
+		///The node's ID in the graph
+		public int ID {
+			get {return _ID;}
+			set {_ID = value;}
+		}
+
+		///All incomming connections to this node
+		public List<Connection> inConnections{
+			get {return _inConnections;}
+			protected set {_inConnections = value;}
+		}
+
+		///All outgoing connections from this node
+		public List<Connection> outConnections{
+			get {return _outConnections;}
+			protected set {_outConnections = value;}
 		}
 
 		//The custom title name of the node if any
@@ -86,25 +105,14 @@ namespace NodeCanvas.Framework{
 			set {_isBreakpoint = value;}
 		}
 
-		///All incomming connections to this node
-		public List<Connection> inConnections{
-			get {return _inConnections;}
-			protected set {_inConnections = value;}
-		}
-
-		///All outgoing connections from this node
-		public List<Connection> outConnections{
-			get {return _outConnections;}
-			protected set {_outConnections = value;}
-		}
-
 
 		///The title name of the node shown in the window if editor is not in Icon Mode. This is a property so title name may change instance wise
 		virtual public string name{
 			get
 			{
-				if (!string.IsNullOrEmpty(customName))
+				if (!string.IsNullOrEmpty(customName)){
 					return customName;
+				}
 
 				if (string.IsNullOrEmpty(_nodeName) ){
 					var nameAtt = this.GetType().RTGetAttribute<NameAttribute>(false);
@@ -139,12 +147,6 @@ namespace NodeCanvas.Framework{
 		abstract public bool showCommentsBottom{get;}
 
 
-		///The node's ID in the graph
-		public int ID {
-			get {return _ID;}
-			private set {_ID = value;}
-		}
-
 		///The current status of the node
 		public Status status{
 			get {return _status;}
@@ -152,12 +154,12 @@ namespace NodeCanvas.Framework{
 		}
 
 		///The current agent. Taken from the graph this node belongs to
-		protected Component graphAgent{
+		public Component graphAgent{
 			get {return graph != null? graph.agent : null;}
 		}
 
 		///The current blackboard. Taken from the graph this node belongs to
-		protected IBlackboard graphBlackboard{
+		public IBlackboard graphBlackboard{
 			get {return graph != null? graph.blackboard : null;}
 		}
 
@@ -248,10 +250,21 @@ namespace NodeCanvas.Framework{
 
 			#if UNITY_EDITOR
 			if (isBreakpoint && status == Status.Resting){
-				status = Status.Running;
-				graph.Pause();
-				Debug.LogWarning(string.Format("<b>Breakpoint</b>: At node '{0}', ID '{1}', Graph name '{2}'", name, ID, graph.name), graph);
-				return Status.Running;
+				var breakEditor = NodeCanvas.Editor.NCPrefs.breakpointPauseEditor;
+				var owner = agent as GraphOwner;
+				var contextName = owner != null? owner.gameObject.name : graph.name;
+				var contextObject = owner != null? (Object)owner : (Object)graph;
+				Debug.LogWarning(string.Format("<b>Breakpoint Reached</b>: At Node: '{0}' | ID: '{1}' | Graph Type: '{2}' | Context Object: '{3}'", name, ID, graph.GetType().Name, contextName), contextObject);
+				if (breakEditor || owner == null){
+					StartCoroutine( YieldBreak(agent, blackboard) );
+					status = Status.Running;
+					return Status.Running;					
+				}
+				if (owner != null){
+					owner.PauseBehaviour();
+					status = Status.Running;
+					return Status.Running;
+				}
 			}
 			#endif
 
@@ -260,6 +273,13 @@ namespace NodeCanvas.Framework{
 			isChecked = false;
 
 			return status;
+		}
+
+		///Helper for breakpoints
+		IEnumerator YieldBreak(Component agent, IBlackboard blackboard){
+			Debug.Break();
+			yield return null;
+			status = OnExecute(agent, blackboard);
 		}
 
 		///A little helper function to log errors easier
@@ -328,17 +348,21 @@ namespace NodeCanvas.Framework{
 
 
 
-		///Returns if a new connection should be allowed with the source node.
+		///Returns if a new input connection should be allowed.
+		public bool IsNewConnectionAllowed(){ return IsNewConnectionAllowed(null); }
+		///Returns if a new input connection should be allowed from the source node.
 		public bool IsNewConnectionAllowed(Node sourceNode){
-			
-			if (this == sourceNode){
-				Debug.LogWarning("Node can't connect to itself");
-				return false;
-			}
 
-			if (sourceNode.outConnections.Count >= sourceNode.maxOutConnections && sourceNode.maxOutConnections != -1){
-				Debug.LogWarning("Source node can have no more out connections.");
-				return false;
+			if (sourceNode != null){
+				if (this == sourceNode){
+					Debug.LogWarning("Node can't connect to itself");
+					return false;
+				}
+
+				if (sourceNode.outConnections.Count >= sourceNode.maxOutConnections && sourceNode.maxOutConnections != -1){
+					Debug.LogWarning("Source node can have no more out connections.");
+					return false;
+				}
 			}
 
 			if (this == graph.primeNode && maxInConnections == 1){
@@ -428,7 +452,7 @@ namespace NodeCanvas.Framework{
 		///Called when an output connection is disconnected but before it actually does
 		virtual public void OnChildDisconnected(int connectionIndex){}
 
-		///Called when the parent graph is started (not continued from pause). Use to init values or otherwise.
+		///Called when the parent graph is started. Use to init values or otherwise.
 		virtual public void OnGraphStarted(){}
 
 		///Called when the parent graph is stopped.
@@ -436,6 +460,9 @@ namespace NodeCanvas.Framework{
 
 		///Called when the parent graph is paused.
 		virtual public void OnGraphPaused(){}
+
+		///Called when the parent graph is unpaused.
+		virtual public void OnGraphUnpaused(){}
 
 		sealed public override string ToString(){
 			var assignable = this as ITaskAssignable;

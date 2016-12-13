@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using Priority_Queue;
 
 public class WaypointNode : FastPriorityQueueNode, IComparable {
-	public readonly WaypointPath waypointPath;
+	public readonly IWaypointPath waypointPath;
 	public readonly IWaypoint waypoint;
 	public readonly Range range;
 	public readonly float g;
 
-	public WaypointNode (WaypointPath path, IWaypoint waypoint, Range range, float g) {
+	public WaypointNode (IWaypointPath path, IWaypoint waypoint, Range range, float g) {
 		this.waypointPath = path;
 		this.waypoint = waypoint;
 		this.range = range;

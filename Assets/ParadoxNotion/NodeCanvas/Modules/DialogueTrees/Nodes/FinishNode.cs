@@ -6,6 +6,7 @@ using UnityEngine;
 namespace NodeCanvas.DialogueTrees{
 
 	[Name("Finish")]
+	[Category("Flow Control")]
 	[Description("End the dialogue in Success or Failure.\nNote: A Dialogue will anyway End in Succcess if it has reached a node without child connections.")]
 	public class FinishNode : DTNode {
 

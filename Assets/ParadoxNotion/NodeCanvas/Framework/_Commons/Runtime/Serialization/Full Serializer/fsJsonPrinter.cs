@@ -118,9 +118,11 @@ namespace ParadoxNotion.Serialization.FullSerializer {
                         bool comma = false;
                         foreach (var entry in data.AsDictionary) {
 
+                            //PARADOXNOTION ADDITION
                             if (!fsGlobalConfig.SerializeDefaultValues && entry.Value.IsNull){
                                 continue;
                             }
+                            //
 
                             if (comma) stream.Write(',');
                             comma = true;
@@ -183,9 +185,11 @@ namespace ParadoxNotion.Serialization.FullSerializer {
                         bool comma = false;
                         foreach (var entry in data.AsDictionary) {
 
+                            //PARADOXNOTION ADDITION
                             if (!fsGlobalConfig.SerializeDefaultValues && entry.Value.IsNull){
                                 continue;
                             }
+                            //
 
                             if (comma) {
                                 stream.Write(',');

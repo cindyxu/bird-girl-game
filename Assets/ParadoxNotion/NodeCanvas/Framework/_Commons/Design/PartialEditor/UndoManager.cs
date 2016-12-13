@@ -17,19 +17,26 @@ namespace ParadoxNotion.Design{
 	
 		public static void CheckUndo(Object target, string name){
 
-			if (Application.isPlaying || target == null)
+			if (Application.isPlaying || target == null){
 				return;
+			}
 
 			var e = Event.current;
-			if ( ( (e.type == EventType.MouseDown || e.type == EventType.MouseUp) && e.button == 0) || (e.type == EventType.KeyUp) ){
+			if (
+				((e.type == EventType.MouseDown || e.type == EventType.MouseUp) && e.button == 0) ||
+				(e.type == EventType.DragPerform) ||
+				(e.type == EventType.KeyUp)
+				)
+			{
 				Undo.RecordObject(target, name);
 			}
 		}
 
 		public static void CheckDirty(Object target){
 
-			if (Application.isPlaying || target == null)
+			if (Application.isPlaying || target == null){
 				return;
+			}
 
 			if ( GUI.changed ){
 				EditorUtility.SetDirty(target);

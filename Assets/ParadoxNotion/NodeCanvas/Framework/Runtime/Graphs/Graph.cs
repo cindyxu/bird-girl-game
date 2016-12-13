@@ -14,7 +14,6 @@ namespace NodeCanvas.Framework{
 
 	///This is the base and main class of NodeCanvas and graphs. All graph System are deriving from this.
 	[System.Serializable]
-	[ParadoxNotion.Design.SpoofAOT]
 	abstract public partial class Graph : ScriptableObject, ITaskSystem, ISerializationCallbackReceiver, IScriptableComponent {
 
 		[SerializeField]
@@ -23,10 +22,12 @@ namespace NodeCanvas.Framework{
 		private List<Object> _objectReferences;
 		[SerializeField]
 		private bool _deserializationFailed = false;
+
 		[System.NonSerialized]
 		private bool hasEnabled = false;
 		[System.NonSerialized]
 		private bool hasDeserialized = false;
+
 
 		//These are the data that are serialized and deserialized into/from a 'GraphSerializationData' object
 		/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,25 +41,38 @@ namespace NodeCanvas.Framework{
 		private BlackboardSource _localBlackboard = null;
 		/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		///Indicates that last deserialization has failed (or succeeded)
-		public bool deserializationFailed{
-			get {return _deserializationFailed;}
-		}
-
 
 		///////////UNITY CALLBACKS///////////
-		public void OnBeforeSerialize(){
-			if (_objectReferences != null && _objectReferences.Any(o => o != null)){ //As it seems Unity requires double deserialize for objects
+		void ISerializationCallbackReceiver.OnBeforeSerialize(){ Serialize(); }
+		void ISerializationCallbackReceiver.OnAfterDeserialize(){ Deserialize(); }
+
+
+		///Serialize the Graph
+		public void Serialize(){
+			if (_objectReferences != null && _objectReferences.Count > 0 && _objectReferences.Any(o => o != null)){ //Unity requires double deserialize for UnityObject refs.
 				hasDeserialized = false;
 			}
-			#if UNITY_EDITOR
-			if (JSONSerializer.applicationPlaying) return;
+			
+			#if UNITY_EDITOR //we only serialize in the editor
+			if (JSONSerializer.applicationPlaying){
+				return;
+			}
+			
 			_serializedGraph = this.Serialize(false, _objectReferences);
+
+			//notify owner. This is used for bound graphs
+			var owner = agent != null && agent is GraphOwner? (GraphOwner)agent : null;
+			if (owner != null){
+				owner.OnGraphSerialized(this);
+			}
 			#endif
 		}
 
-		public void OnAfterDeserialize(){
-			if (hasDeserialized && JSONSerializer.applicationPlaying) return; //avoid double call that Unity does (bug?)
+		///Deserialize the Graph
+		public void Deserialize(){
+			if (hasDeserialized && JSONSerializer.applicationPlaying){ //avoid double call if not needed (UnityObject refs).
+				return;
+			}
 			hasDeserialized = true;
 			this.Deserialize(_serializedGraph, false, _objectReferences);
 		}
@@ -66,7 +80,7 @@ namespace NodeCanvas.Framework{
 
 #if UNITY_EDITOR
 		protected void OnValidate(){
-			if (!Application.isPlaying){
+			if (!Application.isPlaying && !UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode){
 				Validate();
 			}
 		}
@@ -84,18 +98,8 @@ namespace NodeCanvas.Framework{
 		//////////////////////////////////////
 		//////////////////////////////////////
 
-
-		///Clones the graph and returns the new one. Currently exactly the same as Instantiate, but could change in the future
-		public static T Clone<T>(T graph) where T:Graph{
-			var newGraph = (T)Instantiate(graph);
-			newGraph.name = newGraph.name.Replace("(Clone)", "");
-			return (T)newGraph;
-		}
-
-
-		///Serialize (save) the graph and returns the serialized json string
+		///Serialize the graph and returns the serialized json string
 		public string Serialize(bool pretyJson, List<UnityEngine.Object> objectReferences){
-
 			//if something went wrong on deserialization, dont serialize back, but rather keep what we had
 			if (_deserializationFailed){
 				_deserializationFailed = false;
@@ -105,17 +109,14 @@ namespace NodeCanvas.Framework{
 			//the list to save the references in. If not provided externaly we save into the local list
 			if (objectReferences == null){
 				objectReferences = this._objectReferences = new List<Object>();
-			} else {
-				objectReferences.Clear();
 			}
 
 			UpdateNodeIDs(true);
 			return JSONSerializer.Serialize(typeof(GraphSerializationData), new GraphSerializationData(this), pretyJson, objectReferences);
 		}
 
-		///Deserialize (load) the json serialized graph provided. Returns the structure or null if failed.
+		///Deserialize the json serialized graph provided. Returns the structure or null if failed.
 		public GraphSerializationData Deserialize(string serializedGraph, bool validate, List<UnityEngine.Object> objectReferences){
-
 			if (string.IsNullOrEmpty(serializedGraph)){
 				return null;
 			}
@@ -132,6 +133,7 @@ namespace NodeCanvas.Framework{
 				if (LoadGraphData(data, validate) == true){
 					this._deserializationFailed = false;
 					this._serializedGraph = serializedGraph;
+					this._objectReferences = objectReferences;
 					return data;
 				}
 
@@ -140,7 +142,7 @@ namespace NodeCanvas.Framework{
 			}
 			catch (System.Exception e)
 			{
-				Debug.LogError(string.Format("Deserialization Error: '{0}'\n'{1}'\n\n<b>Please report bug</b>", e.Message, e.StackTrace), this);
+				Debug.LogError(string.Format("<b>(Deserialization Error:)</b> {0}", e.ToString() ), this);
 				_deserializationFailed = true;
 				return null;
 			}
@@ -180,13 +182,35 @@ namespace NodeCanvas.Framework{
 			return true;
 		}
 
+		///Graph can override this for derived data serialization if needed
+		virtual public object OnDerivedDataSerialization(){return null;}
+		///Graph can override this for derived data deserialization if needed
+		virtual public void OnDerivedDataDeserialization(object data){}
 
-		//Serialize the local blackboard of the graph alone
+		///Gets the json string along with the list of UnityObject references used for serialization by this graph.
+		public void GetSerializationData(out string json, out List<UnityEngine.Object> references){
+			json = _serializedGraph;
+			references = _objectReferences != null? new List<UnityEngine.Object>(_objectReferences) : null;
+		}
+
+		///Sets the target list of UnityObject references. This is for internal use and highly not recomended to do.
+		public void SetSerializationObjectReferences(List<UnityEngine.Object> references){
+			this._objectReferences = references;
+		}
+
+		///Clones the graph and returns the new one. Currently exactly the same as Instantiate, but could change in the future
+		public static T Clone<T>(T graph) where T:Graph{
+			var newGraph = (T)Instantiate(graph);
+			newGraph.name = newGraph.name.Replace("(Clone)", "");
+			return (T)newGraph;
+		}
+
+		///Serialize the local blackboard of the graph alone
 		public string SerializeLocalBlackboard(){
 			return JSONSerializer.Serialize(typeof(BlackboardSource), _localBlackboard, false, _objectReferences);
 		}
 
-		//Deserialize the local blackboard of the graph
+		///Deserialize the local blackboard of the graph alone
 		public bool DeserializeLocalBlackboard(string json){
 			try
 			{
@@ -196,35 +220,44 @@ namespace NodeCanvas.Framework{
 			}
 			catch (System.Exception e)
 			{
-				Debug.LogError(string.Format("Deserialization Error: '{0}'\n'{1}'\n\n<b>Please report bug</b>", e.Message, e.StackTrace), this);
+				Debug.LogError(string.Format("<b>(Deserialization Error:)</b> {0}", e.ToString()), this);
 				return false;
 			}
 		}
 		
-
-		//Non-editor CopySerialized
+		///Non-editor CopySerialized
 		public void CopySerialized(Graph target){
 			var json = this.Serialize(false, target._objectReferences);
 			target.Deserialize( json, true, this._objectReferences );
 		}
 
-
-
-
 		///Validate the graph and it's nodes. Called both in editor OnValidate and in runtime OnEnable.
 		public void Validate(){
-#if UNITY_EDITOR
-			if (!Application.isPlaying){
+			#if UNITY_EDITOR
+			if (!Application.isPlaying && !UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode){
 				UpdateReferences();
 			}
-#endif
+			#endif
+
 			for (var i = 0; i < allNodes.Count; i++){
-				allNodes[i].OnValidate(this);
+				try { allNodes[i].OnValidate(this); } //validation could be critical. we always continue
+				catch (System.Exception e) { Debug.LogError(e.ToString()); continue; }
 			}
-			foreach (var task in GetAllTasksOfType<Task>()){
-				task.OnValidate(this);
+
+			var allTasks = GetAllTasksOfType<Task>();
+			for (var i = 0; i < allTasks.Count; i++){
+				try { allTasks[i].OnValidate(this); } //validation could be critical. we always continue
+				catch (System.Exception e) { Debug.LogError(e.ToString()); continue; }
 			}
+			
 			OnGraphValidate();
+
+			//in runtime and if graph uses local blackboard, initialize property/field binding.
+			//'null' target gameObject (since localBlackboard can only have static bindings).
+			//'false' so that setter is not called.
+			if (Application.isPlaying && useLocalBlackboard){
+				localBlackboard.InitializePropertiesBinding(null, false);
+			}
 		}
 
 		///Use this for derived graph Validation
@@ -392,8 +425,9 @@ namespace NodeCanvas.Framework{
 		///Copy all nodes provided within the target graph. Connections will duplicate only if target nodes of the connections are contained in the provided list
 		public static List<Node> CopyNodesToGraph(List<Node> nodes, Graph targetGraph){
 			
-			if (targetGraph == null)
+			if (targetGraph == null){
 				return null;
+			}
 
 			var newNodes = new List<Node>();
 			var linkInfo = new Dictionary<Connection, KeyValuePair<int, int>>();
@@ -402,11 +436,13 @@ namespace NodeCanvas.Framework{
 			foreach (var node in nodes){
 				var newNode = node.Duplicate(targetGraph);
 				newNodes.Add(newNode);
-				if (node == node.graph.primeNode && targetGraph != node.graph)
+				if (node == node.graph.primeNode && targetGraph != node.graph){
 					targetGraph.primeNode = newNode;
+				}
 				//store the out connections that need dulpicate along with the indeces of source and target
-				foreach (var c in node.outConnections)
+				foreach (var c in node.outConnections){
 					linkInfo[c] = new KeyValuePair<int, int>( nodes.IndexOf(c.sourceNode), nodes.IndexOf(c.targetNode) );
+				}
 			}
 
 			//duplicate all connections that we stored as 'need duplicating' providing new source and target
@@ -449,14 +485,15 @@ namespace NodeCanvas.Framework{
 
 			var lastID = 0;
 
-			//start with the prime node and set recursively
+			//start from prime
 			if (primeNode != null){
 				lastID = primeNode.AssignIDToGraph(lastID);
 			}
 
-			//then set remaining nodes that are not connected. if already set, the method will return the same lastID, thus continuing to the next
-			for (var i = 0; i < allNodes.Count; i++){
-				lastID = allNodes[i].AssignIDToGraph(lastID);
+			//set the rest starting from nodes without parent(s)
+			var tempList = allNodes.OrderBy(n => n.inConnections.Count != 0).ToList();
+			for (var i = 0; i < tempList.Count; i++){
+				lastID = tempList[i].AssignIDToGraph(lastID);
 			}
 
 			//reset the check
@@ -472,7 +509,7 @@ namespace NodeCanvas.Framework{
 
 		///Start the graph for the agent and blackboard provided.
 		///Optionally provide a callback for when the graph stops or ends
-		public void StartGraph(Component agent, IBlackboard blackboard, System.Action<bool> callback = null){
+		public void StartGraph(Component agent, IBlackboard blackboard, bool autoUpdate, System.Action<bool> callback = null){
 
 			#if UNITY_EDITOR //prevent the user to accidentaly start the graph while its an asset. At least in the editor
 			if (UnityEditor.EditorUtility.IsPersistent(this)){
@@ -513,8 +550,6 @@ namespace NodeCanvas.Framework{
 				}
 			}
 
-			UpdateNodeIDs(true);
-			
 			this.agent = agent;
 			this.blackboard = blackboard;
 			UpdateReferences();
@@ -527,14 +562,24 @@ namespace NodeCanvas.Framework{
 
 			//
 			runningGraphs.Add(this);
-			MonoManager.AddUpdateMethod(UpdateGraph);
-			OnGraphStarted();
-			// place at the end?
+
+			if (autoUpdate){
+				MonoManager.current.onUpdate += UpdateGraph;
+			}
 
 			if (!isPaused){
 				timeStarted = Time.time;
-				for (var i = 0; i < allNodes.Count; i++){
+				OnGraphStarted();
+			} else {
+				OnGraphUnpaused();
+			}
+			// place at the end?
+
+			for (var i = 0; i < allNodes.Count; i++){
+				if (!isPaused){
 					allNodes[i].OnGraphStarted();
+				} else {
+					allNodes[i].OnGraphUnpaused();
 				}
 			}
 
@@ -544,11 +589,13 @@ namespace NodeCanvas.Framework{
 		///Stops the graph completely and resets all nodes.
 		public void Stop(bool success = true){
 
-			if (!isRunning && !isPaused)
+			if (!isRunning && !isPaused){
 				return;
+			}
 
 			runningGraphs.Remove(this);
-			MonoManager.RemoveUpdateMethod(UpdateGraph);
+			MonoManager.current.onUpdate -= UpdateGraph;
+
 			isRunning = false;
 			isPaused = false;
 
@@ -556,6 +603,7 @@ namespace NodeCanvas.Framework{
 				allNodes[i].Reset(false);
 				allNodes[i].OnGraphStoped();
 			}
+
 			OnGraphStoped();
 
 			if (OnFinish != null){
@@ -567,11 +615,13 @@ namespace NodeCanvas.Framework{
 		///Pauses the graph from updating as well as notifying all nodes and tasks.
 		public void Pause(){
 
-			if (!isRunning)
+			if (!isRunning){
 				return;
+			}
 
 			runningGraphs.Remove(this);
-			MonoManager.RemoveUpdateMethod(UpdateGraph);
+			MonoManager.current.onUpdate -= UpdateGraph;
+			
 			isRunning = false;
 			isPaused = true;
 
@@ -584,7 +634,7 @@ namespace NodeCanvas.Framework{
 		//This is updated through the MonoManager...
 		public void UpdateGraph(){ OnGraphUpdate(); }
 
-		///Override for graph specific stuff to run when the graph is started or resumed
+		///Override for graph specific stuff to run when the graph is started
 		virtual protected void OnGraphStarted(){}
 
 		///Override for graph specific per frame logic. Called every frame if the graph is running
@@ -596,7 +646,8 @@ namespace NodeCanvas.Framework{
 		///Override this for when the graph is paused
 		virtual protected void OnGraphPaused(){}
 
-
+		///Override for graph stuff to run when the graph is unpause
+		virtual protected void OnGraphUnpaused(){}
 
 
 		///Sends an OnCustomEvent message to the tasks that needs them. Tasks subscribe to events using [EventReceiver] attribute.
@@ -614,7 +665,7 @@ namespace NodeCanvas.Framework{
 
 				var router = agent.GetComponent<MessageRouter>();
 				if (router != null){
-					router.Dispatch("OnCustomEvent", eventData );
+					router.Dispatch("OnCustomEvent", eventData);
 					router.Dispatch(eventData.name, eventData.value);
 				}
 				//if router is null, it means that nothing has subscribed to any event, thus we dont care.
@@ -625,8 +676,14 @@ namespace NodeCanvas.Framework{
 		public static void SendGlobalEvent(string name){ SendGlobalEvent(new EventData(name)); }
 		public static void SendGlobalEvent<T>(string name, T value){ SendGlobalEvent(new EventData<T>(name, value)); }
 		public static void SendGlobalEvent(EventData eventData){
+			var send = new List<GameObject>();
 			foreach(var graph in runningGraphs.ToArray()){ //ToArray because an event may result in a graph stopping and thus messing with the enumeration.
-				graph.SendEvent(eventData);
+				if (graph.agent != null){
+					if (!send.Contains(graph.agent.gameObject)){
+						send.Add(graph.agent.gameObject);
+						graph.SendEvent(eventData);
+					}
+				}
 			}
 		}
 
@@ -635,8 +692,9 @@ namespace NodeCanvas.Framework{
 
 		///Get a node by it's ID, null if not found
 		public Node GetNodeWithID(int searchID){
-			if (searchID <= allNodes.Count && searchID >= 0)
+			if (searchID <= allNodes.Count && searchID >= 0){
 				return allNodes.Find(n => n.ID == searchID);
+			}
 			return null;
 		}
 
@@ -648,8 +706,9 @@ namespace NodeCanvas.Framework{
 		///Get a node by it's tag name
 		public T GetNodeWithTag<T>(string name) where T:Node{
 			foreach (var node in allNodes.OfType<T>()){
-				if (node.tag == name)
+				if (node.tag == name){
 					return node;
+				}
 			}
 			return default(T);
 		}
@@ -658,8 +717,9 @@ namespace NodeCanvas.Framework{
 		public List<T> GetNodesWithTag<T>(string name) where T:Node{
 			var nodes = new List<T>();
 			foreach (var node in allNodes.OfType<T>()){
-				if (node.tag == name)
+				if (node.tag == name){
 					nodes.Add(node);
+				}
 			}
 			return nodes;
 		}
@@ -668,8 +728,9 @@ namespace NodeCanvas.Framework{
 		public List<T> GetAllTagedNodes<T>() where T:Node{
 			var nodes = new List<T>();
 			foreach (var node in allNodes.OfType<T>()){
-				if (!string.IsNullOrEmpty(node.tag))
+				if (!string.IsNullOrEmpty(node.tag)){
 					nodes.Add(node);
+				}
 			}
 			return nodes;
 		}
@@ -677,8 +738,9 @@ namespace NodeCanvas.Framework{
 		///Get a node by it's name
 		public T GetNodeWithName<T>(string name) where T:Node{
 			foreach(var node in allNodes.OfType<T>()){
-				if (StripNameColor(node.name).ToLower() == name.ToLower())
+				if (StripNameColor(node.name).ToLower() == name.ToLower()){
 					return node;
+				}
 			}
 			return default(T);
 		}
@@ -734,52 +796,39 @@ namespace NodeCanvas.Framework{
 			var resultTasks = new List<T>();
 			for (var i = 0; i < allNodes.Count; i++){
 				var node = allNodes[i];
-				if (node is ITaskAssignable && (node as ITaskAssignable).task != null)
+				if (node is ITaskAssignable && (node as ITaskAssignable).task != null){
 					tasks.Add( (node as ITaskAssignable).task );
+				}
 				
-				if (node is ISubTasksContainer)
+				if (node is ISubTasksContainer){
 					tasks.AddRange( (node as ISubTasksContainer).GetTasks() );
+				}
 
 				for (var j = 0; j < node.outConnections.Count; j++){
 					var c = node.outConnections[j];
-					if (c is ITaskAssignable && (c as ITaskAssignable).task != null)
+					if (c is ITaskAssignable && (c as ITaskAssignable).task != null){
 						tasks.Add( (c as ITaskAssignable).task );
-					if (c is ISubTasksContainer)
+					}
+					if (c is ISubTasksContainer){
 						tasks.AddRange( (c as ISubTasksContainer).GetTasks() );
+					}
 				}
 			}
 
 			for (var i = 0; i < tasks.Count; i++){
 				var task = tasks[i];
-				if (task is ActionList)
+				if (task is ActionList){
 					resultTasks.AddRange( (task as ActionList).actions.OfType<T>());
-				if (task is ConditionList)
+				}
+				if (task is ConditionList){
 					resultTasks.AddRange( (task as ConditionList).conditions.OfType<T>());
-				if (task is T)
+				}
+				if (task is T){
 					resultTasks.Add((T)task);				
-			}
-			return resultTasks;
-
-/*			//Old way for without ISubTasksContainer. Just a personal reminder.
-			var tasks = new List<T>();
-			var assignables = new List<ITaskAssignable>();
-			assignables.AddRange( allNodes.OfType<ITaskAssignable>() );
-			foreach (var node in allNodes)
-				assignables.AddRange( node.outConnections.OfType<ITaskAssignable>() )
-
-			foreach (ITaskAssignable assignable in assignables){
-				if (assignable.task != null){
-					if (assignable.task is ActionList)
-						tasks.AddRange( (assignable.task as ActionList).actions.OfType<T>());
-					if (assignable.task is ConditionList)
-						tasks.AddRange( (assignable.task as ConditionList).conditions.OfType<T>());
-					if (assignable.task is T)
-						tasks.Add((T)assignable.task);
 				}
 			}
 
-			return tasks;
-*/
+			return resultTasks;
 		}
 
 		///Get all defined BBParameters in the graph. Defined means that the BBParameter is set to read or write to/from a Blackboard and is not "|NONE|"
@@ -795,7 +844,7 @@ namespace NodeCanvas.Framework{
 				if (o is Task){
 					var task = (Task)o;
 					if (task.agentIsOverride && !string.IsNullOrEmpty(task.overrideAgentParameterName) ){
-						bbParams.Add( typeof(Task).RTGetField("overrideAgent", true).GetValue(task) as BBParameter );
+						bbParams.Add( typeof(Task).RTGetField("overrideAgent").GetValue(task) as BBParameter );
 					}
 				}
 
@@ -810,10 +859,10 @@ namespace NodeCanvas.Framework{
 		}
 
 
-		///Utility function to copy all defined variables of this graph into the provided blackboard
+		///Utility function to create all defined parameters of this graph into the provided blackboard
 		public void CreateDefinedParameterVariables(IBlackboard bb){
 			foreach (var bbParam in GetDefinedParameters()){
-				bbParam.varRef = bb.AddVariable(bbParam.name, bbParam.varType);
+				bbParam.PromoteToVariable(bb);
 			}
 		}
 
@@ -867,8 +916,10 @@ namespace NodeCanvas.Framework{
 				//auto reconnect parent & child of deleted node. Just a workflow convenience
 				if (autoSort && node.inConnections.Count == 1 && node.outConnections.Count == 1){
 					var relinkNode = node.outConnections[0].targetNode;
-					RemoveConnection(node.outConnections[0]);
-					node.inConnections[0].SetTarget(relinkNode);
+					if (relinkNode != node.inConnections[0].sourceNode){
+						RemoveConnection(node.outConnections[0]);
+						node.inConnections[0].SetTarget(relinkNode);
+					}
 				}
 			}
 
@@ -911,8 +962,9 @@ namespace NodeCanvas.Framework{
 		///Connect two nodes together to a specific port index of the source node
 		public Connection ConnectNodes(Node sourceNode, Node targetNode, int indexToInsert){
 
-			if (targetNode.IsNewConnectionAllowed(sourceNode) == false)
+			if (targetNode.IsNewConnectionAllowed(sourceNode) == false){
 				return null;
+			}
 
 			RecordUndo("New Connection");
 

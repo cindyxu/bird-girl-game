@@ -46,7 +46,7 @@ namespace NodeCanvas{
 			get {return _blackboard;}
 			set
 			{
-				if (_blackboard != (object)value){
+				if ( !ReferenceEquals(_blackboard, value) ){
 					_blackboard = (Blackboard)(object)value;
 					SendTaskOwnerDefaults();
 				}

@@ -1,6 +1,6 @@
 ﻿using NodeCanvas.Framework;
 using ParadoxNotion.Design;
-
+using System.Collections;
 
 namespace NodeCanvas.Tasks.Actions{
 
@@ -19,47 +19,42 @@ namespace NodeCanvas.Tasks.Actions{
 		public Control control = Control.StartBehaviour;
 		public bool waitActionFinish = true;
 
-		private bool isFinished = false;
-
 		protected override string info{
 			get {return agentInfo + "." + control.ToString();}
 		}
 
 		protected override void OnExecute(){
+			StartCoroutine(Do());
+		}
+
+		//these should be done after graph has updated.
+		//EndAction is on purpose called before start/pause/stop.
+		IEnumerator Do(){
+			yield return null;
+
 			if (control == Control.StartBehaviour){
-				isFinished = false;
 				if (waitActionFinish){
-					agent.StartBehaviour( delegate {isFinished = true;} );
+					agent.StartBehaviour( (s)=> { EndAction(s); } );
 				} else {
-					agent.StartBehaviour();
 					EndAction();
+					agent.StartBehaviour();
 				}
+			}
+
+			if (control == Control.StopBehaviour){
+				EndAction();
+				agent.StopBehaviour();
+			}
+
+			if (control == Control.PauseBehaviour){
+				EndAction();
+				agent.PauseBehaviour();
 			}
 		}
 
 		protected override void OnStop(){
 			if (waitActionFinish && control == Control.StartBehaviour){
 				agent.StopBehaviour();
-			}
-		}
-
-		//These should take place here to be called 1 frame later, in case target is the same agent.
-		protected override void OnUpdate(){
-
-			if (control == Control.StartBehaviour){
-			
-				if (isFinished)
-					EndAction();
-			
-			} else if (control == Control.StopBehaviour){
-
-				agent.StopBehaviour();
-				EndAction();
-
-			} else if (control == Control.PauseBehaviour){
-
-				agent.PauseBehaviour();
-				EndAction();
 			}
 		}
 	}

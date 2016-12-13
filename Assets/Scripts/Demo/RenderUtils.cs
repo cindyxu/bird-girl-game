@@ -4,18 +4,18 @@ using System.Collections.Generic;
 
 public class RenderUtils {
 
-	public static GameObject CreateLine (float x0, float y0, float x1, float y1, Color color) {
+	public static GameObject CreateLine (float x0, float y0, float x1, float y1, float width, Color color) {
 		GameObject go = new GameObject ("patch");
 		go.AddComponent<LineRenderer> ();
 		LineRenderer renderer = go.GetComponent<LineRenderer> ();
-		renderer.SetVertexCount (2);
+		renderer.numPositions = 2;
 		renderer.SetPositions (new Vector3[] {
 			new Vector3 (x0, y0, 0), 
 			new Vector3 (x1, y1, 0)
 		});
 		renderer.material = new Material(Shader.Find("Particles/Additive"));
-		renderer.SetWidth (0.1f, 0.1f);
-		renderer.SetColors (color, color);
+		renderer.startWidth = renderer.endWidth = width;
+		renderer.startColor = renderer.endColor = color;
 		return go;
 	}
 
@@ -40,14 +40,14 @@ public class RenderUtils {
 		float absv = Mathf.Abs (area.end.vy) * 0.1f;
 		float lerpShift = (Mathf.Pow (2, -absv) * (Mathf.Pow (2, absv+1) - 1) - 1) * Mathf.Sign(area.end.vy);
 		Color ncolor = Color.HSVToRGB (1 + lerpShift * 0.5f, 1, 1);
-		ncolor.a = 0.5f;
+		ncolor.a = 0.3f;
 		material.color = ncolor;
 		go.GetComponent<PolyDrawer> ().RawPoints = pts;
 		go.GetComponent<PolyDrawer> ().Mat = material;
 		return go;
 	}
 
-	public static GameObject RenderArea(JumpScanArea area) {
+	public static GameObject CreateScanArea(JumpScanArea area) {
 		GameObject parentMesh = null;
 		GameObject currMesh = null;
 

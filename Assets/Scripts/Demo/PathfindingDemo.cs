@@ -38,7 +38,7 @@ public class PathfindingDemo : MonoBehaviour {
 				(edge.isUp ? "isUp" : "") + 
 				(edge.isDown ? "isDown" : ""));
 
-			RenderUtils.CreateLine (edge.x0, edge.y0, edge.x1, edge.y1, new Color (1, 1, 1, 0.1f));
+			RenderUtils.CreateLine (edge.x0, edge.y0, edge.x1, edge.y1, 0.1f, new Color (1, 1, 1, 0.1f));
 		}
 	}
 
@@ -48,10 +48,6 @@ public class PathfindingDemo : MonoBehaviour {
 		if (mRenderSearch != null) mRenderSearch.CleanUp ();
 
 		BoxCollider2D walkerCollider = walker.GetComponent <BoxCollider2D> ();
-		Edge startEdge = EdgeUtil.FindUnderEdge (mEdges, 
-			walker.transform.position.x - walkerCollider.size.x/2f, 
-			walker.transform.position.x + walkerCollider.size.x/2f, 
-			walker.transform.position.y);
 
 		mRenderSearch = new RenderSearch (walkerCollider, targetCollider, mWp,
 			((Vector2) walker.transform.position) - mWp.size / 2, 

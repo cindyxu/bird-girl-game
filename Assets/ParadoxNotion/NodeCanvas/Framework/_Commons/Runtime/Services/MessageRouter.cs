@@ -179,7 +179,7 @@ namespace ParadoxNotion.Services{
 
 			for (var i = 0; i < messages.Length; i++){
 				
-				if (target.GetType().RTGetMethod(messages[i], true) == null){
+				if (target.GetType().RTGetMethod(messages[i]) == null){
 					Debug.LogError(string.Format("Type '{0}' does not implement a method named '{1}', for the registered event to use.", target.GetType().FriendlyName(), messages[i]));
 					continue;
 				}
@@ -215,8 +215,9 @@ namespace ParadoxNotion.Services{
 		///Remove a listener completely
 		public void UnRegister(object target){
 
-			if (target == null)
+			if (target == null){
 				return;
+			}
 
 			foreach (var message in listeners.Keys){
 				foreach (var o in listeners[message].ToArray()){
@@ -286,15 +287,9 @@ namespace ParadoxNotion.Services{
 				MethodInfo method = null;
 
 				if (target is Delegate){
-
-					#if NETFX_CORE
-					method = (target as Delegate).GetMethodInfo();
-					#else
-					method = (target as Delegate).Method;
-					#endif
-
+					method = (target as Delegate).RTGetDelegateMethodInfo();
 				} else {
-					method = target.GetType().RTGetMethod(message, true);
+					method = target.GetType().RTGetMethod(message);
 				}
 
 				if (method == null){

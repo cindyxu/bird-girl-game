@@ -89,7 +89,7 @@ namespace NodeCanvas.Tasks.Conditions{
 					}
 					menu.AddSeparator("/");
 				}
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component))){
 					menu = EditorUtils.GetMethodSelectionMenu(t, typeof(object), typeof(object), SetMethod, 0, true, true, menu);
 				}
 				menu.ShowAsContext();

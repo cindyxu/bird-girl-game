@@ -17,14 +17,11 @@ namespace NodeCanvas.Editor{
 
 		public override void OnInspectorGUI(){
 		
-			if (Event.current.isMouse)
-				Repaint();
-
-			//bb.name = EditorGUILayout.TextField("Name", bb.name);
 			BlackboardEditor.ShowVariables(bb, bb);
 			EditorUtils.EndOfInspector();
-			if (Application.isPlaying)
+			if (Application.isPlaying || Event.current.isMouse){
 				Repaint();
+			}
 		}
 	}
 }

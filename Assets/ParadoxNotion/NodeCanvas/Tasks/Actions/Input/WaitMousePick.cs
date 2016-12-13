@@ -26,6 +26,10 @@ namespace NodeCanvas.Tasks.Actions{
 		private int buttonID;
 		private RaycastHit hit;
 
+		protected override string info{
+			get {return string.Format("Wait Object '{0}' Click. Save As {1}", buttonKey, saveObjectAs);}
+		}
+
 		protected override void OnUpdate(){
 			
 			buttonID = (int)buttonKey;

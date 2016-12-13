@@ -6,7 +6,7 @@ using UnityEngine;
 namespace NodeCanvas.Tasks.Actions{
 
 	[Name("Set Layer Weight")]
-	[Category("Mecanim")]
+	[Category("Animator")]
 	public class MecanimSetLayerWeight : ActionTask<Animator> {
 
 		public BBParameter<int> layerIndex;

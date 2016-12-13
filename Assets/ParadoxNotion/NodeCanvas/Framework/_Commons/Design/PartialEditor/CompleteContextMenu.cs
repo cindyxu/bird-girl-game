@@ -123,7 +123,7 @@ namespace ParadoxNotion.Design{
 		private string lastSearch;
 		private string search;
 		private GUIStyle headerStyle;
-		private float helpRectHeight = 64;
+		private float helpRectHeight = 58;
 		private int hoveringIndex;
 		private Rect mainRect;
 		private bool init;
@@ -133,7 +133,7 @@ namespace ParadoxNotion.Design{
 		//////////////
 
 
-		public override Vector2 GetWindowSize(){ return new Vector2(600, 600); }
+		public override Vector2 GetWindowSize(){ return new Vector2(480, 500); }
 		///Shows the popup menu at position and with title
 		public static void Show(GenericMenu menu, Vector2 pos, string title, System.Type keyType){
 			PopupWindow.Show( new Rect(pos.x, pos.y, 0, 0), new CompleteContextMenu(menu, title, keyType) );
@@ -227,17 +227,17 @@ namespace ParadoxNotion.Design{
 
 			///MAIN AREA
 			mainRect = new Rect(rect.x, rect.y, rect.width, rect.height - helpRectHeight);
-			GUI.Box(mainRect, "", (GUIStyle)"AnimationCurveEditorBackground");
+			GUI.Box(mainRect, "", (GUIStyle)"PreBackground");
 			GUILayout.BeginArea(mainRect);
 
 			//HEADER
-			GUILayout.Space(5);
-			GUILayout.Label(string.Format("<color=#dddddd><size=20><b>{0}</b></size></color>", title), headerStyle);
+			GUILayout.Space(2);
+			GUILayout.Label(string.Format("<color=#dddddd><size=15><b>{0}</b></size></color>", title), headerStyle);
 
 			///SEARCH
 			if (e.keyCode == KeyCode.DownArrow){GUIUtility.keyboardControl = 0;}
 			if (e.keyCode == KeyCode.UpArrow){GUIUtility.keyboardControl = 0;}
-			GUILayout.Space(5);
+			// GUILayout.Space(2);
 			GUILayout.BeginHorizontal();
 			GUI.SetNextControlName("SearchToolbar");
 			search = EditorGUILayout.TextField(search, (GUIStyle)"ToolbarSeachTextField");
@@ -257,15 +257,25 @@ namespace ParadoxNotion.Design{
 			///BACK
 			if (currentNode.parent != null && string.IsNullOrEmpty(search)){
 				GUILayout.BeginHorizontal("box");
-				if (GUILayout.Button(string.Format("<b><size=18>◄ {0}/{1}</size></b>", currentNode.parent.name, currentNode.name), (GUIStyle)"label" )){
+				if (GUILayout.Button(string.Format("<b><size=14>◄ {0}/{1}</size></b>", currentNode.parent.name, currentNode.name), (GUIStyle)"label" )){
 					currentNode = currentNode.parent;
 				}
 				GUILayout.EndHorizontal();
 				var lastRect = GUILayoutUtility.GetLastRect();
 				if (lastRect.Contains(e.mousePosition)){
-					GUI.DrawTexture(lastRect, EditorUtils.GetTexture(hoverColor));
+					GUI.color = hoverColor;
+					GUI.DrawTexture(lastRect, EditorGUIUtility.whiteTexture);
+					GUI.color = Color.white;
 					base.editorWindow.Repaint();
 					hoveringIndex = -1;
+				}
+			}
+
+			//Go back with right click as well...
+			if (e.type == EventType.MouseDown && e.button == 1){
+				e.Use();
+				if (currentNode.parent != null){
+					currentNode = currentNode.parent;
 				}
 			}
 
@@ -354,7 +364,7 @@ namespace ParadoxNotion.Design{
 					label = Regex.Replace(label, search, "<b>$&</b>", RegexOptions.IgnoreCase);
 				}
 
-				if (GUILayout.Button(string.Format("<size=12>{0}</size>",
+				if (GUILayout.Button(string.Format("<size=10>{0}</size>",
 					(leafItem == null? string.Format("<b>{0}</b>", label) : label) ),
 					(GUIStyle)"label", GUILayout.Width(0), GUILayout.ExpandWidth(true) ))
 				{
@@ -383,7 +393,9 @@ namespace ParadoxNotion.Design{
 				}
 
 				if (hoveringIndex == i){
-					GUI.DrawTexture(lastRect, EditorUtils.GetTexture(hoverColor));
+					GUI.color = hoverColor;
+					GUI.DrawTexture(lastRect, EditorGUIUtility.whiteTexture);
+					GUI.color = Color.white;
 					base.editorWindow.Repaint();
 				}
 
@@ -413,18 +425,15 @@ namespace ParadoxNotion.Design{
 			GUI.color = Color.white;
 			GUILayout.BeginArea(helpRect);
 			GUILayout.BeginVertical();
+			var doc = string.Empty;
 			if (hoveringNode != null && hoveringNode.item != null){
-
-				string doc = hoveringNode.item.content.tooltip;
+				doc = hoveringNode.item.content.tooltip;
 				var memberInfo = hoveringNode.item.userData as MemberInfo;
 				if (memberInfo != null && string.IsNullOrEmpty(doc)){
 					doc = DocsByReflection.GetMemberSummary(memberInfo);
 				}
-
-				GUILayout.Label(doc, EditorStyles.wordWrappedLabel);
-			} else {
-				GUILayout.Label("");
 			}
+			GUILayout.Label(doc, EditorStyles.wordWrappedLabel);
 			GUILayout.EndVertical();
 			GUILayout.EndArea();
 

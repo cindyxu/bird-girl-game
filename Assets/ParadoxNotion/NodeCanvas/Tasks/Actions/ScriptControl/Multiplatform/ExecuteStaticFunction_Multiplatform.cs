@@ -109,7 +109,7 @@ namespace NodeCanvas.Tasks.Actions{
 				};
 				
 				var menu = new UnityEditor.GenericMenu();
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object))){
 					foreach(var m in t.GetMethods(BindingFlags.Static | BindingFlags.Public).OrderBy(m => !m.IsSpecialName) ){
 						
 						if (m.IsGenericMethod)

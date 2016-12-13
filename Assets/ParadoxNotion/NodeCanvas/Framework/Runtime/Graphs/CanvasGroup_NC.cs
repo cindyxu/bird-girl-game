@@ -11,6 +11,7 @@ namespace NodeCanvas.Framework{
 
 		public string name;
 		public Rect rect;
+		public Color color;
 
 		//required
 		public CanvasGroup(){}

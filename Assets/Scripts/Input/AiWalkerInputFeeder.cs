@@ -11,32 +11,32 @@ public class AiWalkerInputFeeder : InputFeeder {
 	private readonly AiWalkerFacadeImpl mAiFacade;
 
 	private Inhabitant.GetDest mGetDest;
-	private ScenePathPlanner mPathPlanner;
+	private ScenePathPlanner mScenePathPlanner;
 
 	private bool mInputOn = false;
 
 	public AiWalkerInputFeeder (WalkerParams wp, 
-		InhabitantFacade facade, HumanoidFacade hFacade) {
+		InhabitantFacade facade, HumanoidFacade hFacade, AiWalkerFacadeImpl aiFacade) {
 		mWp = wp;
-		mAiFacade = new AiWalkerFacadeImpl (wp, facade, hFacade);
+		mAiFacade = aiFacade;
 	}
 
 	public void SetDest (Inhabitant.GetDest getDest, OnReachDestination onReachDest) {
 		mGetDest = getDest;
 		mOnReachDestination = onReachDest;
-		if (mInputOn) mPathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
+		if (mInputOn) mScenePathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
 	}
 
 	public override void FeedInput (InputCatcher catcher) {
-		if (mPathPlanner != null) {
-			mPathPlanner.OnUpdate ();
-			if (mPathPlanner.FeedInput (catcher)) {
+		if (mScenePathPlanner != null) {
+			mScenePathPlanner.OnUpdate ();
+			if (mScenePathPlanner.FeedInput (catcher)) {
 				Log.logger.Log (Log.AI_INPUT, "reached goal!");
 				if (mOnReachDestination != null) {
 					mOnReachDestination ();
 					mOnReachDestination = null;
 				}
-				mPathPlanner = null;
+				mScenePathPlanner = null;
 			}
 		}
 	}
@@ -44,14 +44,18 @@ public class AiWalkerInputFeeder : InputFeeder {
 	public override void OnBeginInput (InputCatcher catcher) {
 		mAiFacade.StartObserving ();
 		if (mGetDest != null) {
-			mPathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
+			mScenePathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
 		}
 		mInputOn = true;
 	}
 
 	public override void OnEndInput (InputCatcher catcher) {
 		mAiFacade.StopObserving ();
-		mPathPlanner = null;
+		mScenePathPlanner = null;
 		mInputOn = false;
+	}
+
+	public ScenePathPlanner GetScenePathPlanner () {
+		return mScenePathPlanner;
 	}
 }

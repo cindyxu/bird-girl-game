@@ -7,8 +7,8 @@ public class RoomGraph {
 
 	public readonly List<Edge> edges = new List<Edge> ();
 	public readonly List<LadderModel> ladderModels = new List<LadderModel> ();
-	public readonly Dictionary<IWaypoint, List<WaypointPath>> paths = 
-		new Dictionary<IWaypoint, List<WaypointPath>> ();
+	public readonly Dictionary<IWaypoint, List<IWaypointPath>> paths = 
+		new Dictionary<IWaypoint, List<IWaypointPath>> ();
 
 	public RoomGraph (WalkerParams wp, Room room) : this (wp, buildEdges (room), buildLadders (room)) {}
 
@@ -29,7 +29,7 @@ public class RoomGraph {
 			}
 		}
 
-		paths = new Dictionary<IWaypoint, List<WaypointPath>> ();
+		paths = new Dictionary<IWaypoint, List<IWaypointPath>> ();
 		addJumpPaths (wp);
 		addLadderPaths (wp);
 	}
@@ -82,7 +82,7 @@ public class RoomGraph {
 		foreach (Edge edge in edges) {
 			if (edge.isDown) {
 				Log.logger.Log (Log.AI_SCAN, "scanning for " + edge);
-				List<WaypointPath> edgePaths = PathBuilder.BuildJumpPaths (wp, edges, edge);
+				List<IWaypointPath> edgePaths = PathBuilder.BuildJumpPaths (wp, edges, edge);
 				Log.logger.Log (Log.AI_SCAN, "found " + edgePaths.Count + " paths");
 				if (paths.ContainsKey (edge)) {
 					paths [edge].AddRange (edgePaths);
@@ -99,7 +99,7 @@ public class RoomGraph {
 			if (ladderPaths != null) {
 				foreach (LadderPath path in ladderPaths) {
 					if (!paths.ContainsKey (path.GetStartPoint ())) {
-						paths [path.GetStartPoint ()] = new List<WaypointPath> ();
+						paths [path.GetStartPoint ()] = new List<IWaypointPath> ();
 					}
 					paths [path.GetStartPoint ()].Add (path);
 				}

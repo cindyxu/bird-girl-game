@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace NodeCanvas.Tasks.Actions{
 
-	[Name("Set Mecanim Look At")]
-	[Category("Mecanim")]
+	[Name("Set Look At")]
+	[Category("Animator")]
 	[EventReceiver("OnAnimatorIK")]
 	public class MecanimSetLookAt : ActionTask<Animator> {
 

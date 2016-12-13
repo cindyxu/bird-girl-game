@@ -59,9 +59,6 @@ namespace NodeCanvas.Framework.Internal{
 
 
 
-	#if UNITY_EDITOR //handles missing types
-	[fsObject(Processor = typeof(fsReflectedActionWrapperProcessor))]
-	#endif
 	///Wraps a MethodInfo Action with the relevant BBVariables to be commonly called within a Reflection based Task
 	abstract public class ReflectedActionWrapper : ReflectedWrapper{
 		
@@ -99,9 +96,6 @@ namespace NodeCanvas.Framework.Internal{
 	
 
 
-	#if UNITY_EDITOR //handles missing types
-	[fsObject(Processor = typeof(fsReflectedFunctionWrapperProcessor))]
-	#endif
 	///Wraps a MethodInfo Function with the relevant BBVariables to be commonly called within a Reflection based Task
 	abstract public class ReflectedFunctionWrapper : ReflectedWrapper{
 		

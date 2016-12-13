@@ -24,6 +24,7 @@ namespace NodeCanvas.Editor{
 			public bool showWelcomeWindow          = true;
 			public bool logEvents                  = true;
 			public bool useBrowser                 = true;
+			public bool breakpointPauseEditor      = true;
 		}
 
 		private static SerializedData _data;
@@ -118,6 +119,11 @@ namespace NodeCanvas.Editor{
 		public static bool useBrowser{
 			get {return data.useBrowser;}
 			set {if (data.useBrowser != value){ data.useBrowser = value; Save(); } }
+		}
+
+		public static bool breakpointPauseEditor{
+			get {return data.breakpointPauseEditor;}
+			set {if (data.breakpointPauseEditor != value){ data.breakpointPauseEditor = value; Save(); } }
 		}
 
 		static void Save(){

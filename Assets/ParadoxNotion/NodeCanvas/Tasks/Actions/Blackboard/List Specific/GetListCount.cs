@@ -13,6 +13,10 @@ namespace NodeCanvas.Tasks.Actions{
 		[BlackboardOnly]
 		public BBParameter<int> saveAs;
 
+		protected override string info{
+			get {return string.Format("{0} = {0}.Count", saveAs, targetList);}
+		}
+
 		protected override void OnExecute(){
 			saveAs.value = targetList.value.Count;
 			EndAction(true);

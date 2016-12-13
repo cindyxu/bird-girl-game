@@ -33,29 +33,34 @@ namespace NodeCanvas.BehaviourTrees{
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){
 
-			if (decoratedConnection == null)
+			if (decoratedConnection == null){
 				return Status.Resting;
+			}
 
 			switch(filterMode)
             {
                 case FilterMode.CoolDown:
 
-			        if (currentTime > 0)
+			        if (currentTime > 0){
 			            return inactiveWhenLimited? Status.Resting : Status.Failure;
+			        }
 
 			        status = decoratedConnection.Execute(agent, blackboard);
-			        if (status == Status.Success || status == Status.Failure)
+			        if (status == Status.Success || status == Status.Failure){
 			            StartCoroutine(Cooldown());
+			        }
 			        break;
 			    
                 case FilterMode.LimitNumberOfTimes:
 
-			        if (executedCount >= maxCount.value)
+			        if (executedCount >= maxCount.value){
 			            return inactiveWhenLimited? Status.Resting : Status.Failure;
+			        }
 
 			        status = decoratedConnection.Execute(agent, blackboard);
-			        if (status == Status.Success || status == Status.Failure)
+			        if (status == Status.Success || status == Status.Failure){
 			            executedCount += 1;
+			        }
 			        break;
 			}
 

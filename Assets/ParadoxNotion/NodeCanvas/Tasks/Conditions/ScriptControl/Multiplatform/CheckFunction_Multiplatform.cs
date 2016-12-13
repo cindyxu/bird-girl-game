@@ -121,7 +121,7 @@ namespace NodeCanvas.Tasks.Conditions{
 					menu.AddSeparator("/");
 				}
 
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component))){
 					menu = EditorUtils.GetMethodSelectionMenu(t, typeof(object), typeof(object), SetMethod, 10, false, true, menu);
 				}
 				menu.ShowAsContext();

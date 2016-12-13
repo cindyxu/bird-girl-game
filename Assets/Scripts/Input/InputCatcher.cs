@@ -15,10 +15,10 @@ public class InputCatcher {
 	private bool mActionPress;
 
 	public void FlushPresses () {
-		mLeftPress = false;
-		mRightPress = false;
-		mUpPress = false;
-		mDownPress = false;
+		mLeftPress = mLeft = false;
+		mRightPress = mRight = false;
+		mUpPress = mUp = false;
+		mDownPress = mDown = false;
 		mJumpPress = false;
 		mActionPress = false;
 	}

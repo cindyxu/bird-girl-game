@@ -13,6 +13,10 @@ namespace NodeCanvas.Tasks.Actions{
 		public BBParameter<List<T>> targetList;
 		public BBParameter<T> targetElement;
 
+		protected override string info{
+			get {return string.Format("Remove {0} From {1}", targetElement, targetList);}
+		}
+
 		protected override void OnExecute(){
 			targetList.value.Remove(targetElement.value);
 			EndAction(true);

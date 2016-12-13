@@ -1,13 +1,4 @@
 -------------------------------------------------------------
-AOT PLATFORMS (eg iOS, xBox)
--------------------------------------------------------------
-To make NodeCanvas work with these platforms, please open "Tools/ParadoxNotion/NodeCanvas/Preferred Types Editor".
-Then press the "Generate AOTClasses and link.xml Files" button in there to automaticaly create the required files.
-All *struct* types with which you are working with within NodeCanvas, should be in that list before generating the file.
-You can of course re-generate the file any time you wish.
-
-
--------------------------------------------------------------
 FULL DOCUMENTATION
 -------------------------------------------------------------
 You can find the full documentation online at:

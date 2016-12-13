@@ -111,7 +111,7 @@ namespace NodeCanvas.Tasks.Conditions{
 					menu.AddSeparator("/");
 				}
 
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(Component))){
 					menu = EditorUtils.GetMethodSelectionMenu(t, typeof(object), typeof(object), SetMethod, 6, false, true, menu);
 				}
 				if ( NodeCanvas.Editor.NCPrefs.useBrowser){ menu.ShowAsBrowser("Select Method", this.GetType()); }

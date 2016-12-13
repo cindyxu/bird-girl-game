@@ -28,19 +28,20 @@ namespace ParadoxNotion.Design{
 					typeof(object),
 
 					//Primitives
+					typeof(System.Type),
 					typeof(string),
 					typeof(float),
 					typeof(int),
 					typeof(bool),
 
-					//Unity structs
+					//Unity basics
 					typeof(Vector2),
 					typeof(Vector3),
 					typeof(Vector4),
 					typeof(Quaternion),
 					typeof(Color),
-					typeof(AnimationCurve),
 					typeof(LayerMask),
+					typeof(AnimationCurve),
 
 					//Unity functional classes
 					typeof(Debug),
@@ -49,7 +50,7 @@ namespace ParadoxNotion.Design{
 					typeof(Physics),
 					typeof(Physics2D),
 					typeof(Input),
-					typeof(NavMesh),
+					typeof(UnityEngine.AI.NavMesh),
 					typeof(PlayerPrefs),
 					typeof(UnityEngine.Random),
 					typeof(Time),
@@ -64,7 +65,7 @@ namespace ParadoxNotion.Design{
 					typeof(Rigidbody2D),
 					typeof(Collider),
 					typeof(Collider2D),
-					typeof(NavMeshAgent),
+					typeof(UnityEngine.AI.NavMeshAgent),
 					typeof(CharacterController),
 					typeof(AudioSource),
 					typeof(Camera),
@@ -76,6 +77,7 @@ namespace ParadoxNotion.Design{
 
 					//Unity Asset Objects
 					typeof(Texture2D),
+					typeof(Sprite),
 					typeof(AudioClip),
 					typeof(AnimationClip)
 				};
@@ -84,32 +86,40 @@ namespace ParadoxNotion.Design{
 			}
 		}
 
+		//These types will be filtered out when requesting types with 'filterOutFunctionalOnlyTypes' true.
+		private static readonly List<Type> filterFunctionalTypes = new List<Type>{
+			typeof(Debug),
+			typeof(Application),
+			typeof(Mathf),
+			typeof(Physics),
+			typeof(Physics2D),
+			typeof(Input),
+			typeof(UnityEngine.AI.NavMesh),
+			typeof(PlayerPrefs),
+			typeof(UnityEngine.Random),
+			typeof(Time)
+		};
+
 		/// Get the prefered types set by the user.
-		/// 'dontFilterWithoutPublicMembers' will NOT exclude class types that have ONLY static method and property members
-		/// which are typicaly not used for variables. Of course thats a big assumption here, but true 99% of the time.
-		public static List<Type> GetPreferedTypesList(Type baseType, bool dontFilterWithoutPublicMembers){
+		public static List<Type> GetPreferedTypesList(Type baseType, bool filterOutFunctionalOnlyTypes = false){
 
 			if (_preferedTypes == null){
 				_preferedTypes = new List<Type>();
 				foreach(var s in EditorPrefs.GetString("ParadoxNotion.PreferedTypes", defaultPreferedTypesList).Split('|')){
-					try { _preferedTypes.Add( ReflectionTools.GetType(s) ); }
-					catch { Debug.Log(string.Format("Serialized Preferred Type '{0}' not found. It will be excluded", s)); }
+					var resolvedType = ReflectionTools.GetType(s, /*fallback?*/ true);
+					if (resolvedType != null){
+						_preferedTypes.Add( resolvedType );
+					}
 				}
+				//re-write back, so that fallback type resolved are saved
+				SetPreferedTypesList(_preferedTypes);
 			}
 
-			var types = _preferedTypes.Where(t => baseType.IsAssignableFrom(t) && !t.IsGenericType ).OrderBy(t => t.Name).OrderBy(t => t.Namespace).ToList();
-
-			if (!dontFilterWithoutPublicMembers){
-				foreach (var t in types.ToArray()){
-					if
-					(
-						!t.IsEnum
-						&& t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Length == 0
-						&& t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).Length == 0
-					
-					) { types.Remove(t); }
-				}
-			}
+			var types = _preferedTypes
+			.Where(t => baseType.IsAssignableFrom(t) && !t.IsGenericType && (filterOutFunctionalOnlyTypes == false || !filterFunctionalTypes.Contains(t) ) )
+			.OrderBy(t => t.Name)
+			.OrderBy(t => t.Namespace)
+			.ToList();
 
 			return types;
 		}
@@ -125,6 +135,15 @@ namespace ParadoxNotion.Design{
 		public static void ResetTypeConfiguration(){
 			EditorPrefs.SetString("ParadoxNotion.PreferedTypes", defaultPreferedTypesList);
 			_preferedTypes = null;
+		}
+
+		///Append a type to the list
+		public static void AddType(Type type){
+			var current = GetPreferedTypesList(typeof(object));
+			if (!current.Contains(type)){
+				current.Add(type);
+			}
+			SetPreferedTypesList(current);
 		}
 
 		//A Type to color lookup
@@ -172,12 +191,13 @@ namespace ParadoxNotion.Design{
 
 		///Get the hex color preference for a type
 		public static string GetTypeHexColor(Type type){
+			if (!EditorGUIUtility.isProSkin){
+				return "#000000";
+			}
 			return ColorToHex(GetTypeColor(type));
 		}
 
 		static string ColorToHex(Color32 color){
-			if (!EditorGUIUtility.isProSkin)
-				return "#000000";
 			return ("#" + color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2")).ToLower();
 		}
 		 

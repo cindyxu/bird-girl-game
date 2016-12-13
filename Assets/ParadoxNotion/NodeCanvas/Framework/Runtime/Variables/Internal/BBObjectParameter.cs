@@ -23,15 +23,15 @@ namespace NodeCanvas.Framework.Internal{
 		}
 
 		public void SetType(Type t){
-			if (t == null)
+			
+			if (t == null){
 				t = typeof(object);
-			if (t != _type){
-				if (t.RTIsValueType()){
-					_value = Activator.CreateInstance(t);
-				} else {
-					_value = null;
-				}
 			}
+
+			if (t != _type){
+				_value = t.RTIsValueType()? Activator.CreateInstance(t) : null;
+			}
+
 			_type = t;
 		}
 	}

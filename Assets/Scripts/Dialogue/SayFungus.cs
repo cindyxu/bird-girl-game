@@ -20,7 +20,7 @@ namespace NodeCanvas.Tasks.Actions{
 		protected override void OnExecute () {
 			var tempStatement = statement.BlackboardReplace(blackboard);
 			agent.GetComponent<Canvas> ().enabled = true;
-			agent.WriteStatement (statement, delegate {
+			agent.WriteStatement (tempStatement, delegate {
 				agent.GetComponent<Canvas> ().enabled = false;
 				EndAction ();
 			});

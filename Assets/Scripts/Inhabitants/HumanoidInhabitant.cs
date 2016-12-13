@@ -18,5 +18,6 @@ public class HumanoidInhabitant : Inhabitant {
 		
 		return new HumanoidController (this, walkerParams);
 	}
+
 }
 

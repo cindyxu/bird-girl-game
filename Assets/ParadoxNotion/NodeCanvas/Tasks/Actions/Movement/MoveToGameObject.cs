@@ -7,7 +7,7 @@ namespace NodeCanvas.Tasks.Actions{
 
 	[Name("Move To Target")]
 	[Category("Movement")]
-	public class MoveToGameObject : ActionTask<NavMeshAgent> {
+	public class MoveToGameObject : ActionTask<UnityEngine.AI.NavMeshAgent> {
 
 		[RequiredField]
 		public BBParameter<GameObject> target;
@@ -48,15 +48,16 @@ namespace NodeCanvas.Tasks.Actions{
 
 			lastRequest = pos;
 
-			if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + keepDistance)
+			if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + keepDistance){
 				EndAction(true);
+			}
 		}
 
 		protected override void OnStop(){
-
-			lastRequest = null;
-			if (agent.gameObject.activeSelf)
+			if (lastRequest != null && agent.gameObject.activeSelf){
 				agent.ResetPath();
+			}
+			lastRequest = null;
 		}
 
 		protected override void OnPause(){

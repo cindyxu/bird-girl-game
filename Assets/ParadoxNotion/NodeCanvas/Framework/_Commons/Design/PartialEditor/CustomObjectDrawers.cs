@@ -7,6 +7,7 @@ using System.Reflection;
 namespace ParadoxNotion.Design{
 
 	///Derive this to create custom attributes to be drawn with an ObjectAttributeDrawer<T>.
+	[AttributeUsage(AttributeTargets.Field)]
 	abstract public class CustomDrawerAttribute : Attribute{}
 
 	///Do not derive this. Derive from it's generic version only, where T is the type we care for.

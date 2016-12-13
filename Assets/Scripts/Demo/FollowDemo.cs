@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class FollowDemo : MonoBehaviour {
@@ -9,6 +10,7 @@ public class FollowDemo : MonoBehaviour {
 	public Room room;
 	public HumanoidInhabitant walker;
 	public GameObject cursor;
+	public GameObject debugObjectsRoot;
 
 	private Ladder[] mLadders;
 
@@ -56,9 +58,42 @@ public class FollowDemo : MonoBehaviour {
 				}, delegate {
 					//				Debug.Log ("reached destination!");
 				});
+
+				// need to get scene path planner from here
+				AiWalkerInputFeeder aiInputFeeder =
+					(AiWalkerInputFeeder) walker.GetController ().GetInputFeeder ();
+				ScenePathPlanner planner = aiInputFeeder.GetScenePathPlanner ();
+				drawPlan (planner);
 			}
 			cursor.transform.position = new Vector3 (mousePos.x, mousePos.y, 0);
 		};
+	}
+
+	private void drawPlan(ScenePathPlanner planner) {
+
+		if (debugObjectsRoot != null) {
+			Destroy (debugObjectsRoot);
+		}
+		debugObjectsRoot = new GameObject ();
+
+		RoomPathPlanner roomPlanner = planner.GetCurrentRoomPathPlanner ();
+		List<IWaypointPath> chain = roomPlanner.GetPathChain ();
+		List<Range> targetRanges = roomPlanner.GetTargetRanges ();
+
+		for (int i = 0; i < chain.Count; i++) {
+			IWaypointPath path = chain [i];
+			Range targetRange = targetRanges [i];
+
+			if (path is JumpPath) {
+				JumpPath jumpPath = (JumpPath) path;
+				GameObject mesh = RenderUtils.CreateScanArea (jumpPath.GetScanArea ());
+				mesh.transform.SetParent (debugObjectsRoot.transform);
+			}
+
+			GameObject rangeLine = RenderUtils.CreateLine (
+				targetRange.xl, targetRange.y, targetRange.xr, targetRange.y, 0.2f, Color.green);
+			rangeLine.transform.SetParent (debugObjectsRoot.transform);
+		}
 	}
 
 }

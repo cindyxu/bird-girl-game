@@ -47,6 +47,8 @@ public class EdgeBuilder {
 		return edges;
 	}
 
+	// any edges that are intersected by another edge
+	// need to be split into separate edges.
 	public static List<Edge> splitEdges (List<Edge> edges) {
 		List<Edge> edgesHorz = new List<Edge> ();
 		List<Edge> edgesVert = new List<Edge> ();

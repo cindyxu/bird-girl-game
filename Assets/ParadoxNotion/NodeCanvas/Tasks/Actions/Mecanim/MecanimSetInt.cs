@@ -5,20 +5,25 @@ using UnityEngine;
 
 namespace NodeCanvas.Tasks.Actions{
 
-	[Name("Set Mecanim Int")]
-	[Category("Mecanim")]
+	[Name("Set Parameter Integer")]
+	[Category("Animator")]
+	[Description("You can either use a parameter name OR hashID. Leave the parameter name empty or none to use hashID instead.")]
 	public class MecanimSetInt : ActionTask<Animator> {
 
-		[RequiredField]
 		public BBParameter<string> parameter;
+		public BBParameter<int> parameterHashID;
 		public BBParameter<int> setTo;
 
 		protected override string info{
-			get {return "Mec.SetInt '" + parameter + "' to " + setTo;}
+			get{ return string.Format("Mec.SetInt {0} to {1}", string.IsNullOrEmpty(parameter.value)? parameterHashID.ToString() : parameter.ToString(), setTo ); }
 		}
 
 		protected override void OnExecute(){
-			agent.SetInteger(parameter.value, setTo.value);
+			if (!string.IsNullOrEmpty(parameter.value)){
+				agent.SetInteger(parameter.value, setTo.value);
+			} else {
+				agent.SetInteger(parameterHashID.value, setTo.value);
+			}
 			EndAction();
 		}
 	}

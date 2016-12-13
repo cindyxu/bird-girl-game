@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace NodeCanvas.Tasks.Conditions{
 
-	[Name("Check Mecanim Float")]
-	[Category("Mecanim")]
+	[Name("Check Parameter Float")]
+	[Category("Animator")]
 	public class MecanimCheckFloat : ConditionTask<Animator> {
 
 		[RequiredField]

@@ -52,16 +52,20 @@ namespace NodeCanvas.BehaviourTrees{
 
 			if (status == Status.Resting || nestedFSM.isPaused){
 				status = Status.Running;
-				nestedFSM.StartGraph(agent, blackboard, OnFSMFinish);
+				nestedFSM.StartGraph(agent, blackboard, false, OnFSMFinish);
+			}
+
+			if (status == Status.Running){
+				nestedFSM.UpdateGraph();
 			}
 
 			if (!string.IsNullOrEmpty(successState) && nestedFSM.currentStateName == successState){
-				nestedFSM.Stop();
+				nestedFSM.Stop(true);
 				return Status.Success;
 			}
 
 			if (!string.IsNullOrEmpty(failureState) && nestedFSM.currentStateName == failureState){
-				nestedFSM.Stop();
+				nestedFSM.Stop(false);
 				return Status.Failure;
 			}
 
@@ -70,7 +74,7 @@ namespace NodeCanvas.BehaviourTrees{
 
 		void OnFSMFinish(bool success){
 			if (status == Status.Running){
-				status = Status.Success;
+				status = success? Status.Success : Status.Failure;
 			}
 		}
 

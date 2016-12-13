@@ -61,6 +61,7 @@ namespace ParadoxNotion.Serialization.FullSerializer.Internal {
                 return fsResult.Success;
             }
 
+            //PARADOXNOTION ADDITION
             //Most used thus special care
             if (instance is IList){
                 var args = storageType.GetGenericArguments();

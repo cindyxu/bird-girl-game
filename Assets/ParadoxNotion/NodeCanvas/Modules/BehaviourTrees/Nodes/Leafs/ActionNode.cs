@@ -30,23 +30,27 @@ namespace NodeCanvas.BehaviourTrees{
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){
 
-			if (action == null)
+			if (action == null){
 				return Status.Failure;
+			}
 
-			if (status == Status.Resting || status == Status.Running)
+			if (status == Status.Resting || status == Status.Running){
 				return action.ExecuteAction(agent, blackboard);
+			}
 
 			return status;
 		}
 
 		protected override void OnReset(){
-			if (action != null)
+			if (action != null){
 				action.EndAction(null);
+			}
 		}
 
 		public override void OnGraphPaused(){
-			if (action != null)
+			if (action != null){
 				action.PauseAction();
+			}
 		}
 	}
 }

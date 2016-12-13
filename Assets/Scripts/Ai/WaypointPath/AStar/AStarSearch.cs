@@ -7,8 +7,8 @@ using Priority_Queue;
 public class AStarSearch {
 
 	private readonly FastPriorityQueue<WaypointNode> mOpenQueue;
-	private readonly Dictionary<WaypointPath, HeuristicRange<WaypointNode>> mBestHeuristics = 
-		new Dictionary<WaypointPath, HeuristicRange<WaypointNode>> ();
+	private readonly Dictionary<IWaypointPath, HeuristicRange<WaypointNode>> mBestHeuristics = 
+		new Dictionary<IWaypointPath, HeuristicRange<WaypointNode>> ();
 
 	private readonly RoomGraph mGraph;
 	private readonly IWaypoint mDestPoint;
@@ -18,7 +18,7 @@ public class AStarSearch {
 	private readonly IAStarEvaluator mEvaluator;
 
 	private IWaypoint mStartPoint;
-	private List<WaypointPath> mPathChain;
+	private List<IWaypointPath> mPathChain;
 
 	public AStarSearch (RoomGraph graph, WalkerParams wp, 
 		IWaypoint startPoint, Range startRange, IWaypoint destPoint, Range destRange) {
@@ -49,8 +49,8 @@ public class AStarSearch {
 		return mOpenQueue.First;
 	}
 
-	public List<WaypointPath> reconstructChain (WaypointNode end) {
-		List<WaypointPath> chain = new List<WaypointPath> ();
+	public List<IWaypointPath> reconstructChain (WaypointNode end) {
+		List<IWaypointPath> chain = new List<IWaypointPath> ();
 		WaypointNode curr = end;
 		while (curr != null && curr.waypointPath != null) {
 			chain.Add (curr.waypointPath);
@@ -76,7 +76,7 @@ public class AStarSearch {
 		return chain;
 	}
 
-	public bool Step (out List<WaypointPath> result) {
+	public bool Step (out List<IWaypointPath> result) {
 		Log.logger.Log (Log.AI_SEARCH, "A STAR STEP ********************************");
 		Log.logger.Log (Log.AI_SEARCH, "queue has " + mOpenQueue.Count + " items");
 		result = null;
@@ -96,7 +96,7 @@ public class AStarSearch {
 			Log.logger.Log (Log.AI_SEARCH, "<b>found best path!</b>");
 			result = mPathChain = reconstructChain (bestNode);
 			string s = "";
-			foreach (WaypointPath path in result) {
+			foreach (IWaypointPath path in result) {
 				s += path.GetEndPoint () + " ";
 			}
 			Log.logger.Log (Log.AI_SEARCH, s);
@@ -108,9 +108,9 @@ public class AStarSearch {
 			Log.logger.Log (Log.AI_SEARCH, "no paths from edge!");
 			return true;
 		}
-		List<WaypointPath> neighborPaths = mGraph.paths [bestNode.waypoint];
+		List<IWaypointPath> neighborPaths = mGraph.paths [bestNode.waypoint];
 		Log.logger.Log (Log.AI_SEARCH, neighborPaths.Count + " paths");
-		foreach (WaypointPath neighborPath in neighborPaths) {
+		foreach (IWaypointPath neighborPath in neighborPaths) {
 			processNeighborPath (bestNode, neighborPath);
 		}
 		return true;
@@ -128,7 +128,7 @@ public class AStarSearch {
 		return new Range (xlf, xrf, fullEndRange.y);
 	}
 
-	private void processNeighborPath (WaypointNode parentNode, WaypointPath neighborPath) {
+	private void processNeighborPath (WaypointNode parentNode, IWaypointPath neighborPath) {
 		IWaypoint endPoint = neighborPath.GetEndPoint ();
 
 		Log.logger.Log (Log.AI_SEARCH, "process path to " + endPoint);

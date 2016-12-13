@@ -6,7 +6,7 @@ using UnityEngine;
 namespace NodeCanvas.Tasks.Actions{
  
     [Name("Play Animation")]
-    [Category("Mecanim")]
+    [Category("Animator")]
     public class MecanimPlayAnimation : ActionTask<Animator> {
      
         public BBParameter<int> layerIndex;
@@ -24,6 +24,10 @@ namespace NodeCanvas.Tasks.Actions{
         }
      
         protected override void OnExecute(){
+            if (string.IsNullOrEmpty(stateName.value)){
+                EndAction();
+                return;
+            }
             played = false;
             var current = agent.GetCurrentAnimatorStateInfo(layerIndex.value);
             agent.CrossFade(stateName.value, transitTime/current.length, layerIndex.value);
@@ -38,8 +42,9 @@ namespace NodeCanvas.Tasks.Actions{
                 if (stateInfo.IsName(stateName.value)){
             
 					played = true;
-                    if(elapsedTime >= (stateInfo.length / agent.speed))
+                    if (elapsedTime >= (stateInfo.length / agent.speed)){
                         EndAction();              
+                    }
 
                 } else if (played) {
 
@@ -48,8 +53,9 @@ namespace NodeCanvas.Tasks.Actions{
              
             } else {
 
-                if (elapsedTime >= transitTime)
+                if (elapsedTime >= transitTime){
                     EndAction();
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ParadoxNotion.Serialization.FullSerializer;
+using ParadoxNotion.Serialization.FullSerializer.Internal;
 using UnityEngine;
 
 namespace ParadoxNotion.Serialization{
@@ -12,9 +13,12 @@ namespace ParadoxNotion.Serialization{
         [UnityEditor.InitializeOnLoad]
         class StartUp{
             static StartUp(){
-                //set to false since this is always called in editor start.
+                //set to false since this is always called in editor start where application is not playing.
                 JSONSerializer.applicationPlaying = false;
-                UnityEditor.EditorApplication.playmodeStateChanged += ()=>{ JSONSerializer.applicationPlaying = Application.isPlaying; };
+                UnityEditor.EditorApplication.playmodeStateChanged += ()=>
+                {
+                    JSONSerializer.applicationPlaying = Application.isPlaying && UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode;
+                };
             }
         }
 #endif
@@ -24,7 +28,7 @@ namespace ParadoxNotion.Serialization{
         private static fsSerializer serializer = new fsSerializer();
         private static bool init = false;
 
-        //initialize to true since StartUp is editor only
+        //initialize to true since StartUp is editor only and in runtime application is of course always playing.
         public static bool applicationPlaying = true;
 
         ///Serialize to json
@@ -39,14 +43,16 @@ namespace ParadoxNotion.Serialization{
 
                 //set the objectReferences context
                 if (objectReferences != null){
+                    objectReferences.Clear(); //we clear the list since it will be populated by the converter.
                     serializer.Context.Set<List<UnityEngine.Object>>(objectReferences);
                 }
 
                 //serialize the data
                 fsData data;
-                serializer.TrySerialize(type, value, out data).AssertSuccess();
-
-                cache[fsJsonPrinter.CompressedJson(data)] = data;
+                //We override the UnityObject converter if we serialize a UnityObject directly.
+                //UnityObject converter will still be used for every serialized property found within the object though.
+                var overrideConverterType = typeof(UnityEngine.Object).RTIsAssignableFrom(type)? typeof(fsReflectedConverter) : null;
+                serializer.TrySerialize(type, overrideConverterType, value, out data).AssertSuccess();
 
                 //print data to json
                 if (pretyJson){
@@ -57,12 +63,12 @@ namespace ParadoxNotion.Serialization{
         }
 
         ///Deserialize generic
-        public static T Deserialize<T>(string serializedState, List<UnityEngine.Object> objectReferences = null){
-            return (T)Deserialize(typeof(T), serializedState, objectReferences);
+        public static T Deserialize<T>(string serializedState, List<UnityEngine.Object> objectReferences = null, T deserialized = default(T)){
+            return (T)Deserialize(typeof(T), serializedState, objectReferences, deserialized);
         }
 
         ///Deserialize from json
-        public static object Deserialize(Type type, string serializedState, List<UnityEngine.Object> objectReferences = null) {
+        public static object Deserialize(Type type, string serializedState, List<UnityEngine.Object> objectReferences = null, object deserialized = null) {
 
             lock (serializerLock)
             {
@@ -71,6 +77,7 @@ namespace ParadoxNotion.Serialization{
                     init = true;
                 }
 
+                //set the objectReferences context
                 if (objectReferences != null){
                     serializer.Context.Set<List<UnityEngine.Object>>(objectReferences);
                 }
@@ -83,8 +90,10 @@ namespace ParadoxNotion.Serialization{
                 }
 
                 //deserialize the data
-                object deserialized = null;
-                serializer.TryDeserialize(data, type, ref deserialized).AssertSuccess();
+                //We override the UnityObject converter if we deserialize a UnityObject directly.
+                //UnityObject converter will still be used for every serialized property found within the object though.
+                var overrideConverterType = typeof(UnityEngine.Object).RTIsAssignableFrom(type)? typeof(fsReflectedConverter) : null;
+                serializer.TryDeserialize(data, type, overrideConverterType, ref deserialized).AssertSuccess();
 
                 return deserialized;
             }

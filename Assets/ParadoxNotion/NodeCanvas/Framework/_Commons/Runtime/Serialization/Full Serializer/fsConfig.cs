@@ -8,6 +8,7 @@ namespace ParadoxNotion.Serialization.FullSerializer {
         /// <summary>
         /// Serialize default values?
         /// </summary>
+        //PARADOXNOTION ADDITION
         public static bool SerializeDefaultValues = false;
 
         /// <summary>

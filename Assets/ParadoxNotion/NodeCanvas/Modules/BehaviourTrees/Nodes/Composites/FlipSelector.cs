@@ -8,12 +8,13 @@ namespace NodeCanvas.BehaviourTrees{
 	[Category("Composites")]
 	[Description("Works like a normal Selector, but when a child node returns Success, that child will be moved to the end.\nAs a result, previously Failed children will always be checked first and recently Successful children last")]
 	[Icon("FlipSelector")]
+	[Color("b3ff7f")]
 	public class FlipSelector : BTComposite {
 
 		private int current;
 
 		public override string name{
-			get{return string.Format("<color=#b3ff7f>{0}</color>", base.name.ToUpper());}
+			get{return base.name.ToUpper();}
 		}
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){

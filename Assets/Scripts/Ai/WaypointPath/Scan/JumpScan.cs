@@ -29,9 +29,11 @@ public class JumpScan {
 		Log.logger.Log (Log.AI_SCAN, "found " + qualifiedEdges.Count + " qualified edges");
 
 		ScanStep step = new ScanStep ();
-		step.collideTracker = new JumpScanCollideTracker (qualifiedEdges, y + mWp.size.y, y, mWp.size.x, EDGE_THRESHOLD);
+		step.collideTracker = new JumpScanCollideTracker (
+			qualifiedEdges, y + mWp.size.y, y, mWp.size.x, EDGE_THRESHOLD);
 
-		List<JumpScanCollideTracker.Segment> segments = step.collideTracker.GetSectionedLine (exl, exr, 0);
+		List<JumpScanCollideTracker.Segment> segments =
+			step.collideTracker.GetSectionedLine (exl, exr, 0);
 
 		float xl = exl;
 		float xr = exr;
@@ -64,7 +66,8 @@ public class JumpScan {
 		}
 
 		float vyMin = mWp.trajectory.GetVyFinalFromDeltaY (vyi, -1, yMin - yi);
-		float xBottomSpread = mWp.trajectory.GetAbsDeltaXFromDeltaY (vyi, Math.Sign (vyMin), yMin - yi);
+		float xBottomSpread = mWp.trajectory.GetAbsDeltaXFromDeltaY (
+			vyi, Math.Sign (vyMin), yMin - yi);
 		float xMin = xl - xBottomSpread;
 		float xMax = xr + xBottomSpread;
 
@@ -100,7 +103,8 @@ public class JumpScan {
 		return true;
 	}
 
-	private void ProcessSegment (ScanStep parentStep, JumpScanCollideTracker tracker, float yo, float vyo, JumpScanCollideTracker.Segment segment) {
+	private void ProcessSegment (ScanStep parentStep, JumpScanCollideTracker tracker,
+		float yo, float vyo, JumpScanCollideTracker.Segment segment) {
 		Log.logger.Log (Log.AI_SCAN, "  Process segment: xi: " + segment.xli + " to " + segment.xri + 
 			" ; xf: " + segment.xlf + " to " + segment.xrf + " ; edge: " + segment.horzBlock);
 		if (segment.xri < segment.xli + mWp.size.x || segment.xrf < segment.xlf + mWp.size.x) {

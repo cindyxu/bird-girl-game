@@ -6,7 +6,7 @@ using UnityEngine;
 namespace NodeCanvas.Tasks.Actions{
 
 	[Name("Set IK")]
-	[Category("Mecanim")]
+	[Category("Animator")]
 	[EventReceiver("OnAnimatorIK")]
 	public class MecanimSetIK : ActionTask<Animator> {
 

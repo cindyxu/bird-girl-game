@@ -6,209 +6,209 @@ using UnityEngine.Assertions;
 
 public class RoomPathPlanner {
 
+	private static float SAFETY_THRESHOLD = 0.3f;
+
 	public enum Status {
 		ACTIVE,
 		FAILED,
 		DONE
 	}
 
-	private readonly float mXlf;
-	private readonly float mXrf;
-	private readonly float mYf;
+	private readonly WalkerParams mWp;
+	private readonly List<IWaypointPath> mChain;
+	private readonly List<Range> mTargetRanges;
+	private readonly IAiWalkerFacade mAWFacade;
 
-	private WalkerParams mWp;
-	private List<WaypointPath> mChain;
-	private IAiWalkerFacade mAWFacade;
+	private readonly IWaypoint mDestPoint;
+	private readonly Range mDestRange;
+
 	private int mPathIdx = 0;
 	private Status mStatus = Status.ACTIVE;
 
-	private JumpPilot mJumpPilot;
-	private WalkPilot mWalkPilot;
-	private LadderPilot mLadderPilot;
+	private WaypointPathPlanner mWaypointPlanner;
 
-	public RoomPathPlanner (WalkerParams wp, List<WaypointPath> chain, float xlf, float xrf, float yf,
-		IAiWalkerFacade aWFacade) {
+	public RoomPathPlanner (WalkerParams wp, IAiWalkerFacade aWFacade, 
+		List<IWaypointPath> chain, IWaypoint destPoint, Range destRange) {
+
 		Assert.IsNotNull (chain);
 
-		mXlf = xlf;
-		mXrf = xrf;
-		mYf = yf;
-
 		mWp = wp;
-		mChain = chain;
 		mAWFacade = aWFacade;
+
+		mChain = chain;
+		mDestPoint = destPoint;
+		mDestRange = destRange;
+
+		mTargetRanges = calculateTargetRanges (chain, destRange, wp.size.x);
 	}
 
 	public void StartObserving () {
 		mAWFacade.onGrounded += OnGrounded;
-		initializePilot ();
+		nextStep ();
 	}
 
 	public void StopObserving () {
 		mAWFacade.onGrounded -= OnGrounded;
 	}
 
-	public void OnUpdate () {
-		Vector2 pos = mAWFacade.GetPosition ();
-		Vector2 vel = mAWFacade.GetVelocity ();
-
-		if (mWalkPilot != null) {
-			mWalkPilot.OnUpdate (pos.x);
-		} if (mJumpPilot != null) {
-			mJumpPilot.OnUpdate (pos.x, pos.y, vel.y);
-		} if (mLadderPilot != null) {
-			mLadderPilot.OnUpdate (pos.y);
-		}
-	}
-
 	public Status FeedInput (InputCatcher inputCatcher) {
-		if (mWalkPilot != null) {
-			int hdir = mWalkPilot.GetHorizontalDir ();
-			inputLateralDir (inputCatcher, hdir);
-			if (hdir == 0) {
+		if (mWaypointPlanner != null) {
+			if (mWaypointPlanner.FeedInput (inputCatcher)) {
+				mWaypointPlanner = null;
 				if (mPathIdx < mChain.Count) {
-					enterNextEdgePath (inputCatcher);
-				} else {
-					mStatus = Status.DONE;
-					Log.logger.Log (Log.AI_PLAN, "DONE!");
-				}
-			}
-			inputVerticalDir (inputCatcher, 0);
-		} else if (mJumpPilot != null) {
-			inputLateralDir (inputCatcher, mJumpPilot.GetMoveDir ());
-			inputVerticalDir (inputCatcher, 0);
-		} else if (mLadderPilot != null) {
-			inputLateralDir (inputCatcher, mLadderPilot.GetLateralDir ());
-			int vdir = mLadderPilot.GetVerticalDir ();
-			inputVerticalDir (inputCatcher, vdir);
-			if (vdir == 0 && mPathIdx == mChain.Count) {
-				mStatus = Status.DONE;
+					mPathIdx++;
+					nextStep ();
+				} else mStatus = Status.DONE;
 			}
 		}
 		return mStatus;
 	}
 
-	public void OnGrounded (Edge edge) {
-		Log.logger.Log (Log.AI_PLAN, "on grounded " + edge);
-		if (edge != null && (mJumpPilot != null || mLadderPilot != null)) {
-			mJumpPilot = null;
-			mLadderPilot = null;
+	public void OnGrounded (Edge edge) { }
 
-			WaypointPath currPath = mChain [mPathIdx];
-			if (edge == currPath.GetEndPoint ()) {
-				Log.logger.Log (Log.AI_PLAN, "now at " + mPathIdx + " / " + mChain.Count);
-				mPathIdx++;
-				mWalkPilot = createWalkPilot ();
-			} else {
-				mWalkPilot = null;
-				mStatus = Status.FAILED;
-				Log.logger.Log (Log.AI_PLAN, "Failed jump " + currPath.GetStartPoint () + 
-					" to " + currPath.GetEndPoint () + " ! Recalculating");
-			}
-		}
+	// for debug only
+	public List<IWaypointPath> GetPathChain () {
+		return mChain;
 	}
 
-	private void initializePilot () {
-		// if we're on a ladder now ...
-		if (mAWFacade.GetLadder () != null) {
-			WaypointPath currPath = mChain [mPathIdx];
-			Log.logger.Log (Log.AI_PLAN, "climbing it " + currPath.GetEndPoint ());
-			mLadderPilot = createLadderPilot ();
-
-		} else {
-			Log.logger.Log (Log.AI_PLAN, "walking it");
-			mWalkPilot = createWalkPilot ();
-		}
+	// for debug only
+	public List<Range> GetTargetRanges () {
+		return mTargetRanges;
 	}
 
-	private void enterNextEdgePath (InputCatcher inputCatcher) {
-		mWalkPilot = null;
+	private void nextStep () {
 
-		WaypointPath currPath = mChain [mPathIdx];
-		if (currPath is JumpPath) {
-			Vector2 pos = mAWFacade.GetPosition ();
-
-			float xlt, xrt;
-			getAnticipatedTargetRange (out xlt, out xrt);
-
-			JumpPath jumpPath = currPath as JumpPath;
-			if (!jumpPath.IsDropPath ()) {
-				Log.logger.Log (Log.AI_PLAN, "jumping it " + currPath.GetEndPoint ());
-				if (!inputCatcher.GetJumpPress ()) inputCatcher.OnJumpPress ();
-			} else {
-				Log.logger.Log (Log.AI_PLAN, "dropping it " + currPath.GetEndPoint ());
-			}
-			mJumpPilot = new JumpPilot (jumpPath, xlt, xrt, mWp, pos.x);
-		} else if (currPath is LadderPath) {
-			Log.logger.Log (Log.AI_PLAN, "climbing it " + currPath.GetEndPoint ());
-			mLadderPilot = createLadderPilot ();
-		}
-	}
-
-	private LadderPilot createLadderPilot () {
-		Vector2 pos = mAWFacade.GetPosition ();
-
-		float xlt, xrt;
-		getAnticipatedTargetRange (out xlt, out xrt);
-
-		float lyt = 0;
-		if (mPathIdx < mChain.Count - 1) {
-			// get to nearest edge
-			lyt = mChain [mPathIdx].GetEndPoint ().GetRect ().y;
-		} else {
-			// we're just moving on the ladder, so return target y
-			lyt = mYf;
-		}
-
-		return new LadderPilot (mWp, xlt, xrt, lyt, pos.x, pos.y);
-	}
-
-	private void inputLateralDir (InputCatcher inputCatcher, int dir) {
-		if (dir >= 0 && inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
-		if (dir <= 0 && inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
-		if (dir < 0 && !inputCatcher.GetLeft ()) {
-			inputCatcher.OnLeftPress ();
-		} 
-		if (dir > 0 && !inputCatcher.GetRight ()) {
-			inputCatcher.OnRightPress ();
-		}
-	}
-
-	private void inputVerticalDir (InputCatcher inputCatcher, int dir) {
-		DebugPanel.Log ("vertical", dir);
-		if (dir >= 0 && inputCatcher.GetDown ()) inputCatcher.OnDownRelease ();
-		if (dir <= 0 && inputCatcher.GetUp ()) inputCatcher.OnUpRelease ();
-		if (dir < 0 && !inputCatcher.GetDown ()) {
-			inputCatcher.OnDownPress ();
-		} 
-		if (dir > 0 && !inputCatcher.GetUp ()) {
-			inputCatcher.OnUpPress ();
-		}
-	}
-
-	private WalkPilot createWalkPilot () {
-		Vector2 pos = mAWFacade.GetPosition ();
+		// if we're not at the end of the chain, plan to next segment in chain
 		if (mPathIdx < mChain.Count) {
-			WaypointPath nextPath = mChain [mPathIdx];
-			Range startRange = nextPath.GetStartRange ();
-			Log.logger.Log (Log.AI_PLAN, "walking it to " + startRange.xl + ", " + startRange.xr);
-			return new WalkPilot (mWp, startRange.xl, startRange.xr, pos.x);
+			IWaypointPath path = mChain [mPathIdx];
+			mWaypointPlanner = new WaypointPathPlanner (mWp, mAWFacade, 
+				path.GetStartPoint (), path.GetStartRange (),
+				path, mTargetRanges[mPathIdx]);
+			
+		// else plan directly to dest
 		} else {
-			Log.logger.Log (Log.AI_PLAN, "walking it to " + mXlf + ", " + mXrf);
-			return new WalkPilot (mWp, mXlf, mXrf, pos.x);
+			mWaypointPlanner = new WaypointPathPlanner (mWp, mAWFacade, 
+				mDestPoint, mDestRange);
 		}
 	}
 
-	// while traversing this path,
-	// we want to try getting as close to the next path as possible.
-	private void getAnticipatedTargetRange (out float xlt, out float xrt) {
-		if (mPathIdx + 1 < mChain.Count) {
-			Range range = mChain [mPathIdx + 1].GetStartRange ();
-			xlt = range.xl;
-			xrt = range.xr;
-		} else {
-			xlt = mXlf;
-			xrt = mXrf;
+	/* we want to optimize by ending as close to the next path as possible,
+	 * so here we are calculating the optimal range for each path,
+	 * given the paths that follow it */
+	private static List<Range> calculateTargetRanges (
+		List<IWaypointPath> chain, Range destRange, float width) {
+		List<Range> ranges = new List<Range> (chain.Count);
+
+		Range currentTargetRange = destRange;
+		for (int i = chain.Count - 1; i >= 0; i--) {
+			IWaypointPath path = chain [i];
+
+			// first scope to end range
+			Rect endSafetyRect = path.GetEndPoint ().GetRect ();
+			Range endRange = path.GetEndRange ();
+
+			float l = Mathf.Max (endSafetyRect.xMin - width + SAFETY_THRESHOLD,
+				Mathf.Min (endSafetyRect.xMax - SAFETY_THRESHOLD, currentTargetRange.xl));
+			l = Mathf.Max (endRange.xl, Mathf.Min (endRange.xr - width, l));
+
+			float r = Mathf.Max (endSafetyRect.xMin + SAFETY_THRESHOLD,
+		          Mathf.Min (endSafetyRect.xMax + width - SAFETY_THRESHOLD, currentTargetRange.xr));
+			r = Mathf.Max (endRange.xl + width, Mathf.Min (endRange.xr, r)); 
+
+			currentTargetRange = new Range (l, r, endRange.y);
+			ranges.Add (currentTargetRange);
+
+			// then, for the next for loop iteration, scope to start range
+			Rect startSafetyRect = path.GetStartPoint ().GetRect ();
+			Range startRange = path.GetStartRange ();
+
+			l = Mathf.Max (startSafetyRect.xMin - width + SAFETY_THRESHOLD,
+				Mathf.Min (startSafetyRect.xMax - SAFETY_THRESHOLD, l));
+			l = Mathf.Max (startRange.xl, Mathf.Min (startRange.xr - width, l));
+
+			r = Mathf.Max (startSafetyRect.xMin + SAFETY_THRESHOLD,
+				Mathf.Min (startSafetyRect.xMax + width - SAFETY_THRESHOLD, r));
+			r = Mathf.Max (startRange.xl + width, Mathf.Min (startRange.xr, r));
+			currentTargetRange = new Range (l, r, endRange.y);
+		}
+
+		ranges.Reverse ();
+		return ranges;
+	}
+
+	/* Plans at most one walk segment, followed by at most one jump or ladder segment */
+	private class WaypointPathPlanner {
+		private WalkerParams mWp;
+		private IAiWalkerFacade mAWFacade;
+		private IWaypoint mStartPoint;
+		private Range mStartRange;
+		private Range mTargetRange;
+		private IWaypointPath mPath;
+
+		private bool mStarted = false;
+		private bool mReachedPath = false;
+		private IPathPilot mPilot;
+
+		public WaypointPathPlanner (WalkerParams wp, IAiWalkerFacade aWFacade, 
+			IWaypoint startPoint,
+			// If our path is a walk + ___, startRange refers to where ___ starts
+			Range startRange,
+			IWaypointPath path = null, Range targetRange = new Range()) {
+			mWp = wp;
+			mAWFacade = aWFacade;
+			mStartRange = startRange;
+			mTargetRange = targetRange;
+			mPath = path;
+
+			if (mAWFacade.GetLadder () != null) {
+				setPilot (new LadderPilot (mWp, mAWFacade, mStartRange));
+			} else {
+				setPilot (new WalkPilot (mWp, mAWFacade, mStartRange.xl, mStartRange.xr));
+			}
+		}
+
+		public bool FeedInput (InputCatcher catcher) {
+			if (mPilot == null) return true;
+
+			if (!mStarted) {
+				catcher.FlushPresses ();
+				mPilot.Start (catcher);
+				mStarted = true;
+			}
+
+			// done with current pilot. decide what to do next
+			if (mPilot.FeedInput (catcher)) {
+				mPilot = null;
+
+				if (mPath != null && !mReachedPath) {
+					mReachedPath = true;
+
+					if (mPath.GetType ().Equals (typeof (LadderPath))) {
+						LadderPath ladderPath = (LadderPath) mPath;
+						if (ladderPath.GetVerticalDir () < 0)
+							catcher.OnDownPress ();
+						else if (ladderPath.GetVerticalDir () > 0) {
+							catcher.OnUpPress ();
+						}
+						return false;
+
+					} else if (mPath.GetType ().Equals (typeof (JumpPath))) {
+						JumpPath jumpPath = (JumpPath) mPath;
+						setPilot (new JumpPilot (mWp, mAWFacade, jumpPath, mTargetRange.xl, mTargetRange.xr));
+					}
+
+				} else return true;
+			}
+			return false;
+		}
+
+		private void setPilot (IPathPilot pilot) {
+			if (mPilot != null) {
+				mPilot.Stop ();
+			}
+			mPilot = pilot;
+			mStarted = false;
 		}
 	}
+	
 }

@@ -32,7 +32,7 @@ namespace NodeCanvas.BehaviourTrees{
 			if (condition == null || condition.CheckCondition(agent, blackboard) == false)
 				return decoratedConnection.Execute(agent, blackboard);
 
-			if (decoratedConnection.connectionStatus == Status.Running)
+			if (decoratedConnection.status == Status.Running)
 				decoratedConnection.Reset();
 			
 			return Status.Failure;

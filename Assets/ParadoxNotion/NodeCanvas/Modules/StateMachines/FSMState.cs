@@ -3,6 +3,7 @@ using UnityEditor;
 #endif
 using System.Linq;
 using NodeCanvas.Framework;
+using ParadoxNotion;
 using ParadoxNotion.Design;
 using UnityEngine;
 
@@ -11,23 +12,26 @@ namespace NodeCanvas.StateMachines{
 
 	public interface IState{
 
-		//The name of the state
+		///The name of the state
 		string name{get;}
 		
-		//The tag of the state
+		///The tag of the state
 		string tag{get;}
 		
-		//The elapsed time of the state
+		///The elapsed time of the state
 		float elapsedTime{get;}
 		
-		//The FSM this state belongs to
+		///The FSM this state belongs to
 		FSM FSM{get;}
 
-		//An array of the state's transition connections
+		///An array of the state's transition connections
 		FSMConnection[] GetTransitions();
 
-		//Evaluates the state's transitions and returns true if a transition has been performed
+		///Evaluates the state's transitions and returns true if a transition has been performed
 		bool CheckTransitions();
+
+		///Marks the state as Finished
+		void Finish(bool success);
 	}
 
 	/// <summary>
@@ -74,11 +78,7 @@ namespace NodeCanvas.StateMachines{
 		}
 
 		///Declares that the state has finished
-		public void Finish(){
-			Finish(true);
-		}
-
-		///Declares that the state has finished
+		public void Finish(){ Finish(true); }
 		public void Finish(bool inSuccess){
 			status = inSuccess? Status.Success : Status.Failure;
 		}
@@ -92,8 +92,9 @@ namespace NodeCanvas.StateMachines{
 		}
 
 		sealed public override void OnGraphPaused(){
-			if (status == Status.Running)
+			if (status == Status.Running){
 				OnPause();
+			}
 		}
 
 		//OnEnter...
@@ -125,8 +126,9 @@ namespace NodeCanvas.StateMachines{
 				CheckTransitions();
 			}
 
-			if (status == Status.Running)
+			if (status == Status.Running){
 				OnUpdate();
+			}
 		}
 
 		///Returns true if a transitions was valid and thus made
@@ -137,16 +139,17 @@ namespace NodeCanvas.StateMachines{
 				var connection = (FSMConnection)outConnections[i];
 				var condition = connection.condition;
 				
-				if (!connection.isActive)
+				if (!connection.isActive){
 					continue;
+				}
 
 				if ( (condition != null && condition.CheckCondition(graphAgent, graphBlackboard) ) || (condition == null && status != Status.Running) ){
 					FSM.EnterState( (FSMState)connection.targetNode );
-					connection.connectionStatus = Status.Success; //purely for editor feedback
+					connection.status = Status.Success; //editor vis
 					return true;
 				}
 
-				connection.connectionStatus = Status.Failure;
+				connection.status = Status.Failure; //editor vis
 			}
 
 			return false;
@@ -196,12 +199,11 @@ namespace NodeCanvas.StateMachines{
 			}
 		}
 
-		sealed public override void DrawNodeConnections(Vector2 canvasMousePos, float zoomFactor){
+		sealed protected override void DrawNodeConnections(Rect drawCanvas, bool fullDrawPass, Vector2 canvasMousePos, float zoomFactor){
 
 			var e = Event.current;
 
 			if (maxOutConnections == 0){
-
 				if (clickedPort != null && e.type == EventType.MouseUp){
 					dragDropMisses ++;
 					if (dragDropMisses == graph.allNodes.Count){
@@ -212,49 +214,7 @@ namespace NodeCanvas.StateMachines{
 				return;
 			}
 
-			var portRectLeft = new Rect(0,0,20,20);
-			var portRectRight = new Rect(0,0,20,20);
-			var portRectBottom = new Rect(0,0,20,20);
-
-			portRectLeft.center = new Vector2(nodeRect.x - 11, nodeRect.yMax - 10);
-			portRectRight.center = new Vector2(nodeRect.xMax + 11, nodeRect.yMax - 10);
-			portRectBottom.center = new Vector2(nodeRect.center.x, nodeRect.yMax + 11);
-
-			EditorGUIUtility.AddCursorRect(portRectLeft, MouseCursor.ArrowPlus);
-			EditorGUIUtility.AddCursorRect(portRectRight, MouseCursor.ArrowPlus);
-			EditorGUIUtility.AddCursorRect(portRectBottom, MouseCursor.ArrowPlus);
-
-			GUI.color = new Color(1,1,1,0.3f);
-			GUI.Box(portRectLeft, "", "arrowLeft");
-			GUI.Box(portRectRight, "", "arrowRight");
-			if (maxInConnections == 0)
-				GUI.Box(portRectBottom, "", "arrowBottom");
-			GUI.color = Color.white;
-
-			if (e.type == EventType.MouseDown && e.button == 0){
-				
-				if (portRectLeft.Contains(e.mousePosition)){
-					clickedPort = new GUIPort(this, portRectLeft.center);
-					dragDropMisses = 0;
-					e.Use();
-				}
-				
-				if (portRectRight.Contains(e.mousePosition)){
-					clickedPort = new GUIPort(this, portRectRight.center);
-					dragDropMisses = 0;
-					e.Use();
-				}
-
-				if (maxInConnections == 0 && portRectBottom.Contains(e.mousePosition)){
-					clickedPort = new GUIPort(this, portRectBottom.center);
-					dragDropMisses = 0;
-					e.Use();
-				}
-			}
-
-			if (clickedPort != null && clickedPort.parent == this)
-				Handles.DrawBezier(clickedPort.pos, e.mousePosition, clickedPort.pos, e.mousePosition, new Color(0.5f,0.5f,0.8f,0.8f), null, 2);
-
+			//Receive connections first
 			if (clickedPort != null && e.type == EventType.MouseUp && e.button == 0){
 
 				if (nodeRect.Contains(e.mousePosition)){
@@ -294,6 +254,55 @@ namespace NodeCanvas.StateMachines{
 				}
 			}
 
+
+
+			var portRectLeft = new Rect(0,0,20,20);
+			var portRectRight = new Rect(0,0,20,20);
+			var portRectBottom = new Rect(0,0,20,20);
+
+			portRectLeft.center = new Vector2(nodeRect.x - 11, nodeRect.yMax - 10);
+			portRectRight.center = new Vector2(nodeRect.xMax + 11, nodeRect.yMax - 10);
+			portRectBottom.center = new Vector2(nodeRect.center.x, nodeRect.yMax + 11);
+
+			if (fullDrawPass || drawCanvas.Overlaps(nodeRect)){
+				EditorGUIUtility.AddCursorRect(portRectLeft, MouseCursor.ArrowPlus);
+				EditorGUIUtility.AddCursorRect(portRectRight, MouseCursor.ArrowPlus);
+				EditorGUIUtility.AddCursorRect(portRectBottom, MouseCursor.ArrowPlus);
+
+				GUI.color = new Color(1,1,1,0.3f);
+				GUI.Box(portRectLeft, string.Empty, (GUIStyle)"arrowLeft");
+				GUI.Box(portRectRight, string.Empty, (GUIStyle)"arrowRight");
+				if (maxInConnections == 0){
+					GUI.Box(portRectBottom, string.Empty, (GUIStyle)"arrowBottom");
+				}
+				GUI.color = Color.white;
+
+				if (Graph.allowClick && e.type == EventType.MouseDown && e.button == 0){
+					
+					if (portRectLeft.Contains(e.mousePosition)){
+						clickedPort = new GUIPort(this, portRectLeft.center);
+						dragDropMisses = 0;
+						e.Use();
+					}
+					
+					if (portRectRight.Contains(e.mousePosition)){
+						clickedPort = new GUIPort(this, portRectRight.center);
+						dragDropMisses = 0;
+						e.Use();
+					}
+
+					if (maxInConnections == 0 && portRectBottom.Contains(e.mousePosition)){
+						clickedPort = new GUIPort(this, portRectBottom.center);
+						dragDropMisses = 0;
+						e.Use();
+					}
+				}
+			}
+
+			if (clickedPort != null && clickedPort.parent == this){
+				Handles.DrawBezier(clickedPort.pos, e.mousePosition, clickedPort.pos, e.mousePosition, new Color(0.5f,0.5f,0.8f,0.8f), null, 2);
+			}
+
 			for (var i = 0; i < outConnections.Count; i++){
 
 				var connection = outConnections[i] as FSMConnection;
@@ -304,47 +313,55 @@ namespace NodeCanvas.StateMachines{
 				var targetPos = targetState.GetConnectedInPortPosition(connection);
 				var sourcePos = Vector2.zero;
 
-				if (nodeRect.center.x <= targetPos.x)
+				if (nodeRect.center.x <= targetPos.x){
 					sourcePos = portRectRight.center;
+				}
 				
-				if (nodeRect.center.x > targetPos.x)
+				if (nodeRect.center.x > targetPos.x){
 					sourcePos = portRectLeft.center;
+				}
 
-				if (maxInConnections == 0 && nodeRect.center.y < targetPos.y - 50 && Mathf.Abs(nodeRect.center.x - targetPos.x) < 200 )
+				if (maxInConnections == 0 && nodeRect.center.y < targetPos.y - 50 && Mathf.Abs(nodeRect.center.x - targetPos.x) < 200 ){
 					sourcePos = portRectBottom.center;
+				}
 
-				connection.DrawConnectionGUI(sourcePos, targetPos);
+				var boundRect = RectUtils.GetBoundRect(sourcePos, targetPos);
+				if (fullDrawPass || drawCanvas.Overlaps(boundRect)){
+					connection.DrawConnectionGUI(sourcePos, targetPos);
+				}
 			}
 		}
+
 
 		Vector2 GetConnectedInPortPosition(Connection connection){
 
 			var sourcePos = connection.sourceNode.nodeRect.center;
 			var thisPos = nodeRect.center;
 
-			if (sourcePos.x > nodeRect.x && sourcePos.x < nodeRect.xMax)
+			if (sourcePos.x > nodeRect.x && sourcePos.x < nodeRect.xMax){
 				return new Vector2(nodeRect.center.x, nodeRect.y);
-				//return new Vector2(nodeRect.xMax, nodeRect.y + 10);
+			}
 			
 			if (sourcePos.y > nodeRect.y - 100 && sourcePos.y < nodeRect.yMax){
-				if (sourcePos.x <= thisPos.x)
+				if (sourcePos.x <= thisPos.x){
 					return new Vector2(nodeRect.x, nodeRect.y + 10);
-				if (sourcePos.x > thisPos.x)
+				}
+				if (sourcePos.x > thisPos.x){
 					return new Vector2(nodeRect.xMax, nodeRect.y + 10);
+				}
 			}
 
-			if (sourcePos.y <= thisPos.y)
+			if (sourcePos.y <= thisPos.y){
 				return new Vector2(nodeRect.center.x, nodeRect.y);
-			if (sourcePos.y > thisPos.y)
+			}
+			if (sourcePos.y > thisPos.y){
 				return new Vector2(nodeRect.center.x, nodeRect.yMax);
+			}
 
 			return thisPos;
 		}
 		
-		protected override void OnNodeGUI(){
-			if (inIconMode)
-				GUILayout.Label("<i>" + name + "</i>");
-		}
+		// protected override void OnNodeGUI(){ }
 
 		protected override void OnNodeInspectorGUI(){
 			ShowBaseFSMInspectorGUI();
@@ -359,7 +376,7 @@ namespace NodeCanvas.StateMachines{
 				} else {
 					menu.AddDisabledItem(new GUIContent ("Enter State"));
 				}
-				// menu.AddItem(new GUIContent("Breakpoint"), isBreakpoint, ()=>{ isBreakpoint = !isBreakpoint; });
+				menu.AddItem(new GUIContent("Breakpoint"), isBreakpoint, ()=>{ isBreakpoint = !isBreakpoint; });
 			}
 			return menu;
 		}
@@ -385,7 +402,7 @@ namespace NodeCanvas.StateMachines{
 				if (connection.condition != null){
 					GUILayout.Label(connection.condition.summaryInfo, GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
 				} else {
-					GUILayout.Label("OnFinish" + (onFinishExists? " (exists)" : "" ), GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
+					GUILayout.Label("OnFinish" + (onFinishExists? " (exists)" : string.Empty ), GUILayout.MinWidth(0), GUILayout.ExpandWidth(true));
 					onFinishExists = true;
 				}
 

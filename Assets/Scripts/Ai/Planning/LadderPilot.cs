@@ -1,34 +1,63 @@
 ﻿using System;
 using UnityEngine;
 
-public class LadderPilot {
+public class LadderPilot : IPathPilot {
 
-	private int mHDir = 0;
-	private int mVDir = 0;
-	private float mYt;
-	private float mY;
-	
-	public LadderPilot (WalkerParams wp, float xlf, float xrf, float yt, float x, float y) {
-		if (x < xlf) mHDir = 1;
-		if (x + wp.size.x > xrf) mHDir = -1;
-		mYt = yt;
-		mY = y;
-		mVDir = (y < yt ? 1 : (y > yt ? -1 : 0));
+	private readonly WalkerParams mWp;
+	private readonly IAiWalkerFacade mAiFacade;
+	private readonly Range mTargetRange;
+	private readonly int mVDir;
+
+	public LadderPilot (WalkerParams wp, IAiWalkerFacade aiFacade, Range targetRange) {
+		mWp = wp;
+		mAiFacade = aiFacade;
+		mTargetRange = targetRange;
+		mVDir = Math.Sign (mTargetRange.y - aiFacade.GetPosition ().y);
 	}
 
-	public void OnUpdate (float y) {
-		mY = y;
+	public void Start (InputCatcher inputCatcher) {
+		Log.logger.Log (Log.AI_PLAN, "start ladder pilot");
 	}
 
-	public int GetLateralDir () {
-		return mHDir;
+	public void Stop () {
 	}
 
-	public int GetVerticalDir () {
-		if (mVDir > 0 && mY < mYt) return 1;
-		if (mVDir < 0 && mY > mYt) return -1;
-		return 0;
+	public bool FeedInput (InputCatcher inputCatcher) {
+
+		// no longer on ladder.
+		if (mAiFacade.GetLadder () == null) {
+			return true;
+		}
+
+		Vector2 position = mAiFacade.GetPosition ();
+		int vDir = Math.Sign (mTargetRange.y - position.y);
+		if (vDir == mVDir) {
+			if (vDir > 0) {
+				if (inputCatcher.GetDown ()) inputCatcher.OnDownRelease ();
+				if (!inputCatcher.GetUp ()) inputCatcher.OnUpPress ();
+			} else {
+				if (inputCatcher.GetUp ()) inputCatcher.OnUpRelease ();
+				if (!inputCatcher.GetDown ()) inputCatcher.OnDownPress ();
+			}
+		}
+
+		if (position.x < mTargetRange.xl) {
+			if (inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
+			if (!inputCatcher.GetRight ()) inputCatcher.OnRightPress ();
+		} else if (position.x + mWp.size.x > mTargetRange.xr) {
+			if (inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
+			if (!inputCatcher.GetLeft ()) inputCatcher.OnLeftPress ();
+		}
+
+		if (mVDir == 0) {
+			return true;
+		}
+		Rect ladderRect = mAiFacade.GetLadder ().rect;
+		// if we are moving to a different part of the ladder
+		if (mTargetRange.y > ladderRect.yMin && mTargetRange.y < ladderRect.yMax) {
+			return (vDir != mVDir);
+		}
+		return false;
 	}
 
 }
-

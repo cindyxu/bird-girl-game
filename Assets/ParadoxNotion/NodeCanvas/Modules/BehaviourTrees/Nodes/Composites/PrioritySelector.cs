@@ -8,14 +8,19 @@ using UnityEngine;
 namespace NodeCanvas.BehaviourTrees{
 
 	[Category("Composites")]
-	[Description("Very similar to the normal Selector, but selects the child nodes in order from higher to lower priority until one Succeeds.")]
+	[Description("Used for Utility AI, the Priority Selector executes the child with the highest priority value. If it fails, the Prioerity Selector will continue with the next highest priority child until one Succeeds, or until all Fail (similar to how a normal Selector does).")]
 	[Icon("Priority")]
+	[Color("b3ff7f")]
 	public class PrioritySelector : BTComposite {
 
 		public List<BBParameter<float>> priorities = new List<BBParameter<float>>();
 
 		private List<Connection> orderedConnections = new List<Connection>();
 		private int current = 0;
+
+		public override string name{
+			get {return base.name.ToUpper();}
+		}
 
 		public override void OnChildConnected(int index){
 			priorities.Insert(index, new BBParameter<float>{value = 1, bb = graphBlackboard});

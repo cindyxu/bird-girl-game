@@ -6,12 +6,13 @@ namespace NodeCanvas.StateMachines{
 
 	[Name("Any State")]
 	[Description("The Transitions of this node will constantly be checked. If any becomes true, the target connected State will Enter regardless of the current State. This node can have no incomming transitions.")]
+	[Color("b3ff7f")]
 	public class AnyState : FSMState, IUpdatable{
 
 		public bool dontRetriggerStates = false;
 
 		public override string name{
-			get {return string.Format("<color=#b3ff7f>{0}</color>", base.name.ToUpper());}
+			get {return base.name.ToUpper();}
 		}
 
 		public override int maxInConnections{ get {return 0;} }
@@ -20,8 +21,9 @@ namespace NodeCanvas.StateMachines{
 
 		new public void Update(){
 
-			if (outConnections.Count == 0)
+			if (outConnections.Count == 0){
 				return;
+			}
 
 			status = Status.Running;
 
@@ -39,11 +41,11 @@ namespace NodeCanvas.StateMachines{
 
 				if (condition.CheckCondition(graphAgent, graphBlackboard)){
 					FSM.EnterState( (FSMState)connection.targetNode );
-					connection.connectionStatus = Status.Success;
+					connection.status = Status.Success; //editor vis
 					return;
 				}
 
-				connection.connectionStatus = Status.Failure;
+				connection.status = Status.Failure; //editor vis
 			}
 		}
 

@@ -12,6 +12,7 @@ namespace NodeCanvas.Tasks.Actions{
 
 		[BlackboardOnly]
 		public BBParameter<object> log;
+		public BBParameter<string> prefix;
 		public float secondsToRun = 1f;
 		public CompactStatus finishStatus = CompactStatus.Success;
 
@@ -20,7 +21,7 @@ namespace NodeCanvas.Tasks.Actions{
 		}
 
 		protected override void OnExecute(){
-			Debug.Log(string.Format("<b>Var '{0}' = </b> {1}", log.name, log.value ) );
+			Debug.Log(string.Format("<b>({0}) ({1}) | Var '{2}' = </b> {3}", agent.gameObject.name, prefix.value, log.name, log.value ), agent.gameObject );
 		}
 
 		protected override void OnUpdate(){

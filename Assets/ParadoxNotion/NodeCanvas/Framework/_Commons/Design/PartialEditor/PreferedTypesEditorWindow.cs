@@ -27,7 +27,7 @@ namespace ParadoxNotion.Design{
 	        title = "Preferred Types";
 	        #endif
 
-			typeList = UserTypePrefs.GetPreferedTypesList(typeof(object), true);
+			typeList = UserTypePrefs.GetPreferedTypesList(typeof(object));
 			search = null;
 		}
 
@@ -124,7 +124,7 @@ namespace ParadoxNotion.Design{
 			if (GUILayout.Button("RESET DEFAULTS")){
 				if (EditorUtility.DisplayDialog("Reset Preferred Types", "Are you sure?", "Yes", "NO!")){
 					UserTypePrefs.ResetTypeConfiguration();
-					typeList = UserTypePrefs.GetPreferedTypesList(typeof(object), true);
+					typeList = UserTypePrefs.GetPreferedTypesList(typeof(object));
 					Save();
 				}
 			}

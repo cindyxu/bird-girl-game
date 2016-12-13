@@ -51,8 +51,9 @@ namespace NodeCanvas.Framework{
 
 			UndoManager.CheckUndo(task.ownerSystem.contextObject, "Task Inspector");
 
-			if (task.obsolete != string.Empty)
+			if (task.obsolete != string.Empty){
 				EditorGUILayout.HelpBox(string.Format("This is an obsolete Task:\n\"{0}\"", task.obsolete), MessageType.Warning);
+			}
 
 			if (!showTitlebar || ShowTaskTitlebar(task, callback) == true){
 
@@ -60,6 +61,7 @@ namespace NodeCanvas.Framework{
 					EditorGUILayout.HelpBox(task.description, MessageType.None);
 				}
 
+				// ShowWarnings(task);
 				SpecialCaseInspector(task);
 				ShowAgentField(task);
 				task.OnTaskInspectorGUI();
@@ -68,7 +70,16 @@ namespace NodeCanvas.Framework{
 			UndoManager.CheckDirty(task.ownerSystem.contextObject);
 		}
 
-		//Some special cases for Action & Condition. Bit weird but better that creating a virtual method in this case
+		static void ShowWarnings(Task task){
+			if (task.firstWarningMessage != null){
+				GUILayout.BeginHorizontal("box");
+				GUILayout.Box(EditorUtils.warningIcon, GUIStyle.none, GUILayout.Width(16));
+				GUILayout.Label(string.Format("<size=9>{0}</size>", task.firstWarningMessage) );
+				GUILayout.EndHorizontal();
+			}
+		}
+
+		//Some special cases for Action & Condition. A bit weird but better that creating a virtual method in this case
 		static void SpecialCaseInspector(Task task){
 			
 			if (task is ActionTask){
@@ -158,17 +169,19 @@ namespace NodeCanvas.Framework{
 		//Shows the agent field in case an agent type is specified either with [AgentType] attribute or through the use of the generic versions of Actio or Condition Task
 		static void ShowAgentField(Task task){
 
-			if (task.agentType == null)
+			if (task.agentType == null){
 				return;
+			}
 
 			if (Application.isPlaying && task.agentIsOverride && task.overrideAgent.value == null){
 				GUI.color = EditorUtils.lightRed;
-				EditorGUILayout.LabelField("Missing Agent Reference!");
+				GUILayout.Label("<b>!Missing Agent Reference!</b>");
 				GUI.color = Color.white;
 				return;
 			}
 
-			var isMissingType = task.agent == null || task.agent.GetComponent(task.agentType) == null;
+
+			var isMissingType = task.agent == null;
 			var infoString = isMissingType? "<color=#ff5f5f>" + task.agentType.FriendlyName() + "</color>": task.agentType.FriendlyName();
 
 			GUI.color = new Color(1f,1f,1f, task.agentIsOverride? 1f : 0.5f);
@@ -186,9 +199,11 @@ namespace NodeCanvas.Framework{
 					
 					//Local
 					if (task.overrideAgent.bb != null){
-						//varNames.AddRange(task.overrideAgent.bb.GetVariableNames(task.agentType));
 						varNames.AddRange(task.overrideAgent.bb.GetVariableNames(typeof(GameObject)));
 						varNames.AddRange(task.overrideAgent.bb.GetVariableNames(typeof(Component)));
+						if (task.agentType.IsInterface){
+							varNames.AddRange(task.overrideAgent.bb.GetVariableNames(task.agentType));
+						}
 					}
 
 					//Globals
@@ -197,9 +212,11 @@ namespace NodeCanvas.Framework{
 						varNames.Add(globalBB.name + "/");
 						
 						var globalVars = new List<string>();
-						//globalVars.AddRange( globalBB.GetVariableNames(task.agentType));
 						globalVars.AddRange( globalBB.GetVariableNames(typeof(GameObject)));
 						globalVars.AddRange( globalBB.GetVariableNames(typeof(Component)));
+						if (task.agentType.IsInterface){
+							globalVars.AddRange( globalBB.GetVariableNames(task.agentType));
+						}
 
 						for (var i = 0; i < globalVars.Count; i++){
 							globalVars[i] = globalBB.name + "/" + globalVars[i];
@@ -243,8 +260,9 @@ namespace NodeCanvas.Framework{
 			GUI.color = Color.white;
 
 			if (task.agentIsOverride){
-				if (isMissingType)
+				if (isMissingType){
 					GUILayout.Label("(" + infoString + ")", GUILayout.Height(15));
+				}
 				task.overrideAgent.useBlackboard = EditorGUILayout.Toggle(task.overrideAgent.useBlackboard, EditorStyles.radioButton, GUILayout.Width(18));
 			}
 

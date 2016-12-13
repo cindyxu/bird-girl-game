@@ -9,6 +9,7 @@ namespace NodeCanvas.BehaviourTrees{
 	[Category("Composites")]
 	[Description("Executes ONE child based on the provided int or enum and return it's status. If 'case' change while a child is running, that child will be interrupted before the new child is executed")]
 	[Icon("IndexSwitcher")]
+	[Color("b3ff7f")]
 	public class Switch : BTComposite {
 
 		public enum CaseSelectionMode
@@ -33,7 +34,7 @@ namespace NodeCanvas.BehaviourTrees{
 		private int runningIndex;
 
 		public override string name{
-			get{return string.Format("<color=#b3ff7f>{0}</color>", base.name.ToUpper());}
+			get{return base.name.ToUpper();}
 		}
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){

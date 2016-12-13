@@ -14,7 +14,7 @@ namespace ParadoxNotion.Design{
 
 	public static class AOTClassesGenerator {
 
-		static List<Type> defaultSpoofTypes = new List<Type>{
+		static readonly List<Type> defaultSpoofTypes = new List<Type>{
 			typeof(bool),
 			typeof(float),
 			typeof(int),
@@ -43,7 +43,7 @@ namespace ParadoxNotion.Design{
 			}
 
 			var spoofTypes = defaultSpoofTypes;
-			spoofTypes.AddRange(UserTypePrefs.GetPreferedTypesList(typeof(object), false).Where(t => t.IsValueType && !spoofTypes.Contains(t)) );
+			spoofTypes.AddRange(UserTypePrefs.GetPreferedTypesList(typeof(object), true).Where(t => t.IsValueType && !spoofTypes.Contains(t)) );
 			var types = EditorUtils.GetAssemblyTypes(typeof(object)).Where(t => t.RTGetAttribute<SpoofAOTAttribute>(true) != null).ToList();
 
 			var nClasses = 0;
@@ -123,6 +123,7 @@ namespace ParadoxNotion.Design{
 									}
 									if (parameter.ParameterType.IsGenericType){
 										toString = parameter.ParameterType.FriendlyName(true).Replace("<T>", "<" + spoofType.FullName + ">");
+										toString = toString.Replace("[[T]]", "");
 									}
 									paramsString += string.Format("({0})o", toString);
 									if (i < parameters.Length-1){
@@ -169,7 +170,7 @@ namespace ParadoxNotion.Design{
 				return;
 			}
 
-			var spoofTypes = UserTypePrefs.GetPreferedTypesList(typeof(UnityEngine.Object), false);
+			var spoofTypes = UserTypePrefs.GetPreferedTypesList(typeof(UnityEngine.Object), true);
 			var pairs = new Dictionary<string, List<Type>>();
 			foreach(var type in spoofTypes){
 				var asmName = type.Assembly.GetName().Name;

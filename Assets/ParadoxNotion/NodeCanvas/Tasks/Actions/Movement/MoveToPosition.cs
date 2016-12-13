@@ -7,7 +7,7 @@ namespace NodeCanvas.Tasks.Actions{
 
 	[Name("Move To Target Position")]
 	[Category("Movement")]
-	public class MoveToPosition : ActionTask<NavMeshAgent> {
+	public class MoveToPosition : ActionTask<UnityEngine.AI.NavMeshAgent> {
 
 		public BBParameter<Vector3> targetPosition;
 		public BBParameter<float> speed = 3;
@@ -45,15 +45,16 @@ namespace NodeCanvas.Tasks.Actions{
 
 			lastRequest = targetPosition.value;
 
-			if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + keepDistance)
+			if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + keepDistance){
 				EndAction(true);
+			}
 		}
 
 		protected override void OnStop(){
-
-			lastRequest = null;
-			if (agent.gameObject.activeSelf)
+			if (lastRequest != null && agent.gameObject.activeSelf){
 				agent.ResetPath();
+			}
+			lastRequest = null;
 		}
 
 		protected override void OnPause(){
@@ -61,17 +62,3 @@ namespace NodeCanvas.Tasks.Actions{
 		}
 	}
 }
-
-/*
-public static float SumDistances(this Vector3[] list){
-    float sum = 0f;
-
-    // Sum for all except the end cap, since that doesn't have a distance to anything else.
-    for (int i = 0; i < list.Length - 1; i++ )
-    {
-        sum += UnityEngine.Vector3.Distance(list[i], list[i + 1]);
-    }
-
-    return sum;
-}
-*/

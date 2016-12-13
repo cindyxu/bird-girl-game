@@ -63,7 +63,7 @@ namespace NodeCanvas.Tasks.Conditions{
 				};
 
 				var menu = new UnityEditor.GenericMenu();
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object))){
 					menu = EditorUtils.GetStaticEventSelectionMenu(t, null, Selected, menu);
 				}
 				if ( NodeCanvas.Editor.NCPrefs.useBrowser){ menu.ShowAsBrowser("Select System.Action Event", this.GetType()); }
@@ -140,7 +140,7 @@ namespace NodeCanvas.Tasks.Conditions{
 				};
 
 				var menu = new UnityEditor.GenericMenu();
-				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object), true)){
+				foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object))){
 					menu = EditorUtils.GetStaticEventSelectionMenu(t, typeof(T), Selected, menu);
 				}
 				if ( NodeCanvas.Editor.NCPrefs.useBrowser){ menu.ShowAsBrowser("Select System.Action<T> Event", this.GetType()); }

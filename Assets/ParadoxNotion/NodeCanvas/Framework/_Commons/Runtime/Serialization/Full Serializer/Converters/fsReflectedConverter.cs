@@ -25,17 +25,26 @@ namespace ParadoxNotion.Serialization.FullSerializer.Internal {
             fsMetaType metaType = fsMetaType.Get(Serializer.Config, instance.GetType());
             metaType.EmitAotData();
 
-            var defaultInstance = metaType.CreateInstance();
+            //PARADOXNOTION ADDITION
+            object defaultInstance = null;
+            //Dont do this for UnityObject. While there is fsUnityObjectConverter, this converter is also used as override,
+            //when serializing a UnityObject directly.
+            if ( fsGlobalConfig.SerializeDefaultValues == false && !(instance is UnityEngine.Object) ){
+                defaultInstance = metaType.CreateInstance();
+            }
+            //
 
             for (int i = 0; i < metaType.Properties.Length; ++i) {
                 fsMetaProperty property = metaType.Properties[i];
                 if (property.CanRead == false) continue;
 
-                if (fsGlobalConfig.SerializeDefaultValues == false){
+                //PARADOXNOTION ADDITION
+                if ( fsGlobalConfig.SerializeDefaultValues == false && defaultInstance != null ){
                     if (Equals( property.Read(instance), property.Read(defaultInstance) )){
                         continue;
                     }
                 }
+                //
 
                 fsData serializedData;
 

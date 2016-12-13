@@ -20,17 +20,12 @@ namespace NodeCanvas.Tasks.Actions{
 		}
 
 		protected override void OnUpdate(){
-			if (elapsedTime > delay.value){
+			if (elapsedTime >= delay.value){
+				var e = new EventData(eventName.value);
 				if (sendGlobal){
-					Graph.SendGlobalEvent( new EventData(eventName.value) );
+					Graph.SendGlobalEvent(e);
 				} else {
-					var e = new EventData(eventName.value);
-					// agent.SendEvent(e);
-					var router = agent.GetComponent<MessageRouter>();
-					if (router != null){
-						router.Dispatch("OnCustomEvent", e);
-						router.Dispatch(e.name, null);
-					}
+					agent.SendEvent(e);
 				}
 				EndAction();
 			}
@@ -53,17 +48,12 @@ namespace NodeCanvas.Tasks.Actions{
 		}
 
 		protected override void OnUpdate(){
-			if (elapsedTime > delay.value){
+			if (elapsedTime >= delay.value){
+				var e = new EventData<T>(eventName.value, eventValue.value);
 				if (sendGlobal){
-					Graph.SendGlobalEvent( new EventData<T>(eventName.value, eventValue.value) );
+					Graph.SendGlobalEvent( e );
 				} else {
-					var e = new EventData<T>(eventName.value, eventValue.value);
-					// agent.SendEvent(e);
-					var router = agent.GetComponent<MessageRouter>();
-					if (router != null){
-						router.Dispatch("OnCustomEvent", e);
-						router.Dispatch(e.name, e.value);
-					}
+					agent.SendEvent(e);
 				}
 				EndAction();
 			}

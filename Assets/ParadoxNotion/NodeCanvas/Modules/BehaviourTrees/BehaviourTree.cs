@@ -5,9 +5,7 @@ using UnityEngine;
 
 namespace NodeCanvas.BehaviourTrees{
 
-	/// <summary>
 	/// BehaviourTrees are used to create advanced AI and logic based on simple rules.
-	/// </summary>
 	[GraphInfo(
 		packageName = "NodeCanvas",
 		docsURL = "http://nodecanvas.paradoxnotion.com/documentation/",
@@ -16,9 +14,33 @@ namespace NodeCanvas.BehaviourTrees{
 		)]
 	public class BehaviourTree : Graph {
 
+		//////
+		[System.Serializable]
+		struct DerivedSerializationData{
+			public bool repeat;
+			public float updateInterval;
+		}
+
+		public override object OnDerivedDataSerialization(){
+			var data = new DerivedSerializationData();
+			data.repeat = this.repeat;
+			data.updateInterval = this.updateInterval;
+			return data;
+		}
+
+		public override void OnDerivedDataDeserialization(object data){
+			if (data is DerivedSerializationData){
+				this.repeat = ((DerivedSerializationData)data).repeat;
+				this.updateInterval = ((DerivedSerializationData)data).updateInterval;
+			}
+		}
+		//////
+
 		///Should the tree repeat forever?
+		[SerializeField]
 		public bool repeat = true;
 		///The frequency in seconds for the tree to repeat if set to repeat.
+		[SerializeField]
 		public float updateInterval = 0;
 		
 		///This event is called when the root status of the behaviour is changed
@@ -81,19 +103,46 @@ namespace NodeCanvas.BehaviourTrees{
 		///////////GUI AND EDITOR STUFF/////////
 		////////////////////////////////////////
 		#if UNITY_EDITOR
-		[UnityEditor.MenuItem("Tools/ParadoxNotion/NodeCanvas/Create/Behaviour Tree", false, 0)]
+		[UnityEditor.MenuItem("Tools/ParadoxNotion/NodeCanvas/Create/Behaviour Tree Asset", false, 0)]
 		public static void Editor_CreateGraph(){
 			var newGraph = EditorUtils.CreateAsset<BehaviourTree>(true);
 			UnityEditor.Selection.activeObject = newGraph;
 		}
 
 
-		[UnityEditor.MenuItem("Assets/Create/ParadoxNotion/NodeCanvas/Behaviour Tree")]
+		[UnityEditor.MenuItem("Assets/Create/ParadoxNotion/NodeCanvas/Behaviour Tree Asset")]
 		public static void Editor_CreateGraphFix(){
 			var path = EditorUtils.GetAssetUniquePath("BehaviourTree.asset");
 			var newGraph = EditorUtils.CreateAsset<BehaviourTree>(path);
 			UnityEditor.Selection.activeObject = newGraph;
 		}	
+
+		//Append "Complete" version nodes
+		protected override UnityEditor.GenericMenu OnCanvasContextMenu(UnityEditor.GenericMenu menu, Vector2 mPos){
+			//"Complete" version nodes excluded
+			menu.AddDisabledItem(new GUIContent("Composites/Binary Selector"));
+			menu.AddDisabledItem(new GUIContent("Composites/Flip Selector"));
+			menu.AddDisabledItem(new GUIContent("Composites/Priority Selector"));
+			menu.AddDisabledItem(new GUIContent("Composites/Probability Selector"));
+			menu.AddDisabledItem(new GUIContent("Composites/Step Iterator"));
+			menu.AddDisabledItem(new GUIContent("Composites/Switch Case"));
+
+			menu.AddDisabledItem(new GUIContent("Decorators/Filter"));
+			menu.AddDisabledItem(new GUIContent("Decorators/Guard"));
+			menu.AddDisabledItem(new GUIContent("Decorators/Interupt"));
+			menu.AddDisabledItem(new GUIContent("Decorators/Iterate"));
+			menu.AddDisabledItem(new GUIContent("Decorators/Optional"));
+			menu.AddDisabledItem(new GUIContent("Decorators/Override Agent"));
+			menu.AddDisabledItem(new GUIContent("Decorators/Remap"));
+			menu.AddDisabledItem(new GUIContent("Decorators/Timeout"));
+			menu.AddDisabledItem(new GUIContent("Decorators/Wait Until"));
+
+			menu.AddDisabledItem(new GUIContent("Nested/SubTree"));	
+
+			return menu;
+		}
+
+
 		#endif
 	}
 }

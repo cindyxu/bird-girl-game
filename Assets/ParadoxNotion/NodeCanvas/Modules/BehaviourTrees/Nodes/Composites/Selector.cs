@@ -9,6 +9,7 @@ namespace NodeCanvas.BehaviourTrees{
 	[Category("Composites")]
 	[Description("Execute the child nodes in order or randonly until the first that returns Success and return Success as well. If none returns Success, then returns Failure.\nIf is Dynamic, then higher priority children Status are revaluated and if one returns Success the Selector will select that one and bail out immediately in Success too")]
 	[Icon("Selector")]
+	[Color("b3ff7f")]
 	public class Selector : BTComposite{
 
 		public bool dynamic;
@@ -17,7 +18,7 @@ namespace NodeCanvas.BehaviourTrees{
 		private int lastRunningNodeIndex= 0;
 
 		public override string name{
-			get {return string.Format("<color=#b3ff7f>{0}</color>", base.name.ToUpper());}
+			get {return base.name.ToUpper();}
 		}
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){
@@ -46,29 +47,6 @@ namespace NodeCanvas.BehaviourTrees{
 			}
 
 			return Status.Failure;
-
-/*
-
-			if (dynamic && status != Status.Success){
-				for (int i = 0; i < lastRunningNodeIndex; i++){
-					if (outConnections[i].Execute(agent, blackboard) == Status.Success){
-						outConnections[lastRunningNodeIndex].Reset();
-						return Status.Success;
-					}
-				}
-			}
-
-			if (lastRunningNodeIndex >= outConnections.Count)
-				return Status.Failure;
-
-			status = outConnections[lastRunningNodeIndex].Execute(agent, blackboard);
-
-			if (status != Status.Failure)
-				return status;
-
-			lastRunningNodeIndex++;
-			return OnExecute(agent, blackboard);
-*/
 		}
 
 		protected override void OnReset(){

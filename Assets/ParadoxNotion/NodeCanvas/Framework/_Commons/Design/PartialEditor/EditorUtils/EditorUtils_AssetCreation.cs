@@ -66,11 +66,13 @@ namespace ParadoxNotion.Design{
 			return AssetDatabase.GenerateUniqueAssetPath(path + "/" + fileName);
 		}
 
-		//Nice hack to attach a ScriptableObject to a game object.
+/*
+		//Nice hack to attach a ScriptableObject to a game object. Used to work up to Unity version 5.5
 		class Dummy : MonoBehaviour{}
 		public static T AddScriptableComponent<T>(GameObject target) where T:ScriptableObject{
 			return (T)AddScriptableComponent(target, typeof(T));
 		}
+
 		public static ScriptableObject AddScriptableComponent(GameObject target, System.Type type){
 
 			var scriptable = ScriptableObject.CreateInstance(type);
@@ -96,6 +98,7 @@ namespace ParadoxNotion.Design{
 			var o = (ScriptableObject)EditorUtility.InstanceIDToObject(id);
 			return o;
 		}
+*/
 	}
 }
 

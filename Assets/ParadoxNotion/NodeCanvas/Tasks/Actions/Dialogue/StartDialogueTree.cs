@@ -6,26 +6,25 @@ using NodeCanvas.DialogueTrees;
 namespace NodeCanvas.Tasks.Actions{
 
 	[Category("Dialogue")]
-	[AgentType(typeof(IDialogueActor))]
-	[Description("Starts a Dialogue Tree with specified agent for 'Instigator'\nPlease Drag & Drop the DialogueTree Component rather than the GameObject for assignement")]
+	[Description("Starts the Dialogue Tree assigned on a Dialogue Tree Controller object with specified agent used for 'Instigator'.")]
 	[Icon("Dialogue")]
+	[AgentType(typeof(IDialogueActor))]
 	public class StartDialogueTree : ActionTask {
 
 		[RequiredField]
-		public BBParameter<DialogueTree> dialogueTree;
+		public BBParameter<DialogueTreeController> dialogueTreeController;
 		public bool waitActionFinish = true;
 
 		protected override string info{
-			get {return string.Format("Start Dialogue {0}", dialogueTree.ToString());}
+			get {return string.Format("Start Dialogue {0}", dialogueTreeController);}
 		}
 
 		protected override void OnExecute(){
-			
 			var actor = (IDialogueActor)agent;
 			if (waitActionFinish){
-				dialogueTree.value.StartDialogue(actor, (success)=> {EndAction(success);} );
+				dialogueTreeController.value.StartDialogue(actor, (success)=> {EndAction(success);} );
 			} else {
-				dialogueTree.value.StartDialogue(actor);
+				dialogueTreeController.value.StartDialogue(actor);
 				EndAction();
 			}
 		}

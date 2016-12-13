@@ -9,9 +9,7 @@ using UnityEngine;
 
 namespace NodeCanvas.DialogueTrees{
 
-	/// <summary>
 	/// Use DialogueTrees to create Dialogues between Actors
-	/// </summary>
 	[GraphInfo(
 		packageName = "NodeCanvas",
 		docsURL = "http://nodecanvas.paradoxnotion.com/documentation/",
@@ -19,6 +17,25 @@ namespace NodeCanvas.DialogueTrees{
 		forumsURL = "http://nodecanvas.paradoxnotion.com/forums-page/"
 		)]
 	public class DialogueTree : Graph {
+
+		//////
+		[System.Serializable]
+		struct DerivedSerializationData{
+			public List<ActorParameter> actorParameters;
+		}
+
+		public override object OnDerivedDataSerialization(){
+			var data = new DerivedSerializationData();
+			data.actorParameters = this._actorParameters;
+			return data;
+		}
+
+		public override void OnDerivedDataDeserialization(object data){
+			if (data is DerivedSerializationData){
+				this._actorParameters = ((DerivedSerializationData)data).actorParameters;
+			}
+		}
+		//////
 
 		[System.Serializable]
 		public class ActorParameter {
@@ -64,20 +81,28 @@ namespace NodeCanvas.DialogueTrees{
 				this.name = name;
 				this.actor = actor;
 			}
+
+			public override string ToString(){
+				return name;
+			}
 		}
+
+
+		public const string INSTIGATOR_NAME = "INSTIGATOR";
 
 		[SerializeField]
 		private List<ActorParameter> _actorParameters = new List<ActorParameter>();
+
 		private DTNode currentNode;
 
-		public const string INSTIGATOR_NAME = "INSTIGATOR";
 
 		public static event Action<DialogueTree> OnDialogueStarted;
 		public static event Action<DialogueTree> OnDialoguePaused;
 		public static event Action<DialogueTree> OnDialogueFinished;
 		public static event Action<SubtitlesRequestInfo> OnSubtitlesRequest;
 		public static event Action<MultipleChoiceRequestInfo> OnMultipleChoiceRequest;
-		public static DialogueTree currentDialogue;
+		public static DialogueTree currentDialogue{get; private set;}
+		public static DialogueTree previousDialogue{get; private set;}
 
 
 		public override System.Type baseNodeType{ get {return typeof(DTNode);} }
@@ -152,23 +177,23 @@ namespace NodeCanvas.DialogueTrees{
 
 		///Set the target IDialogueActor for the provided key parameter name
 		public void SetActorReference(string paramName, IDialogueActor actor){
-			var reference = actorParameters.Find(r => r.name == paramName);
-			if (reference == null){
+			var param = actorParameters.Find(p => p.name == paramName);
+			if (param == null){
 				Debug.LogError(string.Format("There is no defined Actor key name '{0}'", paramName));
 				return;
 			}
-			reference.actor = actor;
+			param.actor = actor;
 		}
 
 		///Set all target IDialogueActors at once by provided dictionary
 		public void SetActorReferences(Dictionary<string, IDialogueActor> actors){
 			foreach (var pair in actors){
-				var reference = actorParameters.Find(r => r.name == pair.Key);
-				if (reference == null){
+				var param = actorParameters.Find(p => p.name == pair.Key);
+				if (param == null){
 					Debug.LogWarning(string.Format("There is no defined Actor key name '{0}'. Seting actor skiped", pair.Key));
 					continue;
 				}
-				reference.actor = pair.Value;
+				param.actor = pair.Value;
 			}
 		}
 
@@ -215,43 +240,16 @@ namespace NodeCanvas.DialogueTrees{
 		}
 
 
-		///Convenience starting Methods
-
-		///Start the DialogueTree without an Instigator
-		public void StartDialogue(){
-			StartGraph(null, localBlackboard, null);
-		}
-
-		///Start the DialogueTree with provided actor as Instigator
-		public void StartDialogue(IDialogueActor instigator){
-			StartGraph(instigator is Component? (Component)instigator : instigator.transform, localBlackboard, null);
-		}
-
-		///Start the DialogueTree with provded actor as instigator and callback
-		public void StartDialogue(IDialogueActor instigator, Action<bool> callback){
-			StartGraph(instigator is Component? (Component)instigator : instigator.transform, localBlackboard, callback );
-		}
-
-		///Start the DialogueTree with a callback for when its finished
-		public void StartDialogue(Action<bool> callback){
-			StartGraph(null, localBlackboard, callback);
-		}
-
-
-		////
 
 		protected override void OnGraphStarted(){
 
-			if (currentDialogue != null){
-				Debug.LogWarning(string.Format("<b>DialogueTree:</b> Another Dialogue Tree named '{0}' is already running and will be stoped before starting new one '{1}'", currentDialogue.name, this.name ));
-				currentDialogue.Stop(true);
-			}
-
+			previousDialogue = currentDialogue;
 			currentDialogue = this;
 
 			Debug.Log(string.Format("<b>DialogueTree:</b> Dialogue Started '{0}'", this.name));
-			if (OnDialogueStarted != null)
+			if (OnDialogueStarted != null){
 				OnDialogueStarted(this);
+			}
 
 			if ( !(agent is IDialogueActor) ){
 				Debug.Log("<b>DialogueTree:</b> INSTIGATOR agent used in DialogueTree does not implement IDialogueActor. A dummy actor will be used.");
@@ -261,21 +259,35 @@ namespace NodeCanvas.DialogueTrees{
 			EnterNode( currentNode );
 		}
 
+		protected override void OnGraphUnpaused(){
+			currentNode = currentNode != null? currentNode : (DTNode)primeNode;
+			EnterNode( currentNode );			
+			
+			Debug.Log(string.Format("<b>DialogueTree:</b> Dialogue Resumed '{0}'", this.name));
+			if (OnDialogueStarted != null){
+				OnDialogueStarted(this);
+			}
+		}
+
 		protected override void OnGraphStoped(){
 
+			currentDialogue = previousDialogue;
+			previousDialogue = null;
+
 			currentNode = null;
-			currentDialogue = null;
 
 			Debug.Log(string.Format("<b>DialogueTree:</b> Dialogue Finished '{0}'", this.name));
-			if (OnDialogueFinished != null)
+			if (OnDialogueFinished != null){
 				OnDialogueFinished(this);
+			}
 		}
 
 		protected override void OnGraphPaused(){
 
 			Debug.Log(string.Format("<b>DialogueTree:</b> Dialogue Paused '{0}'", this.name));
-			if (OnDialoguePaused != null)
+			if (OnDialoguePaused != null){
 				OnDialoguePaused(this);
+			}
 		}
 
 
@@ -284,26 +296,19 @@ namespace NodeCanvas.DialogueTrees{
 		////////////////////////////////////////
 		#if UNITY_EDITOR
 
-		[UnityEditor.MenuItem("Tools/ParadoxNotion/NodeCanvas/Create/Dialogue Tree", false, 0)]
+		[UnityEditor.MenuItem("Tools/ParadoxNotion/NodeCanvas/Create/Dialogue Tree Object", false, 0)]
 		public static void Editor_CreateGraph(){
-			var newGraph = EditorUtils.AddScriptableComponent<DialogueTree>( new GameObject("DialogueTree") );
-			UnityEditor.Selection.activeObject = newGraph;
+			var dt = new GameObject("DialogueTree").AddComponent<DialogueTreeController>();
+			UnityEditor.Selection.activeObject = dt;
 		}
 
-/*		
-		[UnityEditor.MenuItem("Window/NodeCanvas/Create/Graph/Dialogue Tree")]
-		public static void Editor_CreateGraph(){
-			var newGraph = EditorUtils.CreateAsset<DialogueTree>(true);
-			UnityEditor.Selection.activeObject = newGraph;
-		}
-
-		[UnityEditor.MenuItem("Assets/Create/NodeCanvas/Dialogue Tree")]
+		[UnityEditor.MenuItem("Assets/Create/ParadoxNotion/NodeCanvas/Dialogue Tree Asset")]
 		public static void Editor_CreateGraphFix(){
 			var path = EditorUtils.GetAssetUniquePath("DialogueTree.asset");
 			var newGraph = EditorUtils.CreateAsset<DialogueTree>(path);
 			UnityEditor.Selection.activeObject = newGraph;
-		}	
-*/		
+		}
+
 		#endif
 	}
 }

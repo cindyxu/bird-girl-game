@@ -16,8 +16,9 @@ namespace NodeCanvas.BehaviourTrees{
 
 		protected override Status OnExecute(Component agent, IBlackboard blackboard){
 
-			if (decoratedConnection == null)
+			if (decoratedConnection == null){
 				return Status.Resting;
+			}
 
 			status = decoratedConnection.Execute(agent, blackboard);
 
@@ -25,7 +26,10 @@ namespace NodeCanvas.BehaviourTrees{
 				timer += Time.deltaTime;
 			}
 
-		    if ( !(timer >= timeout.value) ) return status;
+		    if (timer < timeout.value){
+		    	return status;
+		    }
+
 		    timer = 0;
 		    decoratedConnection.Reset();
 		    return Status.Failure;

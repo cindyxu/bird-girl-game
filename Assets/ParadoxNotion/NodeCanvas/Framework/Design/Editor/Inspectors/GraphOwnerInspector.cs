@@ -1,11 +1,11 @@
 ﻿#if UNITY_EDITOR
 
+using System.Linq;
 using NodeCanvas.Framework;
 using ParadoxNotion;
 using ParadoxNotion.Design;
 using UnityEditor;
 using UnityEngine;
-
 
 namespace NodeCanvas.Editor{
 
@@ -31,18 +31,14 @@ namespace NodeCanvas.Editor{
 	[CustomEditor(typeof(GraphOwner), true)]
 	public class GraphOwnerInspector : UnityEditor.Editor {
 
-		private GraphOwner owner{
-			get{return target as GraphOwner;}
-		}
-
+		private GraphOwner owner{ get {return (GraphOwner)target;} }
 		
 		//destroy local graph when owner gets destroyed
 		void OnDestroy(){
 			if (owner == null && owner.graph != null){
-				//1st check is for prefab owner with local graph
-				//2nd check is for non prefab with local graph
-				if (AssetDatabase.IsSubAsset(owner.graph) || !EditorUtility.IsPersistent(owner.graph))
-					DestroyImmediate(owner.graph, true);
+				if (!EditorUtility.IsPersistent(owner.graph)){
+					Undo.DestroyObjectImmediate(owner.graph);
+				}
 			}
 		}
 
@@ -50,7 +46,7 @@ namespace NodeCanvas.Editor{
 		Graph NewAsAsset(){
 			var newGraph = (Graph)EditorUtils.CreateAsset(owner.graphType, true);
 			if (newGraph != null){
-				Undo.RecordObject(owner, "Export To Asset");
+				Undo.RecordObject(owner, "New Asset Graph");
 				owner.graph = newGraph;
 				EditorUtility.SetDirty(owner);
 				EditorUtility.SetDirty(newGraph);
@@ -60,52 +56,36 @@ namespace NodeCanvas.Editor{
 		}
 
 		//create new local graph and assign it to owner
-		Graph NewAsLocal(){
-			var newGraph = (Graph)EditorUtils.AddScriptableComponent(owner.gameObject, owner.graphType);
-			newGraph.name = owner.graphType.Name;
-			newGraph.hideFlags = HideFlags.HideInInspector;
-			Undo.RegisterCreatedObjectUndo(newGraph, "New Bound Graph");
+		Graph NewAsBound(){
+			var newGraph = (Graph)ScriptableObject.CreateInstance(owner.graphType);
 			Undo.RecordObject(owner, "New Bound Graph");
-			owner.graph = newGraph;
+			owner.SetBoundGraphReference(newGraph);
 			EditorUtility.SetDirty(owner);
-			EditorUtility.SetDirty(newGraph);
 			return newGraph;
 		}
 
 		//Bind graph to owner
-		void AssetToLocal(){
-			var newGraph = (Graph)EditorUtils.AddScriptableComponent(owner.gameObject, owner.graphType);
-			newGraph.hideFlags = HideFlags.HideInInspector;
-			
-			EditorUtility.CopySerialized(owner.graph, newGraph);
-			newGraph.Validate();
-
-			Undo.RegisterCreatedObjectUndo(newGraph, "New Bound Graph");
-			Undo.RecordObject(owner, "New Bound Graph");
-			owner.graph = newGraph;
+		void AssetToBound(){
+			Undo.RecordObject(owner, "Bind Asset Graph");
+			owner.SetBoundGraphReference(owner.graph);
 			EditorUtility.SetDirty(owner);
-			EditorUtility.SetDirty(newGraph);
-		}
-
-		//Save graph to asset
-		Graph LocalToAsset(){
-			var newGraph = (Graph)EditorUtils.CreateAsset(owner.graphType, true);
-			if (newGraph != null){
-				
-				EditorUtility.CopySerialized(owner.graph, newGraph);
-				newGraph.Validate();
-				
-				EditorUtility.SetDirty(owner);
-				EditorUtility.SetDirty(newGraph);
-				AssetDatabase.SaveAssets();
-			}
-			return newGraph;			
 		}
 
 		
 		public override void OnInspectorGUI(){
 
+			if ( !owner.hasUpdated2_6_2 ){
+				EditorGUILayout.HelpBox("IMPORTANT: Due to a core version update change, this Graph Owner created with a previous version, is temporary locked.\nPlease update your project to the new version simply by clicking the button bellow.", MessageType.Warning);
+				if (GUILayout.Button("Update Project", GUILayout.Height(40))){
+					ProjectVersionUpdater.DoVersionUpdate();
+				}				
+				return;
+			}
+
 			UndoManager.CheckUndo(owner, "Graph Owner Inspector");
+			if (owner.graph != null && owner.graphIsBound){
+				UndoManager.CheckUndo(owner.graph, "Graph Owner Inspector");
+			}
 
 			var ownerPeristant = EditorUtility.IsPersistent(owner);
 			var label = owner.graphType.Name.SplitCamelCase();
@@ -121,7 +101,7 @@ namespace NodeCanvas.Editor{
                         "You can convert from one type to the other at any time.",
                         "Bound", "Asset")){
 
-						newGraph = NewAsLocal();
+						newGraph = NewAsBound();
 
 					} else {
 
@@ -134,13 +114,18 @@ namespace NodeCanvas.Editor{
 				}
 
 				owner.graph = (Graph)EditorGUILayout.ObjectField(label, owner.graph, owner.graphType, false);
+				if (GUI.changed){
+					owner.Validate();
+					EditorUtility.SetDirty(owner);
+				}
 				return;
 			}
 
 			GUILayout.Space(10);
 
+
 			//Graph comments ONLY if Bound graph
-			if (owner.graphIsLocal){
+			if (owner.graphIsBound){
 				owner.graph.graphComments = GUILayout.TextArea(owner.graph.graphComments, GUILayout.Height(45));
 				EditorUtils.TextFieldComment(owner.graph.graphComments, "Graph comments...");
 			}
@@ -154,23 +139,25 @@ namespace NodeCanvas.Editor{
 		
 			if (!Application.isPlaying){
 
-				if (!owner.graphIsLocal && GUILayout.Button("Bind Graph")){
-					if (EditorUtility.DisplayDialog("Bind Graph", "This will make a local copy of the graph, bound to the owner.\n\nThis allows you to make local changes and assign scene object references directly.\n\nNote that you can also use scene references through the Blackboard Variables\n\nBind Graph?", "YES", "NO"))
-						AssetToLocal();
+				if (!owner.graphIsBound && GUILayout.Button("Bind Graph")){
+					if (EditorUtility.DisplayDialog("Bind Graph", "This will make a local copy of the graph, bound to the owner.\n\nThis allows you to make local changes and assign scene object references directly.\n\nNote that you can also use scene object references through the use of Blackboard Variables.\n\nBind Graph?", "YES", "NO")){
+						AssetToBound();
+					}
 				}
 
 				//Reference graph
-				if (!owner.graphIsLocal){
+				if (!owner.graphIsBound){
 
 					owner.graph = (Graph)EditorGUILayout.ObjectField(label, owner.graph, owner.graphType, true);
 
 				} else {
 
 					if (GUILayout.Button("Delete Bound Graph")){
-						if (EditorUtility.DisplayDialog("Delete Bound Graph", "Are you sure?", "YES", "NO")){
+						var safe = !EditorUtility.IsPersistent(owner.graph) || AssetDatabase.IsSubAsset(owner.graph);
+						if (safe && EditorUtility.DisplayDialog("Delete Bound Graph", "Are you sure?", "YES", "NO")){
 							Undo.DestroyObjectImmediate(owner.graph);
-							Undo.RecordObject(owner, "Delete Bound");
-							owner.graph = null;
+							Undo.RecordObject(owner, "Delete Bound Graph");
+							owner.SetBoundGraphReference(null);
 							EditorUtility.SetDirty(owner);
 						}
 					}
@@ -193,7 +180,7 @@ namespace NodeCanvas.Editor{
 			//execution debug controls
 			if (Application.isPlaying && owner.graph != null && !ownerPeristant){
 				var pressed = new GUIStyle(GUI.skin.GetStyle("button"));
-				pressed.normal.background = GUI.skin.GetStyle("button").active.background;
+				pressed.normal.background = pressed.active.background;
 
 				GUILayout.BeginHorizontal("box");
 				GUILayout.FlexibleSpace();
@@ -217,12 +204,8 @@ namespace NodeCanvas.Editor{
 			EditorUtils.EndOfInspector();
 
 			UndoManager.CheckDirty(owner);
-
-			if (GUI.changed){
-				EditorUtility.SetDirty(owner);
-				if (owner.graph != null){
-					EditorUtility.SetDirty(owner.graph);
-				}
+			if (owner.graph != null && owner.graphIsBound){
+				UndoManager.CheckDirty(owner.graph);
 			}
 		}
 

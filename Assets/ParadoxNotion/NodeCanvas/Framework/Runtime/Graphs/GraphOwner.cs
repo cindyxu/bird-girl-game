@@ -1,17 +1,24 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using ParadoxNotion;
+using ParadoxNotion.Serialization;
+using NodeCanvas.Framework.Internal;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 
 namespace NodeCanvas.Framework{
 
-    /// <summary>
     /// A component that is used to control a Graph in respects to the gameobject attached to
-    /// </summary>
-    [ParadoxNotion.Design.SpoofAOT]
 	abstract public class GraphOwner : MonoBehaviour {
+
+		[SerializeField] /*[HideInInspector]*/
+		private string boundGraphSerialization;
+		[SerializeField] /*[HideInInspector]*/
+		private List<UnityEngine.Object> boundGraphObjectReferences;
 
 		public enum EnableAction{
 			EnableBehaviour,
@@ -24,11 +31,9 @@ namespace NodeCanvas.Framework{
 			DoNothing
 		}
 
-		///What will happen OnEnable
-		[HideInInspector]
+		[HideInInspector] ///What will happen OnEnable
 		public EnableAction enableAction = EnableAction.EnableBehaviour;
-		///What will happen OnDisable
-		[HideInInspector]
+		[HideInInspector] ///What will happen OnDisable
 		public DisableAction disableAction = DisableAction.DisableBehaviour;
 
 		private Dictionary<Graph, Graph> instances = new Dictionary<Graph, Graph>();
@@ -39,21 +44,6 @@ namespace NodeCanvas.Framework{
 		abstract public Graph graph{get;set;}
 		abstract public IBlackboard blackboard{get;set;}
 		abstract public System.Type graphType{get;}
-
-		abstract public void StartBehaviour();
-		abstract public void StartBehaviour(System.Action<bool> callback);
-		abstract public void PauseBehaviour();
-		abstract public void StopBehaviour();
-		abstract public void UpdateBehaviour();
-
-		///Is the graph local?
-		public bool graphIsLocal{
-			get
-			{
-				var sc = GetComponents(typeof(IScriptableComponent)).Cast<IScriptableComponent>().ToList();
-				return sc.Contains(this.graph);
-			}
-		}
 
 		///Is the assigned graph currently running?
 		public bool isRunning{
@@ -70,24 +60,29 @@ namespace NodeCanvas.Framework{
 			get {return graph != null? graph.elapsedTime : 0;}
 		}
 
-
 		//Gets the instance graph for this owner of the provided graph
 		protected Graph GetInstance(Graph originalGraph){
 
-			if (originalGraph == null)
+			if (originalGraph == null){
 				return null;
+			}
 
 			//in editor the instance is always the original
-			if (!Application.isPlaying)
+			#if UNITY_EDITOR
+			if (!Application.isPlaying){
 				return originalGraph;
+			}
+			#endif
 
 			//if its already an instance, return the instance
-			if (instances.Values.Contains(originalGraph))
+			if (instances.Values.Contains(originalGraph)){
 				return originalGraph;
+			}
 
 			Graph instance = null;
 
-			//if it's not an instance but rather an asset reference which has been instantiated before, return the instance stored
+			//if it's not an instance but rather an asset reference which has been instantiated before, return the instance stored,
+			//otherwise create and store a new instance.
 			if (!instances.TryGetValue(originalGraph, out instance)){
 				instance = Graph.Clone<Graph>(originalGraph);
 				instances[originalGraph] = instance;
@@ -98,6 +93,43 @@ namespace NodeCanvas.Framework{
 			return instance;
 		}
 
+
+		///Start the graph assigned
+		public void StartBehaviour(){
+			graph = GetInstance(graph);
+			if (graph != null){
+				graph.StartGraph(this, blackboard, true);
+			}
+		}
+
+		///Start the graph assigned providing a callback for when it's finished if at all
+		public void StartBehaviour(System.Action<bool> callback){
+			graph = GetInstance(graph);
+			if (graph != null){
+				graph.StartGraph(this, blackboard, true, callback);
+			}
+		}
+
+		///Pause the current running graph
+		public void PauseBehaviour(){
+			if (graph != null){
+				graph.Pause();
+			}
+		}
+
+		///Stop the current running graph
+		public void StopBehaviour(){
+			if (graph != null){
+				graph.Stop();
+			}
+		}
+
+		///Manually update the assigned graph
+		public void UpdateBehaviour(){
+			if (graph != null){
+				graph.UpdateGraph();
+			}
+		}
 
 
 		///Send an event through the graph (To be used with CheckEvent for example). Same as .graph.SendEvent
@@ -120,18 +152,47 @@ namespace NodeCanvas.Framework{
 
 
 		
-		//set the quite flag
+		//just set the quit flag
 		protected void OnApplicationQuit(){
 			isQuiting = true;
 		}
 
-		//instantiate the graph reference if not local
+		//instantiate and deserialize the bound graph, or instantiate the asset graph reference
 		protected void Awake(){
-			if (graphIsLocal){
-				instances[graph] = graph;
-			} else {
-				graph = GetInstance(graph);
+
+			if (graph == null){
+				return;
 			}
+
+			#if UNITY_EDITOR
+			if ( !hasUpdated2_6_2 ){
+				Debug.LogWarning(string.Format("GraphOwner '{0}' is being used in runtime but has not been updated to version 2.6.2+ !", name), gameObject);
+				enabled = false;
+				return;
+			}
+			#endif
+
+
+			//The graph is bound
+			if (!string.IsNullOrEmpty(boundGraphSerialization)){
+
+				//Case1: The graph is a bound instance in the scene.
+				//Use it directly.
+				if (graph.hideFlags == HideFlags.HideInInspector){
+					instances[graph] = graph;
+					return;
+				}
+
+				//Case2: The graph is a bound asset reference. This takes place when instantiating prefabs.
+				//Set object references before GetInstance, so that graph deserialize with correct references.
+				graph.SetSerializationObjectReferences(boundGraphObjectReferences);
+				graph = GetInstance(graph);
+				return;
+			}
+
+			//Case3: The graph is just a non-bound asset reference.
+			//Instantiate and use it.
+			graph = GetInstance(graph);
 		}
 
 		//mark as startCalled and handle enable behaviour setting
@@ -172,9 +233,7 @@ namespace NodeCanvas.Framework{
 				return;
 			}
 
-			if (disableAction == DisableAction.DisableBehaviour){
-				StopBehaviour();
-			}
+			StopBehaviour();
 
 			foreach (var graph in instances.Values){
 				foreach(var subGraph in graph.GetAllInstancedNestedGraphs()){
@@ -184,36 +243,217 @@ namespace NodeCanvas.Framework{
 			}
 		}
 
+
+
+
+
 		////////////////////////////////////////
 		///////////GUI AND EDITOR STUFF/////////
 		////////////////////////////////////////
-		#if UNITY_EDITOR		
+		#if UNITY_EDITOR
 
-		[SerializeField] [HideInInspector]
-		private bool hasUpdated2_1;
+		[SerializeField]
+		private VersionUpdateProxyGraph versionUpdateProxyGraph;
+		private Graph boundGraphInstance;
 
-		//hide local IScriptableObject graph
-		protected void OnValidate(){
-			
-			if (!hasUpdated2_1){
-				hasUpdated2_1 = true;
-				if (graph != null && !UnityEditor.EditorUtility.IsPersistent(graph)){
-					var newLocal = (Graph)ParadoxNotion.Design.EditorUtils.AddScriptableComponent(this.gameObject, graphType);
-					UnityEditor.EditorUtility.CopySerialized(graph, newLocal);
-					DestroyImmediate(graph);
-					graph = newLocal;
+		///Editor. Has owner been version updated?
+		public bool hasUpdated2_6_2{
+			get	{ return versionUpdateProxyGraph == null && GetComponents(typeof(IScriptableComponent)).Cast<Graph>().Contains(this.graph) == false; }
+		}
+
+		///Editor. Is the graph a bound one?
+		public bool graphIsBound{
+			get
+			{
+				if (graph != null){
+					var prefabType = PrefabUtility.GetPrefabType(this);
+					if (prefabType == PrefabType.Prefab){
+						return AssetDatabase.IsSubAsset(graph) && AssetDatabase.GetAssetPath(graph) == AssetDatabase.GetAssetPath(this);
+					}
+
+					if (prefabType == PrefabType.PrefabInstance){
+						var parent = (GraphOwner)PrefabUtility.GetPrefabParent(this);
+						return graph.hideFlags == HideFlags.HideInInspector || (AssetDatabase.IsSubAsset(graph) && AssetDatabase.GetAssetPath(graph) == AssetDatabase.GetAssetPath(parent));
+					}
+
+					return graph.hideFlags == HideFlags.HideInInspector;
+				}
+
+				return !string.IsNullOrEmpty(boundGraphSerialization);
+			}
+		}
+
+		//Called in editor only after assigned graph is serialized.
+		//If the graph is bound, we store the serialization data here.
+		public void OnGraphSerialized(Graph serializedGraph){
+			if (graphIsBound && graph == serializedGraph){
+				graph.GetSerializationData(out boundGraphSerialization, out boundGraphObjectReferences);
+				EditorUtility.SetDirty(this);
+			}
+		}
+
+		///Called from the editor.
+		protected void OnValidate(){ Validate(); }
+		public void Validate(){
+
+			if (Application.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode){
+				return;
+			}
+
+			//check if has updated before everything else!
+			if (!hasUpdated2_6_2){
+				if (graph != null) graph.hideFlags = HideFlags.HideInInspector;
+				return;
+			}
+
+			//everything bellow is relevant to bound graphs only
+			if (!graphIsBound){
+				return;
+			}
+
+			var prefabType = PrefabUtility.GetPrefabType(this);
+			if (boundGraphInstance == null){
+
+				if (prefabType == PrefabType.Prefab){
+
+					if (graph == null){
+						graph = (Graph)ScriptableObject.CreateInstance(graphType);
+						AssetDatabase.AddObjectToAsset(graph, this);
+						EditorApplication.delayCall += ()=>{ AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(graph)); };
+					}
+
+					boundGraphInstance = graph;
+
+				} else {
+
+					boundGraphInstance = (Graph)ScriptableObject.CreateInstance(graphType);
 				}
 			}
 
+			boundGraphInstance.Deserialize(boundGraphSerialization, false, boundGraphObjectReferences);
 
-			if (graphIsLocal){
-				graph.hideFlags = HideFlags.HideInInspector;
-			}			
+			boundGraphInstance.hideFlags = prefabType == PrefabType.Prefab? HideFlags.None : HideFlags.HideInInspector;
+			(boundGraphInstance as UnityEngine.Object).name = this.name + (AssetDatabase.IsSubAsset(boundGraphInstance)? "(SubAsset)" : "");
+			boundGraphInstance.Validate();
+			graph = boundGraphInstance;
+
+			boundGraphSerialization = graph.Serialize(false, boundGraphObjectReferences);
+
+			graph.agent = this;
+			graph.blackboard = this.blackboard;
 		}
-		
-		//...
+
+		///Editor. Handles updating bound graphs from previous versions.
+		public void TryUpdateBoundGraphPriorToVersion2_6_2(){
+
+			if (hasUpdated2_6_2){
+				return;
+			}
+
+			var scriptableComponents = GetComponents(typeof(IScriptableComponent)).Where(s => s != null && s.GetType() == graphType).Cast<Graph>();
+			var prefabType = PrefabUtility.GetPrefabType(this);
+			var thisTypeName = this.GetType().Name;
+
+			if (prefabType == PrefabType.Prefab){
+				//Replace monoscript reference thus keeping object reference the same as far as prefab system works.
+				//VersionUpdateProxyGraph uses exactly the same field names, so Unity will still deserialize values but in the new script.
+				foreach(var scriptable in scriptableComponents){
+					if (scriptable == this.graph){
+						scriptable.Serialize();
+						scriptable.GetSerializationData(out boundGraphSerialization, out boundGraphObjectReferences);
+						var monoscriptGUID = AssetDatabase.FindAssets("VersionUpdateProxyGraph")[0];
+						var monoScript = (MonoScript)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(monoscriptGUID), typeof(MonoScript));
+						var id = scriptable.GetInstanceID();
+						var serObject = new SerializedObject(scriptable);
+						var scriptProp = serObject.FindProperty("m_Script");
+						scriptProp.objectReferenceValue = monoScript;
+						serObject.ApplyModifiedProperties();
+						serObject.UpdateIfDirtyOrScript();
+						versionUpdateProxyGraph = (VersionUpdateProxyGraph)EditorUtility.InstanceIDToObject(id);
+						versionUpdateProxyGraph.hideFlags = HideFlags.NotEditable;
+
+						boundGraphInstance = null;
+						graph = null;
+
+						Debug.Log(string.Format("{0} '{1}' ({2}), Updated.", thisTypeName, name, prefabType), this);
+						EditorUtility.SetDirty(this);
+
+						break;
+					}
+				}
+			}
+
+			if (prefabType == PrefabType.PrefabInstance){
+				if (versionUpdateProxyGraph != null){
+					versionUpdateProxyGraph.GetSerializationData(out boundGraphSerialization, out boundGraphObjectReferences);
+
+					Debug.Log(string.Format("{0} '{1}' (Linked {2}), Updated.", thisTypeName, name, prefabType), this);
+					boundGraphInstance = null;
+					graph = null;
+
+					DestroyImmediate(versionUpdateProxyGraph, true);
+					EditorUtility.SetDirty(this);
+				}
+
+				//This can happen if the graphowner (and it's bound graph) is not part of the prefab asset.
+				foreach(var scriptable in scriptableComponents){
+					if (scriptable == this.graph){
+						scriptable.Serialize();
+						scriptable.GetSerializationData(out boundGraphSerialization, out boundGraphObjectReferences);
+
+						Debug.Log(string.Format("{0} '{1}' ({2}), Updated.", thisTypeName, name, prefabType), this);
+						boundGraphInstance = null;
+						graph = null;
+
+						DestroyImmediate(scriptable, true);
+						EditorUtility.SetDirty(this);
+					}
+					break;
+				}
+			}
+
+			//All other PrefabType cases.
+			if (prefabType != PrefabType.Prefab && prefabType != PrefabType.PrefabInstance){
+				foreach(var scriptable in scriptableComponents){
+					if (scriptable == this.graph){
+						scriptable.Serialize();
+						scriptable.GetSerializationData(out boundGraphSerialization, out boundGraphObjectReferences);
+
+						Debug.Log(string.Format("{0} '{1}', Updated.", thisTypeName, name), this);
+						boundGraphInstance = null;
+						graph = null;
+
+						DestroyImmediate(scriptable, true);
+						EditorUtility.SetDirty(this);
+					}
+					break;
+				}
+			}
+		}
+		//////
+		//////
+
+
+		///Editor. Binds the target graph (null to unbind current).
+		public void SetBoundGraphReference(Graph target){
+
+			if (Application.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode){
+				return;
+			}
+
+			graph = null;
+			boundGraphInstance = null;
+			if (target == null){
+				boundGraphSerialization = null;
+				boundGraphObjectReferences = null;
+				return;
+			}
+			target.Serialize();
+			target.GetSerializationData(out boundGraphSerialization, out boundGraphObjectReferences);
+			Validate(); //validate to handle bound graph instance
+		}
+
 		protected void Reset(){
-			hasUpdated2_1 = true;
 			blackboard = gameObject.GetComponent<Blackboard>();
 			if (blackboard == null){
 				blackboard = gameObject.AddComponent<Blackboard>();		
@@ -253,89 +493,50 @@ namespace NodeCanvas.Framework{
 	///The class where GraphOwners derive from
 	abstract public class GraphOwner<T> : GraphOwner where T:Graph{
 
-		[SerializeField] [HideInInspector]
+		[SerializeField] /*[HideInInspector]*/
 		private T _graph;
-		[SerializeField] [HideInInspector]
+		[SerializeField] /*[HideInInspector]*/
 		private Blackboard _blackboard;
-		
+
 		///The current behaviour Graph assigned
 		sealed public override Graph graph{
-			get {return behaviour;}
-			set {behaviour = (T)value;}
+			get {return _graph; }
+			set {_graph = (T)value;}
 		}
 
-		///The blackboard that the assigned behaviour will be Started with
+		///The current behaviour Graph assigned (same as .graph but of type T)
+		public T behaviour{
+			get { return _graph; }
+			set { _graph = value; }
+		}
+
+		///The blackboard that the assigned behaviour will be Started with or currently using
 		sealed public override IBlackboard blackboard{
 			get
 			{
+				if (graph != null && graph.useLocalBlackboard){
+					return graph.localBlackboard;
+				}
+
 				if (_blackboard == null){
 					_blackboard = GetComponent<Blackboard>();
 				}
+
 				return _blackboard;
 			}
 			set
 			{
-				if (_blackboard != (object)value){
+				if ( !ReferenceEquals(_blackboard, value) ){
 					_blackboard = (Blackboard)(object)value;
-					if (graph != null){
+					if (graph != null && !graph.useLocalBlackboard){
 						graph.blackboard = value;
 					}
 				}
 			}
 		}
-		
 
 		///The Graph type this Owner can be assigned
-		sealed public override Type graphType{ get {return typeof(T);} }
-
-		///The current behaviour Graph assigned
-		public T behaviour{
-			get {return _graph;}
-			set
-			{
-				if (_graph != value){
-					_graph = (T)GetInstance(value);
-				}
-			}
-		}
-
-
-		///Start the behaviour assigned
-		sealed public override void StartBehaviour(){
-			behaviour = (T)GetInstance(behaviour);
-			if (behaviour != null){
-				behaviour.StartGraph(this, blackboard);
-			}
-		}
-
-		///Start the behaviour assigned providing a callback for when it's finished if at all
-		sealed public override void StartBehaviour(Action<bool> callback){
-			behaviour = (T)GetInstance(behaviour);
-			if (behaviour != null){
-				behaviour.StartGraph(this, blackboard, callback);
-			}
-		}
-
-		///Pause the current running Behaviour
-		sealed public override void PauseBehaviour(){
-			if (behaviour != null){
-				behaviour.Pause();
-			}
-		}
-
-		///Stop the current running behaviour
-		sealed public override void StopBehaviour(){
-			if (behaviour != null){
-				behaviour.Stop();
-			}
-		}
-
-		///Manually update the assigned behaviour graph
-		sealed public override void UpdateBehaviour(){
-			if (behaviour != null){
-				behaviour.UpdateGraph();
-			}
-		}
+		sealed public override System.Type graphType{ get {return typeof(T);} }
 
 		///Start a new behaviour on this owner
 		public void StartBehaviour(T newGraph){
@@ -343,7 +544,7 @@ namespace NodeCanvas.Framework{
 		}
 
 		///Start a new behaviour on this owner and get a call back for when it's finished if at all
-		public void StartBehaviour(T newGraph, Action<bool> callback){
+		public void StartBehaviour(T newGraph, System.Action<bool> callback){
 			SwitchBehaviour(newGraph, callback);
 		}
 
@@ -353,9 +554,9 @@ namespace NodeCanvas.Framework{
 		}
 
 		///Use to switch or set graphs at runtime and optionaly get a callback when it's finished if at all
-		public void SwitchBehaviour(T newGraph, Action<bool> callback){
+		public void SwitchBehaviour(T newGraph, System.Action<bool> callback){
 			StopBehaviour();
-			behaviour = newGraph;
+			graph = newGraph;
 			StartBehaviour(callback);
 		}
 	}

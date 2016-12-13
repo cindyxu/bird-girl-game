@@ -66,7 +66,7 @@ namespace NodeCanvas.Framework{
 			}
 		}
 
-		void OnDisable(){
+		void OnDestroy(){
 			allGlobals.Remove(this);
 		}
 

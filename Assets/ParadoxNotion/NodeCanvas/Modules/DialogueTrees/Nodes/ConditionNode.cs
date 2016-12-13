@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace NodeCanvas.DialogueTrees{
 
-	[Name("Condition")]
+	[Name("Task Condition")]
+	[Category("Flow Control")]
 	[Description("Execute the first child node if a Condition is true, or the second one if that Condition is false. The Actor selected is used for the Condition check")]
 	public class ConditionNode : DTNode, ITaskAssignable<ConditionTask>{
 

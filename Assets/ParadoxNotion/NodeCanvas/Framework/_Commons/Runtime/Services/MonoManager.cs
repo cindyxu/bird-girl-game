@@ -23,13 +23,10 @@ namespace ParadoxNotion.Services {
         public event Action onLateUpdate;
         public event Action onFixedUpdate;
         public event Action onGUI;
+        public event Action onApplicationQuit;
+        public event Action<bool> onApplicationPause;
 
-
-        //These are used internaly instead of the events above for performance reasons.
-        private List<Action> onUpdateCalls      = new List<Action>();
-        private List<Action> onLateUpdateCalls  = new List<Action>();
-        private List<Action> onFixedUpdateCalls = new List<Action>();
-        private List<Action> onGUICalls         = new List<Action>();
+        private static bool isQuiting;
 
         private static MonoManager _current;
         public static MonoManager current {
@@ -49,23 +46,18 @@ namespace ParadoxNotion.Services {
         ///Creates the MonoManager singleton
         public static void Create() { _current = current; }
 
+        void OnApplicationQuit(){
+            isQuiting = true;
+            if (onApplicationQuit != null){
+                onApplicationQuit();
+            }
+        }
 
-        public static void AddUpdateMethod(Action method) { current.onUpdateCalls.Add(method); }
-        public static void RemoveUpdateMethod(Action method) { current.onUpdateCalls.Remove(method); }
-
-        public static void AddLateUpdateMethod(Action method) { current.onLateUpdateCalls.Add(method); }
-        public static void RemoveLateUpdateMethod(Action method) { current.onLateUpdateCalls.Remove(method); }
-
-        public static void AddFixedUpdateMethod(Action method) { current.onFixedUpdateCalls.Add(method); }
-        public static void RemoveFixedUpdateMethod(Action method) { current.onFixedUpdateCalls.Remove(method); }
-
-        public static void AddOnGUIMethod(Action method) { current.onGUICalls.Add(method); }
-        public static void RemoveOnGUIMethod(Action method) { current.onGUICalls.Remove(method); }
-
-
-        private static bool isQuiting;
-        void OnApplicationQuit() { isQuiting = true; }
-
+        void OnApplicationPause(bool isPause){
+            if (onApplicationPause != null){
+                onApplicationPause(isPause);
+            }
+        }
 
         void Awake() {
             if ( _current != null && _current != this ) {
@@ -78,50 +70,18 @@ namespace ParadoxNotion.Services {
         }
 
         public void Update(){
-
-            if (Time.timeScale <= 0){
-                return;
-            }
-
-            for (var i = 0; i < onUpdateCalls.Count; i++){
-                onUpdateCalls[i]();
-            }
             if (onUpdate != null){ onUpdate(); }
         }
 
         public void LateUpdate(){
-
-            if (Time.timeScale <= 0){
-                return;
-            }
-
-            for (var i = 0; i < onLateUpdateCalls.Count; i++){
-                onLateUpdateCalls[i]();
-            }
             if (onLateUpdate != null){ onLateUpdate(); }
         }
 
         public void FixedUpdate(){
-
-            if (Time.timeScale <= 0){
-                return;
-            }
-
-            for (var i = 0; i < onFixedUpdateCalls.Count; i++){
-                onFixedUpdateCalls[i]();
-            }
             if (onFixedUpdate != null){ onFixedUpdate(); }
         }
 
         public void OnGUI(){
-
-            if (Time.timeScale <= 0){
-                return;
-            }
-
-            for (var i = 0; i < onGUICalls.Count; i++){
-                onGUICalls[i]();
-            }
             if (onGUI != null){ onGUI(); }
         }
     }

@@ -2,90 +2,142 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class JumpPilot {
+public class JumpPilot : IPathPilot {
 
 	public const float MAX_RANGE_THRESHOLD = 0.1f;
+	public const float TARGET_THRESHOLD = 0.2f;
 
-	private JumpPath mJumpPath;
-	private List<JumpScanArea> mScanAreas = new List<JumpScanArea> ();
-	private int mAidx;
 	private WalkerParams mWp;
-	private float mXlt, mXrt;
+	private IAiWalkerFacade mAiFacade;
+	private JumpPath mJumpPath;
 
-	private int mTDir = 0;
-	private int mDir = 0;
-	private float tx;
+	private List<JumpScanArea> mScanAreas = new List<JumpScanArea> ();
+	private int mScanAreaIdx;
 
-	public JumpPilot (JumpPath jumpPath, float xlt, float xrt, WalkerParams wp, float x) {
+	// where do we want to be when we land,
+	// to minimize distance to the next waypoint?
+	private float mXLOpt, mXROpt;
+
+	private int mCurrTargetDir = 0;
+	private float mCurrTargetX;
+	private bool mLanded = false;
+
+	public JumpPilot (WalkerParams wp, IAiWalkerFacade aiFacade, JumpPath jumpPath,
+		float xlopt, float xropt) {
+		mAiFacade = aiFacade;
 		mWp = wp;
-		mXlt = xlt;
-		mXrt = xrt;
+		mXLOpt = xlopt;
+		mXROpt = xropt;
 		mJumpPath = jumpPath;
-		JumpScanArea scanArea = jumpPath.GetScanArea ();
+	}
+
+	public void Start (InputCatcher inputCatcher) {
+		JumpScanArea scanArea = mJumpPath.GetScanArea ();
 		while (scanArea != null) {
 			mScanAreas.Insert (0, scanArea);
 			scanArea = scanArea.parent;
 		}
-		updateScanIdx (wp.jumpSpd, x, mJumpPath.GetStartPoint ().GetRect ().y);
+		if (!mJumpPath.IsDropPath ()) {
+			inputCatcher.OnJumpPress ();
+		}
+		updateTarget (mAiFacade.GetPosition ().x);
+		inputHorizontalDir (inputCatcher);
+
+		mAiFacade.onGrounded += OnGrounded;
+		Log.logger.Log (Log.AI_PLAN, "start jump pilot");
 	}
 
-	public void OnUpdate (float x, float y, float vy) {
-		updateScanIdx (vy, x, y);
+	public void Stop() {
+		mAiFacade.onGrounded -= OnGrounded;
+	}
 
-		if (mJumpPath.IsDropPath () && y > mJumpPath.GetStartPoint ().GetRect ().y - 0.1f) {
-			mDir = 0;
-		} else {
-			if (mTDir < 0) {
-				if (x > tx) mDir = -1;
-				else mDir = 0;
-			} else if (mTDir > 0) {
-				if (x < tx) mDir = 1;
-				else mDir = 0;
-			}
+	public bool FeedInput (InputCatcher inputCatcher) {
+		if (inputCatcher.GetUp ()) inputCatcher.OnUpRelease ();
+		if (inputCatcher.GetDown ()) inputCatcher.OnDownRelease ();
+		return inputHorizontalDir (inputCatcher);
+	}
+
+	private void OnGrounded(Edge edge) {
+		if (edge != null) {
+			mLanded = true;
 		}
 	}
 
-	public int GetMoveDir () {
-		return mDir;
+	private bool inputHorizontalDir (InputCatcher inputCatcher) {
+		Vector2 pos = mAiFacade.GetPosition ();
+		updateScanIdx (pos.x, mAiFacade.GetVelocity ().y);
+
+		int mDir = 0;
+
+		/* only move if 
+		 * a) we are jumping or
+		 * b) we are far enough below the platform or
+		 * c) we are moving away from the platform anyway,
+		 * in case we move back onto the platform
+		 */
+		Rect startRect = mJumpPath.GetStartPoint ().GetRect ();
+		if (!mJumpPath.IsDropPath () ||
+			pos.y <= startRect.y - 0.1f ||
+			(mCurrTargetDir < 0 && pos.x + mWp.size.x <= startRect.xMin) ||
+			(mCurrTargetDir > 0 && pos.x >= startRect.xMax)) {
+			if (mCurrTargetDir < 0 && pos.x > mCurrTargetX) mDir = -1;
+			else if (mCurrTargetDir > 0 && pos.x < mCurrTargetX) mDir = 1;
+		}
+
+		if (mDir == 0) {
+			if (inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
+			if (inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
+		} else if (mDir < 0) {
+			if (inputCatcher.GetRight ()) inputCatcher.OnRightRelease ();
+			if (!inputCatcher.GetLeft ()) inputCatcher.OnLeftPress ();
+		} else {
+			if (inputCatcher.GetLeft ()) inputCatcher.OnLeftRelease ();
+			if (!inputCatcher.GetRight ()) inputCatcher.OnRightPress ();
+		}
+
+		return mLanded;
 	}
 
-	private void updateScanIdx (float vy, float x, float y) {
-		JumpScanArea scanArea = mScanAreas [mAidx];
+	private void updateScanIdx (float x, float vy) {
+		JumpScanArea scanArea = mScanAreas [mScanAreaIdx];
 		float evy = scanArea.end.vy;
-		Boolean updated = false;
-		while (vy < evy && mAidx + 1 < mScanAreas.Count) {
-			mAidx++;
-			scanArea = mScanAreas [mAidx];
+		bool updated = false;
+		while (vy <= evy && mScanAreaIdx + 1 < mScanAreas.Count) {
+			mScanAreaIdx++;
+			scanArea = mScanAreas [mScanAreaIdx];
 			evy = scanArea.end.vy;
-//			Log.logger.Log (Log.AI_PLAN, "jump idx = " + mAidx + " / " + mScanAreas.Count + ", evy = "  + evy);
 			updated = true;
 		}
-		if (updated) updateTarget (x);
+		if (updated) {
+			updateTarget (x);
+		}
 	}
 
 	private void updateTarget (float x) {
-		JumpScanArea scanArea = mScanAreas [mAidx];
+		JumpScanArea scanArea = mScanAreas [mScanAreaIdx];
 
 		float endRangeX = scanArea.end.xr - scanArea.end.xl;
 		float padding = (endRangeX - mWp.size.x) / 2f;
+
 		// target distance from either left or right
-		float threshold = Mathf.Max (Mathf.Min (MAX_RANGE_THRESHOLD, padding - MAX_RANGE_THRESHOLD), 0);
+		float threshold = Mathf.Max (Mathf.Min (
+			MAX_RANGE_THRESHOLD, padding - MAX_RANGE_THRESHOLD), 0);
 
 		float leftLim = scanArea.end.xl + threshold;
 		float rightLim = scanArea.end.xr - threshold - mWp.size.x;
 
-		float leftTarget = Mathf.Max (Mathf.Min (mXlt, rightLim), leftLim);
-		float rightTarget = Mathf.Max (Mathf.Min (mXrt - mWp.size.x, rightLim), leftLim);
+		float leftTarget = Mathf.Max (Mathf.Min (mXLOpt - TARGET_THRESHOLD, rightLim), leftLim);
+		float rightTarget = Mathf.Max (Mathf.Min (mXROpt + TARGET_THRESHOLD - mWp.size.x, rightLim), leftLim);
 
 		if (x < leftTarget) {
-			tx = leftTarget;
-			mTDir = 1;
+			mCurrTargetX = leftTarget;
+			mCurrTargetDir = 1;
 		} else if (x > rightTarget) {
-			tx = rightTarget;
-			mTDir = -1;
+			mCurrTargetX = rightTarget;
+			mCurrTargetDir = -1;
 		} else {
-			tx = x;
-			mTDir = 0;
+			mCurrTargetX = x;
+			mCurrTargetDir = 0;
 		}
 	}
 }

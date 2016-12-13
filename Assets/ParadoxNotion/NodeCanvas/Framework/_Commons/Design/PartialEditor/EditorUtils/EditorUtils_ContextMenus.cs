@@ -59,7 +59,7 @@ namespace ParadoxNotion.Design{
 			};							
 
 			var listTypes = new Dictionary<Type, string>();
-			foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object), false)){
+			foreach (var t in UserTypePrefs.GetPreferedTypesList(typeof(object), true)){
 				if (type.IsAssignableFrom(t) || (t.IsInterface && showInterfaces) ){
 					var nsString = string.IsNullOrEmpty(t.Namespace)? "No Namespace/" : (t.Namespace.Replace(".","/") + "/") ;
 					var finalString = nsString + t.FriendlyName();
@@ -73,7 +73,8 @@ namespace ParadoxNotion.Design{
 				menu.AddItem(new GUIContent(subCategory + "List<T>/" + tPair.Value), false, Selected, tPair.Key);
 			}
 
-			menu.AddItem(new GUIContent(subCategory + "Add Type..."), false, ()=>{ PreferedTypesEditorWindow.ShowWindow(); });
+			// menu.AddItem(new GUIContent(subCategory + "Add Type..."), false, ()=>{ PreferedTypesEditorWindow.ShowWindow(); });
+			menu.AddDisabledItem(new GUIContent(subCategory + "Add Type..."));
 
 			return menu;
 		}
@@ -116,7 +117,10 @@ namespace ParadoxNotion.Design{
 
 				var category = more? subMenu + type.FriendlyName() + "/More" : subMenu + type.FriendlyName();
 
-			    menu.AddItem(new GUIContent(string.Format("{0}/{1} : {2}", category, field.Name, field.FieldType.FriendlyName())), false, Selected, field);
+				//= field.DeclaringType.GetField(field.Name);
+				var finalField = field.GetBaseDefinition();
+
+			    menu.AddItem(new GUIContent(string.Format("{0}/{1} : {2}", category, finalField.Name, finalField.FieldType.FriendlyName())), false, Selected, finalField);
 			    itemAdded = true;
 			}
 
@@ -141,11 +145,13 @@ namespace ParadoxNotion.Design{
 		///Get a GenericMenu for properties of a type optionaly specifying mustRead & mustWrite
 		static GenericMenu Internal_GetPropertySelectionMenu(BindingFlags flags, Type type, Type propType, Action<PropertyInfo> callback, bool mustRead = true, bool mustWrite = true, GenericMenu menu = null, string subMenu = null){
 			
-			if (menu == null)
+			if (menu == null){
 				menu = new GenericMenu();
+			}
 
-			if (subMenu != null)
+			if (subMenu != null){
 				subMenu = subMenu + "/";
+			}
 
 			GenericMenu.MenuFunction2 Selected = delegate(object selectedProperty){
 				callback((PropertyInfo)selectedProperty);
@@ -155,22 +161,30 @@ namespace ParadoxNotion.Design{
 			var more = false;
 			foreach (var prop in type.GetProperties(flags)){
 
-				if (!prop.CanRead && mustRead)
+				if (!prop.CanRead && mustRead){
 					continue;
-
-				if (!prop.CanWrite && mustWrite)
-					continue;
-
-				if (propType.IsAssignableFrom(prop.PropertyType)){
-
-					if (prop.DeclaringType != type)
-						more = true;
-
-					var category = more? subMenu + type.FriendlyName() + "/More" : subMenu + type.FriendlyName();
-
-					menu.AddItem( new GUIContent( string.Format("{0}/{1} : {2}", category, prop.Name, prop.PropertyType.FriendlyName())), false, Selected, prop );
-					itemAdded = true;
 				}
+
+				if (!prop.CanWrite && mustWrite){
+					continue;
+				}
+
+				if (!propType.IsAssignableFrom(prop.PropertyType)){
+					continue;
+				}
+
+				if (prop.GetCustomAttributes(typeof(System.ObsoleteAttribute), true).FirstOrDefault() != null){
+					continue;
+				}
+
+				if (prop.DeclaringType != type){
+					more = true;
+				}
+
+				var category = more? subMenu + type.FriendlyName() + "/More" : subMenu + type.FriendlyName();
+				var finalProp = prop.GetBaseDefinition();
+				menu.AddItem( new GUIContent( string.Format("{0}/{1} : {2}", category, finalProp.Name, finalProp.PropertyType.FriendlyName())), false, Selected, finalProp );
+				itemAdded = true;
 			}
 
 			if (!itemAdded){
@@ -194,11 +208,13 @@ namespace ParadoxNotion.Design{
 		///Get a GenericMenu for method or property get/set methods selection in a type
 		static GenericMenu Internal_GetMethodSelectionMenu(BindingFlags flags, Type type, Type returnType, Type acceptedParamsType, System.Action<MethodInfo> callback, int maxParameters, bool propertiesOnly, bool excludeVoid = false, GenericMenu menu = null, string subMenu = null){
 
-			if (menu == null)
+			if (menu == null){
 				menu = new GenericMenu();
+			}
 
-			if (subMenu != null)
+			if (subMenu != null){
 				subMenu = subMenu + "/";
+			}
 
 			GenericMenu.MenuFunction2 Selected = delegate(object selectedMethod){
 				callback((MethodInfo)selectedMethod);
@@ -208,21 +224,26 @@ namespace ParadoxNotion.Design{
 			var more = false;
 			foreach (var method in type.GetMethods(flags)){
 
-				if (propertiesOnly != method.IsSpecialName)
+				if (propertiesOnly != method.IsSpecialName){
 					continue;
+				}
 
-				if (method.IsGenericMethod)
+				if (method.IsGenericMethod){
 					continue;
+				}
 
-				if (!returnType.IsAssignableFrom(method.ReturnType))
+				if (!returnType.IsAssignableFrom(method.ReturnType)){
 					continue;
+				}
 
-				if (method.ReturnType == typeof(void) && excludeVoid)
+				if (method.ReturnType == typeof(void) && excludeVoid){
 					continue;
+				}
 
 				var parameters = method.GetParameters();
-				if (parameters.Length > maxParameters && maxParameters != -1)
+				if (parameters.Length > maxParameters && maxParameters != -1){
 					continue;
+				}
 
 				if (parameters.Length > 0){
 					if ( parameters.Any(param => !acceptedParamsType.IsAssignableFrom(param.ParameterType)) ) {
@@ -230,17 +251,29 @@ namespace ParadoxNotion.Design{
 					}
 				}
 
-				if (method.DeclaringType != type)
+				
+				MemberInfo member = method;
+	            if (method.Name.StartsWith("get_") || method.Name.StartsWith("set_")){
+	                member = method.DeclaringType.GetProperty(method.Name.Replace("get_", "").Replace("set_", "") );
+	            }
+	            if (member != null && member.GetCustomAttributes(typeof(System.ObsoleteAttribute), true).FirstOrDefault() != null){
+	            	continue;
+	            }
+
+
+				if (method.DeclaringType != type){
 					more = true;
+				}
 
 				var category = more? subMenu + type.FriendlyName() + "/More" : subMenu + type.FriendlyName();
-
-				menu.AddItem(new GUIContent( category + "/" + method.SignatureName()), false, Selected, method);
+				var finalMethod = method.GetBaseDefinition();
+				menu.AddItem(new GUIContent( category + "/" + finalMethod.SignatureName()), false, Selected, finalMethod);
 				itemAdded = true;
 			}
 			
-			if (!itemAdded)
+			if (!itemAdded){
 				menu.AddDisabledItem(new GUIContent(subMenu + type.FriendlyName()) );
+			}
 
 			return menu;
 		}
@@ -334,8 +367,9 @@ namespace ParadoxNotion.Design{
 			};
 
 			var menu = new GenericMenu();
-			foreach (var element in options)
-				menu.AddItem(new GUIContent(element.ToString()), false, Selected, element );
+			foreach (var element in options){
+				menu.AddItem(new GUIContent( element != null? element.ToString() : "null" ), false, Selected, element );
+			}
 			menu.ShowAsContext();
 			Event.current.Use();
 		}

@@ -15,6 +15,8 @@ namespace NodeCanvas.Tasks.Actions{
         public BBParameter<float> turn;
         [BlackboardOnly]
         public BBParameter<float> forward;
+        [BlackboardOnly]
+        public BBParameter<float> up;
         public BBParameter<float> moveSpeed = 1;
         public BBParameter<float> rotationSpeed = 1;
 
@@ -29,7 +31,8 @@ namespace NodeCanvas.Tasks.Actions{
 
 			var forwardMovement = agent.forward * forward.value * moveSpeed.value * Time.deltaTime;
 			var strafeMovement = agent.right * strafe.value * moveSpeed.value * Time.deltaTime;
-			agent.position += strafeMovement + forwardMovement;
+			var upMovement = agent.up * up.value * moveSpeed.value * Time.deltaTime;
+			agent.position += strafeMovement + forwardMovement + upMovement;
 
             if (!repeat)
 	            EndAction();

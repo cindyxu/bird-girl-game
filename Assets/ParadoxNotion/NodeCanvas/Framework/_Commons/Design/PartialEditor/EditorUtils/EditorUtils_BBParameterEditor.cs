@@ -18,7 +18,7 @@ namespace ParadoxNotion.Design{
 
 
 		//a special object field for the BBParameter class to let user choose either a real value or enter a string to read data from a Blackboard
-		public static BBParameter BBParameterField(string prefix, BBParameter bbParam, bool blackboardOnly = false, MemberInfo member = null){
+		public static BBParameter BBParameterField(string prefix, BBParameter bbParam, bool blackboardOnly = false, MemberInfo member = null, object context = null){
 
 			if (bbParam == null){
 				EditorGUILayout.LabelField(prefix, "Non Set Variable");
@@ -30,14 +30,14 @@ namespace ParadoxNotion.Design{
 
 			//override if we have a memeber info
 			if (member != null){
-				blackboardOnly = member.RTGetAttribute<BlackboardOnlyAttribute>(false) != null;
+				blackboardOnly = member.RTGetAttribute<BlackboardOnlyAttribute>(true) != null;
 			}
 
 			//Direct assignement
 			if (!blackboardOnly && !bbParam.useBlackboard){
 
 				GUILayout.BeginVertical();
-				bbParam.value = GenericField(prefix, bbParam.value, bbParam.varType, member);
+				bbParam.value = GenericField(prefix, bbParam.value, bbParam.varType, member, context);
 				GUILayout.EndVertical();
 			
 			//Dropdown variable selection
@@ -94,6 +94,10 @@ namespace ParadoxNotion.Design{
 				} else {
 					
 					bbParam.name = EditorGUILayout.TextField(prefix + " (" + bbParam.varType.FriendlyName() + ")", bbParam.name);
+					GUI.backgroundColor = new Color(1,1,1,0.2f);
+					if (bbParam.bb != null && GUILayout.Button("▲", GUILayout.Width(20), GUILayout.Height(14))){
+						bbParam.PromoteToVariable(bbParam.bb);
+					}
 				}
 			}
 
@@ -107,21 +111,27 @@ namespace ParadoxNotion.Design{
 
 			GUILayout.EndHorizontal();
 
-			if (bbParam.isNone || bbParam.bb == null){
+			string info = null;
+
+			if (bbParam.bb == null){
+				info = "<i>No current Blackboard reference</i>";
+			} else
+			if (bbParam.isNone){
+				info = "Select a '" + bbParam.varType.FriendlyName() + "' Assignable Blackboard Variable";
+			} else
+			if (bbParam.varRef != null && bbParam.varType != bbParam.refType){
+				if (blackboardOnly){
+					info = string.Format("AutoConvert: ({0} ➲ {1})", bbParam.varType.FriendlyName(), bbParam.refType.FriendlyName() );
+				} else {
+					info = string.Format("AutoConvert: ({0} ➲ {1})", bbParam.refType.FriendlyName(), bbParam.varType.FriendlyName() );
+				}
+			}
+
+			if (info != null){
 				GUI.backgroundColor = new Color(0.8f,0.8f,1f,0.5f);
 				GUI.color = new Color(1f,1f,1f,0.5f);
 				GUILayout.BeginVertical("textfield");
-				
-				var info = string.Empty;
-				if (bbParam.bb == null){
-					info = "<i>No current Blackboard reference</i>";
-				}
-				else if (bbParam.isNone){
-					info = "Select '" + bbParam.varType.FriendlyName() + "' Assignable Blackboard Variable";
-				}
-
-				GUILayout.Label(info);
-
+				GUILayout.Label(info, GUILayout.Width(0), GUILayout.ExpandWidth(true));
 				GUILayout.EndVertical();
 				GUILayout.Space(2);
 			}
