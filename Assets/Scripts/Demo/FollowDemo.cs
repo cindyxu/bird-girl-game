@@ -77,22 +77,24 @@ public class FollowDemo : MonoBehaviour {
 		debugObjectsRoot = new GameObject ();
 
 		RoomPathPlanner roomPlanner = planner.GetCurrentRoomPathPlanner ();
-		List<IWaypointPath> chain = roomPlanner.GetPathChain ();
-		List<Range> targetRanges = roomPlanner.GetTargetRanges ();
+		if (roomPlanner != null) {
+			List<IWaypointPath> chain = roomPlanner.GetPathChain ();
+			List<Range> targetRanges = roomPlanner.GetTargetRanges ();
 
-		for (int i = 0; i < chain.Count; i++) {
-			IWaypointPath path = chain [i];
-			Range targetRange = targetRanges [i];
+			for (int i = 0; i < chain.Count; i++) {
+				IWaypointPath path = chain [i];
+				Range targetRange = targetRanges [i];
 
-			if (path is JumpPath) {
-				JumpPath jumpPath = (JumpPath) path;
-				GameObject mesh = RenderUtils.CreateScanArea (jumpPath.GetScanArea ());
-				mesh.transform.SetParent (debugObjectsRoot.transform);
+				if (path is JumpPath) {
+					JumpPath jumpPath = (JumpPath) path;
+					GameObject mesh = RenderUtils.CreateScanArea (jumpPath.GetScanArea ());
+					mesh.transform.SetParent (debugObjectsRoot.transform);
+				}
+
+				GameObject rangeLine = RenderUtils.CreateLine (
+                   targetRange.xl, targetRange.y, targetRange.xr, targetRange.y, 0.2f, Color.green);
+				rangeLine.transform.SetParent (debugObjectsRoot.transform);
 			}
-
-			GameObject rangeLine = RenderUtils.CreateLine (
-				targetRange.xl, targetRange.y, targetRange.xr, targetRange.y, 0.2f, Color.green);
-			rangeLine.transform.SetParent (debugObjectsRoot.transform);
 		}
 	}
 
