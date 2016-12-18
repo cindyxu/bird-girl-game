@@ -1,58 +1,43 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
-public class GameState : MonoBehaviour {
+public static class GameState {
 
-	public static SceneController sceneController = new SceneController ();
-	public static GameState instance;
+	public delegate void OnSceneLoaded();
 
-	private PlayerRoomController mPlayerRoomController = new PlayerRoomController ();
-	public KeyBindingManager keybindingManager = new KeyBindingManager ();
+	private static string sPlayerRes;
+	private static List<string> mFollowersRes;
 
-	public GameObject player;
-	public CameraController cameraController;
+	private static string sSceneName;
+	private static OnSceneLoaded mOnSceneLoaded;
 
-	void Awake () {
-		if (FindObjectsOfType (GetType ()).Length > 1) {
-			Destroy (gameObject);
-
-		} else {
-			DontDestroyOnLoad (gameObject);
-			instance = this;
-		}
+	static GameState () {
+		sPlayerRes = "Willowby";
+		mFollowersRes = new List<string> ();
+		mFollowersRes.Add ("Passe");
 	}
 
-	public Inhabitant LoadInhabitant(string name, Room room, Vector2 position, string sortingLayerName) {
-		UnityEngine.Object res = Resources.Load ("Prefabs/Characters/" + name);
-		GameObject go = (GameObject) GameObject.Instantiate (res, position, Quaternion.identity);
-		Inhabitant inhabitant = go.GetComponent<Inhabitant> ();
-		inhabitant.GetFacade ().GetRoomTraveller ().TransportTo (room, sortingLayerName);
-		inhabitant.GetFacade ().SetKeyBindingManager (keybindingManager);
-		return inhabitant;
+	public static void LoadScene(string sceneName, OnSceneLoaded onSceneLoaded) {
+
+		sSceneName = sceneName;
+		mOnSceneLoaded = onSceneLoaded;
+
+		SceneManager.LoadScene (sceneName);
 	}
 
-	public void InitializeScene(GameObject player, CameraController cameraController) {
-		this.player = player;
-		this.cameraController = cameraController;
-
-		if (player != null) {
-			player.GetComponent<Inhabitant> ().RequestEnablePlayerControl (false);
-		}
-
-		player.GetComponent<Inhabitant> ().RequestEnablePlayerControl (true);
-		cameraController.SetFollowTarget (player);
-		mPlayerRoomController.Init (player.GetComponent<Inhabitant> ()
-			.GetFacade ().GetRoomTraveller (), cameraController);
-
-		sceneController.HandleLevelWasLoaded ();
+	public static string GetPlayerRes () {
+		return sPlayerRes;
 	}
 
-	void Update()
-	{
-		if(Input.GetKeyDown(KeyCode.P))
-		{
-			Debug.Break();
+	public static List<string> GetFollowersRes () {
+		return mFollowersRes;
+	}
+
+	public static void HandleLevelWasLoaded() {
+		if (mOnSceneLoaded != null) {
+			mOnSceneLoaded ();
 		}
 	}
 }

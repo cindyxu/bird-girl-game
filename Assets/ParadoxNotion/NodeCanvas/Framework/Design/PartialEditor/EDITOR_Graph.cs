@@ -260,8 +260,7 @@ namespace NodeCanvas.Framework{
 				menu.AddItem (new GUIContent ("Connection Style/Stepped"), NCPrefs.connectionStyle == NCPrefs.ConnectionStyle.Stepped, ()=> {NCPrefs.connectionStyle = NCPrefs.ConnectionStyle.Stepped;});
 				menu.AddItem (new GUIContent ("Connection Style/Straight"), NCPrefs.connectionStyle == NCPrefs.ConnectionStyle.Straight, ()=> {NCPrefs.connectionStyle = NCPrefs.ConnectionStyle.Straight;});
 				//menu.AddItem (new GUIContent ("Use External Inspector"), NCPrefs.useExternalInspector, ()=> {NCPrefs.useExternalInspector = !NCPrefs.useExternalInspector;});
-				// menu.AddItem( new GUIContent("Open Preferred Types Editor..."), false, ()=>{PreferedTypesEditorWindow.ShowWindow();} );
-				menu.AddDisabledItem(new GUIContent("Open Preferred Types Editor..."));
+				menu.AddItem( new GUIContent("Open Preferred Types Editor..."), false, ()=>{PreferedTypesEditorWindow.ShowWindow();} );
 				menu.ShowAsContext();
 			}
 			/////////

@@ -9,7 +9,7 @@ public class InterDoorTrigger : DoorTrigger {
 
 	public override bool Execute(GameObject target) {
 		Log.logger.Log (Log.TRIGGER, "Triggered " + name);
-		if (target != GameState.instance.player) {
+		if (target != pGameState.GetPlayer()) {
 			return false;
 		}
 //		Cutscene.Event leaveDoorEvt = CreateLeaveEvent (target);

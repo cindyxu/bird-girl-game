@@ -73,8 +73,7 @@ namespace ParadoxNotion.Design{
 				menu.AddItem(new GUIContent(subCategory + "List<T>/" + tPair.Value), false, Selected, tPair.Key);
 			}
 
-			// menu.AddItem(new GUIContent(subCategory + "Add Type..."), false, ()=>{ PreferedTypesEditorWindow.ShowWindow(); });
-			menu.AddDisabledItem(new GUIContent(subCategory + "Add Type..."));
+			menu.AddItem(new GUIContent(subCategory + "Add Type..."), false, ()=>{ PreferedTypesEditorWindow.ShowWindow(); });
 
 			return menu;
 		}

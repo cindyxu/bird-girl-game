@@ -22,6 +22,7 @@ namespace NodeCanvas.BehaviourTrees{
 		protected override UnityEditor.GenericMenu OnContextMenu(UnityEditor.GenericMenu menu){
 			menu = base.OnContextMenu(menu);
 			menu = EditorUtils.GetTypeSelectionMenu(typeof(BTComposite), (t)=>{ ReplaceWith(t); }, menu, "Replace");
+			menu.AddItem (new GUIContent ("Convert to SubTree"), false, ()=> { ConvertToSubTree(this); });
             if (outConnections.Count > 0){
 				menu.AddItem(new GUIContent("Duplicate Branch"), false, ()=> { DuplicateBranch(this, graph); });
 				menu.AddItem (new GUIContent ("Delete Branch"), false, ()=> { DeleteBranch(this); } );
@@ -44,7 +45,32 @@ namespace NodeCanvas.BehaviourTrees{
 			graph.RemoveNode(this);
 		}
 
+		///Create a new SubTree out of the branch of the provided root node
+		static void ConvertToSubTree(BTNode root){
 
+			if (!UnityEditor.EditorUtility.DisplayDialog("Convert to SubTree", "This will create a new SubTree out of this branch.\nThe SubTree can NOT be unpacked later on.\nAre you sure?", "Yes", "No!")){
+				return;
+			}
+
+			var newBT = EditorUtils.CreateAsset<BehaviourTree>(true);
+			if (newBT == null){
+				return;
+			}
+
+			var subTreeNode = root.graph.AddNode<SubTree>(root.nodePosition);
+			subTreeNode.subTree = newBT;
+
+			for (var i = 0; i < root.inConnections.Count; i++){
+				root.inConnections[i].SetTarget(subTreeNode);
+			}
+
+			root.inConnections.Clear();
+
+			newBT.primeNode = DuplicateBranch(root, newBT);
+			DeleteBranch(root);
+
+			UnityEditor.AssetDatabase.SaveAssets();
+		}
 
 		///Delete the whole branch of provided root node along with the root node
 		static void DeleteBranch(BTNode root){

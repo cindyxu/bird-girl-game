@@ -35,14 +35,14 @@ public class JumpPilotTest {
 
 		Assert.IsTrue (inputCatcher.GetLeft ());
 
-		inputCatcher.FlushPresses ();
+		inputCatcher.FlushAll ();
 		facade.position = new Vector2 (-0.5f, 0.5f);
 		facade.velocity = new Vector2 (0, 0);
 		pilot.FeedInput (inputCatcher);
 
 		Assert.IsTrue (inputCatcher.GetLeft ());
 
-		inputCatcher.FlushPresses ();
+		inputCatcher.FlushAll ();
 		facade.position = new Vector2 (-1, 0);
 		facade.velocity = new Vector2 (0, 0);
 		pilot.FeedInput (inputCatcher);
@@ -80,14 +80,14 @@ public class JumpPilotTest {
 
 		Assert.IsTrue (inputCatcher.GetRight ());
 
-		inputCatcher.FlushPresses ();
+		inputCatcher.FlushAll ();
 		facade.position = new Vector2 (0.5f, 0.5f);
 		facade.velocity = new Vector2 (0, 0);
 		pilot.FeedInput (inputCatcher);
 
 		Assert.IsTrue (inputCatcher.GetRight ());
 
-		inputCatcher.FlushPresses ();
+		inputCatcher.FlushAll ();
 		facade.position = new Vector2 (1, 0);
 		facade.velocity = new Vector2 (0, 0);
 		pilot.FeedInput (inputCatcher);

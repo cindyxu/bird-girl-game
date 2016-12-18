@@ -4,6 +4,7 @@ using System.Collections;
 public abstract class DoorTrigger : Trigger, ITarget {
 	
 	protected Room pRoom;
+	protected SceneState pGameState;
 
 	public delegate void DoorEnterEvent (System.Action callback);
 	public delegate void DoorLeaveEvent (System.Action callback);
@@ -15,6 +16,7 @@ public abstract class DoorTrigger : Trigger, ITarget {
 		base.Awake ();
 		pRoom = GetComponentInParent<Room> ();
 		pCollider2D = GetComponent<Collider2D> ();
+		pGameState = FindObjectOfType<SceneState> ();
 	}
 
 	public override int GetPriority() {

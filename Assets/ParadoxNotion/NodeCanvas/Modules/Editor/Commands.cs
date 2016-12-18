@@ -14,6 +14,11 @@ namespace NodeCanvas.Editor{
 			Selection.activeObject = GlobalBlackboard.Create();
 		}
 
+		[MenuItem("Tools/ParadoxNotion/NodeCanvas/Create/Standalone Action List")]
+		static void CreateActionListPlayer(){
+			Selection.activeObject = ActionListPlayer.Create();
+		}
+
 #if !UNITY_WEBPLAYER
 		[MenuItem("Tools/ParadoxNotion/NodeCanvas/Create/New Task")]
 		[MenuItem("Assets/Create/ParadoxNotion/NodeCanvas/New Task")]
@@ -26,6 +31,16 @@ namespace NodeCanvas.Editor{
 		public static void UpdateProject(){
 			ProjectVersionUpdater.DoVersionUpdate();
 		}
+
+		[MenuItem("Tools/ParadoxNotion/NodeCanvas/Preferred Types Editor")]
+		public static void ShowPrefTypes(){
+			PreferedTypesEditorWindow.ShowWindow();
+		}
+
+	    [MenuItem("Tools/ParadoxNotion/NodeCanvas/External Inspector Panel")]
+	    public static void ShowExternalInspector(){
+	    	ExternalInspectorWindow.ShowWindow();
+	    }
 
 		[MenuItem("Tools/ParadoxNotion/NodeCanvas/Welcome Window")]
 		public static void ShowWelcome(){

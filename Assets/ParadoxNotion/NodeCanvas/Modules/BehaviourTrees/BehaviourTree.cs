@@ -116,33 +116,6 @@ namespace NodeCanvas.BehaviourTrees{
 			var newGraph = EditorUtils.CreateAsset<BehaviourTree>(path);
 			UnityEditor.Selection.activeObject = newGraph;
 		}	
-
-		//Append "Complete" version nodes
-		protected override UnityEditor.GenericMenu OnCanvasContextMenu(UnityEditor.GenericMenu menu, Vector2 mPos){
-			//"Complete" version nodes excluded
-			menu.AddDisabledItem(new GUIContent("Composites/Binary Selector"));
-			menu.AddDisabledItem(new GUIContent("Composites/Flip Selector"));
-			menu.AddDisabledItem(new GUIContent("Composites/Priority Selector"));
-			menu.AddDisabledItem(new GUIContent("Composites/Probability Selector"));
-			menu.AddDisabledItem(new GUIContent("Composites/Step Iterator"));
-			menu.AddDisabledItem(new GUIContent("Composites/Switch Case"));
-
-			menu.AddDisabledItem(new GUIContent("Decorators/Filter"));
-			menu.AddDisabledItem(new GUIContent("Decorators/Guard"));
-			menu.AddDisabledItem(new GUIContent("Decorators/Interupt"));
-			menu.AddDisabledItem(new GUIContent("Decorators/Iterate"));
-			menu.AddDisabledItem(new GUIContent("Decorators/Optional"));
-			menu.AddDisabledItem(new GUIContent("Decorators/Override Agent"));
-			menu.AddDisabledItem(new GUIContent("Decorators/Remap"));
-			menu.AddDisabledItem(new GUIContent("Decorators/Timeout"));
-			menu.AddDisabledItem(new GUIContent("Decorators/Wait Until"));
-
-			menu.AddDisabledItem(new GUIContent("Nested/SubTree"));	
-
-			return menu;
-		}
-
-
 		#endif
 	}
 }
