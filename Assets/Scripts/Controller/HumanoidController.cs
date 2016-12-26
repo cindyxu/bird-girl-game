@@ -83,6 +83,10 @@ public class HumanoidController : IController {
 		return mWalkLocomotion;
 	}
 
+	public void InitializeAi (SceneModelConverter converter) {
+		mAwFacade.Initialize (converter);
+	}
+
 	public void Act () {
 		mInputSwitcher.FeedInput ();
 	}

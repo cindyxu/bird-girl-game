@@ -16,6 +16,7 @@ public class FollowDemo : MonoBehaviour {
 
 	void Start () {
 		walker.GetFacade ().SetKeyBindingManager (keybindingManager);
+		walker.InitializeAi (new SceneModelConverter (new List<Room> { room }));
 		walker.RequestEnablePlayerControl (true);
 
 		mLadders = FindObjectsOfType<Ladder> ();

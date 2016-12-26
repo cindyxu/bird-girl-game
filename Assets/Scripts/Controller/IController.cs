@@ -8,5 +8,6 @@ public interface IController {
 	bool RequestFinishRequest ();
 	bool EnablePlayerControl (bool enable);
 	InputFeeder GetInputFeeder ();
+	void InitializeAi (SceneModelConverter converter);
 }
 

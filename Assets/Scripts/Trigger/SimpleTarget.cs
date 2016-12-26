@@ -6,7 +6,7 @@ public class SimpleTarget : MonoBehaviour, ITarget {
 	[IsSortingLayer]
 	public string sortingLayerName;
 
-	public Vector2 GetTargetPosition(Bounds bounds) {
+	public Vector2 GetTargetPosition(Vector2 size) {
 		return transform.position;
 	}
 

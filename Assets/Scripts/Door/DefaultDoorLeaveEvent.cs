@@ -33,7 +33,7 @@ public class DefaultDoorLeaveEvent {
 		};
 
 		mTargetRigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
-		Vector2 transportPosition = mDoor.GetTargetPosition (mTargetCollider2D.bounds);
+		Vector2 transportPosition = mDoor.GetTargetPosition (mTargetCollider2D.bounds.size);
 		iTween.MoveTo (mInhabitant.gameObject, iTween.Hash (
 			"x", transportPosition.x - mTargetCollider2D.offset.x,
 			"y", transportPosition.y - mTargetCollider2D.offset.y,

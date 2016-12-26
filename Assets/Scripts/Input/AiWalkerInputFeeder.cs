@@ -15,7 +15,7 @@ public class AiWalkerInputFeeder : InputFeeder {
 
 	private bool mInputOn = false;
 
-	public AiWalkerInputFeeder (WalkerParams wp, 
+	public AiWalkerInputFeeder (WalkerParams wp,
 		InhabitantFacade facade, HumanoidFacade hFacade, AiWalkerFacadeImpl aiFacade) {
 		mWp = wp;
 		mAiFacade = aiFacade;
@@ -24,7 +24,9 @@ public class AiWalkerInputFeeder : InputFeeder {
 	public void SetDest (Inhabitant.GetDest getDest, OnReachDestination onReachDest) {
 		mGetDest = getDest;
 		mOnReachDestination = onReachDest;
-		if (mInputOn) mScenePathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
+		if (mInputOn) {
+			mScenePathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
+		}
 	}
 
 	public override void FeedInput (InputCatcher catcher) {

@@ -25,4 +25,3 @@ public class WaypointNode : FastPriorityQueueNode, IComparable {
 		} else throw new Exception ();
 	}
 }
-

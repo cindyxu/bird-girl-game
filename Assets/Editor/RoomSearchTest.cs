@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using NUnit.Framework;
 
-public class AStarEdgeSearchTest {
+public class RoomSearchTest {
 
 	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, 10, -50, -100);
 
@@ -16,8 +16,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		List<IWaypointPath> result;
@@ -38,8 +39,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (mid);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		List<IWaypointPath> result;
@@ -62,8 +64,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (mid);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		List<IWaypointPath> result;
@@ -82,8 +85,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
@@ -102,8 +106,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
@@ -123,8 +128,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (start);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
@@ -144,8 +150,9 @@ public class AStarEdgeSearchTest {
 		LadderModel ladder = new LadderModel (new Rect (0, 0, 1, 5));
 		List<LadderModel> ladders = new List<LadderModel> { ladder };
 
-		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges, ladders);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -157,10 +164,10 @@ public class AStarEdgeSearchTest {
 		}
 
 		Assert.AreEqual (2, result.Count);
-		Assert.IsInstanceOf (typeof (LadderPath), result [0]);
+		Assert.IsInstanceOf (typeof (LadderWaypointPath), result [0]);
 		Assert.AreEqual (start, result [0].GetStartPoint ());
 		Assert.AreEqual (dest, result [1].GetEndPoint ());
-		Assert.IsInstanceOf (typeof (LadderPath), result [1]);
+		Assert.IsInstanceOf (typeof (LadderWaypointPath), result [1]);
 	}
 
 	[Test]
@@ -172,8 +179,9 @@ public class AStarEdgeSearchTest {
 		LadderModel ladder = new LadderModel (new Rect (0, 0, 1, 5));
 		List<LadderModel> ladders = new List<LadderModel> { ladder };
 
-		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges, ladders);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 1), 
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 2));
 
@@ -192,8 +200,9 @@ public class AStarEdgeSearchTest {
 		LadderModel ladder = new LadderModel (new Rect (0, 0, 1, 5));
 		List<LadderModel> ladders = new List<LadderModel> { ladder };
 
-		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges, ladders);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 1), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -202,7 +211,7 @@ public class AStarEdgeSearchTest {
 
 		Assert.AreEqual (1, result.Count);
 		Assert.AreEqual (dest, result [0].GetEndPoint ());
-		Assert.IsInstanceOf (typeof (LadderPath), result [0]);
+		Assert.IsInstanceOf (typeof (LadderWaypointPath), result [0]);
 	}
 
 	[Test]
@@ -216,8 +225,9 @@ public class AStarEdgeSearchTest {
 		LadderModel ladder1 = new LadderModel (new Rect (0, 5, 1, 5));
 		List<LadderModel> ladders = new List<LadderModel> { ladder0, ladder1 };
 
-		RoomGraph graph = new RoomGraph (wp, edges, ladders);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges, ladders);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -242,8 +252,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 		edges.Add (right);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -264,8 +275,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (left);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
@@ -286,8 +298,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (dest);
 		edges.Add (down);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -308,8 +321,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (up);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -347,8 +361,9 @@ public class AStarEdgeSearchTest {
 		edges.Add (short1);
 		edges.Add (dest);
 
-		RoomGraph graph = new RoomGraph (wp, edges);
-		AStarSearch search = new AStarSearch (graph, wp,
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		RoomSearch search = new RoomSearch (graph, wp,
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 

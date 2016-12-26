@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class AStarHumanoidEvaluator : IAStarEvaluator {
+public class HumanoidSearchEvaluator : ISearchEvaluator {
 
 	private WalkerParams mWp;
 
-	public AStarHumanoidEvaluator (WalkerParams wp) {
+	public HumanoidSearchEvaluator (WalkerParams wp) {
 		mWp = wp;
 	}
 

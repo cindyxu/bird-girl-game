@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IAStarEvaluator {
+public interface ISearchEvaluator {
 	
 	float GetTravelTime (Range fromRange, Range toRange);
 

@@ -38,7 +38,7 @@ public class DefaultDoorEnterEvent {
 //		iTween.FadeTo (mInhabitant.gameObject, iTween.Hash (
 //			"alpha", 0,
 //			"time", 0));
-		Vector2 position = mDoor.GetTargetPosition (mTargetCollider2D.bounds);
+		Vector2 position = mDoor.GetTargetPosition (mTargetCollider2D.bounds.size);
 		iTween.MoveTo (mInhabitant.gameObject, iTween.Hash (
 			"x", position.x - mTargetCollider2D.offset.x,
 			"y", position.y - mTargetCollider2D.offset.y,

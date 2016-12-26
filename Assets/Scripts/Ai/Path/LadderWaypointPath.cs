@@ -1,17 +1,23 @@
 ﻿using System;
 using UnityEngine;
 
-public class LadderPath : IWaypointPath {
+public class LadderWaypointPath : IWaypointPath {
 
+	private readonly WalkerParams mWp;
 	private readonly LadderModel mLadder;
 
-	private readonly int mVLoc;
+	// travelling direction
 	private readonly int mVDir;
+	// 1 if edge is top, -1 if edge is bottom
+	private readonly int mVLoc;
+	private readonly IWaypoint mWaypoint;
 
-	public LadderPath (WalkerParams wp, LadderModel ladder, int vloc, int vdir) {
+	public LadderWaypointPath (WalkerParams wp, LadderModel ladder, IWaypoint waypoint, int vLoc, int vDir) {
+		mWp = wp;
 		mLadder = ladder;
-		mVLoc = vloc;
-		mVDir = vdir;
+		mWaypoint = waypoint;
+		mVDir = vDir;
+		mVLoc = vLoc;
 	}
 
 	public LadderModel GetLadder () {
@@ -19,37 +25,15 @@ public class LadderPath : IWaypointPath {
 	}
 
 	public IWaypoint GetStartPoint () {
-		if (mVLoc > 0) {
-			if (mVDir > 0) {
-				return mLadder;
-			} else if (mVDir < 0) {
-				return mLadder.topEdge;
-			}
-		} else if (mVLoc < 0) {
-			if (mVDir > 0) {
-				return mLadder.bottomEdge;
-			} else if (mVDir < 0) {
-				return mLadder;
-			}
-		}
-		return null;
+		// going same way as edge? we must be starting from the ladder
+		if (mVLoc == mVDir) return mLadder;
+		// otherwise we must be starting from edge and going away from it
+		return mWaypoint;
 	}
 
 	public IWaypoint GetEndPoint () {
-		if (mVLoc > 0) {
-			if (mVDir > 0) {
-				return mLadder.topEdge;
-			} else if (mVDir < 0) {
-				return mLadder;
-			}
-		} else if (mVLoc < 0) {
-			if (mVDir > 0) {
-				return mLadder;
-			} else if (mVDir < 0) {
-				return mLadder.bottomEdge;
-			}
-		}
-		return null;
+		if (mVLoc == mVDir) return mWaypoint;
+		return mLadder;
 	}
 
 	public float GetTravelTime () {

@@ -4,15 +4,16 @@ using System.Collections.Generic;
 
 public class RenderSearch {
 
-	private AStarSearch mSearch;
+	private RoomSearch mSearch;
 	private List<GameObject> mDrawLines = new List<GameObject> ();
 
 	public RenderSearch (BoxCollider2D walker, BoxCollider2D target, WalkerParams wp, Vector2 start, 
 		Vector2 dest, List<Edge> edges) {
-		RoomGraph graph = new RoomGraph (wp, edges);
-		Edge startEdge = EdgeUtil.FindUnderEdge (graph.edges, start.x, start.x + wp.size.x, start.y);
-		Edge destEdge = EdgeUtil.FindUnderEdge (graph.edges, dest.x, dest.x + wp.size.x, dest.y);
-		mSearch = new AStarSearch (graph, wp, startEdge, new Range (start.x, start.x + wp.size.x, start.y),
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+		Edge startEdge = EdgeUtil.FindUnderEdge (model.edges, start.x, start.x + wp.size.x, start.y);
+		Edge destEdge = EdgeUtil.FindUnderEdge (model.edges, dest.x, dest.x + wp.size.x, dest.y);
+		mSearch = new RoomSearch (graph, wp, startEdge, new Range (start.x, start.x + wp.size.x, start.y),
 			destEdge, new Range (dest.x, dest.x + wp.size.x, dest.y));
 	}
 

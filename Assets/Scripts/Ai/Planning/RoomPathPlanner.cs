@@ -183,8 +183,8 @@ public class RoomPathPlanner {
 				if (mPath != null && !mReachedPath) {
 					mReachedPath = true;
 
-					if (mPath.GetType ().Equals (typeof (LadderPath))) {
-						LadderPath ladderPath = (LadderPath) mPath;
+					if (mPath.GetType ().Equals (typeof (LadderWaypointPath))) {
+						LadderWaypointPath ladderPath = (LadderWaypointPath) mPath;
 						if (ladderPath.GetVerticalDir () < 0)
 							catcher.OnDownPress ();
 						else if (ladderPath.GetVerticalDir () > 0) {

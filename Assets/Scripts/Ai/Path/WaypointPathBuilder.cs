@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Priority_Queue;
 using UnityEngine;
 
-public static class PathBuilder {
+public static class WaypointPathBuilder {
 	
 	public static List<IWaypointPath> BuildJumpPaths (WalkerParams wp, List<Edge> edges, Edge edge) {
 		JumpScan jumpScan = new JumpScan (wp, edge, edge.x0, wp.jumpSpd, edges);
@@ -20,12 +20,17 @@ public static class PathBuilder {
 		return paths;
 	}
 
-	public static List<LadderPath> BuildLadderPaths (WalkerParams wp, List<Edge> edges, LadderModel ladder) {
-		List<LadderPath> ladderPaths = new List<LadderPath> ();
-		ladderPaths.Add (new LadderPath (wp, ladder, 1, 1));
-		ladderPaths.Add (new LadderPath (wp, ladder, 1, -1));
-		ladderPaths.Add (new LadderPath (wp, ladder, -1, 1));
-		ladderPaths.Add (new LadderPath (wp, ladder, -1, -1));
+	public static List<LadderWaypointPath> BuildLadderPaths (
+		WalkerParams wp, LadderModel ladder, Edge topEdge, Edge bottomEdge) {
+
+		List<LadderWaypointPath> ladderPaths = new List<LadderWaypointPath> ();
+		if (topEdge != null) {
+			ladderPaths.Add (new LadderWaypointPath (wp, ladder, topEdge, 1, 1));
+			ladderPaths.Add (new LadderWaypointPath (wp, ladder, topEdge, 1, -1));
+		} if (bottomEdge != null) {
+			ladderPaths.Add (new LadderWaypointPath (wp, ladder, bottomEdge, -1, 1));
+			ladderPaths.Add (new LadderWaypointPath (wp, ladder, bottomEdge, -1, -1));
+		}
 		return ladderPaths;
 	}
 }

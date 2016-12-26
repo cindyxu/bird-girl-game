@@ -18,8 +18,11 @@ public class SceneState : MonoBehaviour {
 
 	private Inhabitant mPlayer;
 	private List<Inhabitant> mFollowers = new List<Inhabitant> ();
+	private SceneModelConverter mSceneModelConverter;
 
 	void Start () {
+
+		mSceneModelConverter = new SceneModelConverter (FindObjectsOfType<Room> ());
 
 		mPlayer = LoadInhabitant (GameState.GetPlayerRes (), spawnRoom, spawnPos, 
 			spawnSortingLayerName);
@@ -50,6 +53,7 @@ public class SceneState : MonoBehaviour {
 		Inhabitant inhabitant = go.GetComponent<Inhabitant> ();
 		inhabitant.GetFacade ().GetRoomTraveller ().TransportTo (room, sortingLayerName);
 		inhabitant.GetFacade ().SetKeyBindingManager (mKeybindingManager);
+		inhabitant.InitializeAi (mSceneModelConverter);
 		return inhabitant;
 	}
 

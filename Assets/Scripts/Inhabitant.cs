@@ -47,6 +47,10 @@ public class Inhabitant : MonoBehaviour {
 		mController = CreateController ();
 	}
 
+	public void InitializeAi (SceneModelConverter converter) {
+		mController.InitializeAi (converter);
+	}
+
 	public virtual IController CreateController () {
 		return null;
 	}

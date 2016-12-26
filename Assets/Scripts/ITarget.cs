@@ -2,7 +2,7 @@
 
 public interface ITarget {
 
-	Vector2 GetTargetPosition (Bounds bounds);
+	Vector2 GetTargetPosition (Vector2 size);
 	Room GetRoom ();
 	string GetSortingLayerName ();
 

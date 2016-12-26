@@ -9,7 +9,9 @@ public class TestAiWalkerFacade : IAiWalkerFacade {
 
 	public event OnAiGroundedEvent onGrounded;
 
-	public RoomGraph GetRoomGraph () { return null; }
+	public RoomModel GetRoomModel () { return null; }
+
+	public RoomGraph GetRoomGraph (RoomModel model) { return null; }
 
 	public Edge GetEdge () { return null; }
 
@@ -22,5 +24,8 @@ public class TestAiWalkerFacade : IAiWalkerFacade {
 	public Vector2 GetVelocity () {
 		return velocity;
 	}
+
+	public void Initialize (SceneModelConverter converter) {}
+
 }
 

@@ -37,7 +37,7 @@ public class LevelCrossTrigger : Trigger {
 		SceneState newSceneState = FindObjectOfType<SceneState>();
 		ITarget destTarget = GameObject.Find (destTargetName).GetComponent<ITarget> ();
 		newSceneState.GetPlayer().GetFacade().SetPosition(
-			destTarget.GetTargetPosition (newSceneState.GetPlayer().GetComponent<Collider2D> ().bounds));
+			destTarget.GetTargetPosition (newSceneState.GetPlayer().GetComponent<Collider2D> ().bounds.size));
 		newSceneState.GetPlayer().GetFacade ().GetRoomTraveller ()
 			.TransportTo (destTarget.GetRoom (), destTarget.GetSortingLayerName ());
 	}

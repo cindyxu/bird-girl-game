@@ -5,11 +5,15 @@ public delegate void OnAiGroundedEvent (Edge edge);
 
 public interface IAiWalkerFacade {
 
-	RoomGraph GetRoomGraph ();
+	void Initialize (SceneModelConverter converter);
 
 	Edge GetEdge ();
 
 	LadderModel GetLadder ();
+
+	RoomModel GetRoomModel ();
+
+	RoomGraph GetRoomGraph (RoomModel room);
 
 	Vector2 GetPosition ();
 

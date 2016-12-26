@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.Assertions;
 using Priority_Queue;
 
-public class AStarSearch {
+public class RoomSearch {
 
 	private readonly FastPriorityQueue<WaypointNode> mOpenQueue;
 	private readonly Dictionary<IWaypointPath, HeuristicRange<WaypointNode>> mBestHeuristics = 
@@ -15,18 +15,18 @@ public class AStarSearch {
 	private readonly Range mDestRange;
 
 	private readonly WalkerParams mWp;
-	private readonly IAStarEvaluator mEvaluator;
+	private readonly ISearchEvaluator mEvaluator;
 
 	private IWaypoint mStartPoint;
 	private List<IWaypointPath> mPathChain;
 
-	public AStarSearch (RoomGraph graph, WalkerParams wp, 
+	public RoomSearch (RoomGraph graph, WalkerParams wp, 
 		IWaypoint startPoint, Range startRange, IWaypoint destPoint, Range destRange) {
 
 		Log.logger.Log (Log.AI_SEARCH, "<b>starting Astar: from " + startPoint + " to " + destPoint + ",</b>");
 
 		mWp = wp;
-		mEvaluator = new AStarHumanoidEvaluator (wp);
+		mEvaluator = new HumanoidSearchEvaluator (wp);
 		mGraph = graph;
 		mOpenQueue = new FastPriorityQueue<WaypointNode> (graph.paths.Count * graph.paths.Count);
 		mStartPoint = startPoint;

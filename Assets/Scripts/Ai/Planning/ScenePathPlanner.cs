@@ -10,7 +10,8 @@ public class ScenePathPlanner {
 	private RoomPathPlanner mRoomPathPlanner;
 	private IAiWalkerFacade mAWFacade;
 
-	public ScenePathPlanner (WalkerParams wp, IAiWalkerFacade awFacade, Inhabitant.GetDest getDest) {
+	public ScenePathPlanner (WalkerParams wp, IAiWalkerFacade awFacade,
+		Inhabitant.GetDest getDest) {
 		mWp = wp;
 		mGetDest = getDest;
 		mAWFacade = awFacade;
@@ -26,8 +27,7 @@ public class ScenePathPlanner {
 		float minDist;
 		mGetDest (out destRoom, out destPos, out minDist);
 
-		RoomGraph graph = mAWFacade.GetRoomGraph ();
-
+		RoomModel roomModel = mAWFacade.GetRoomModel ();
 		IWaypoint startPoint = null;
 		Vector2 pos = mAWFacade.GetPosition ();
 		if (mAWFacade.GetLadder () != null) startPoint = mAWFacade.GetLadder ();
@@ -37,15 +37,17 @@ public class ScenePathPlanner {
 		}
 		Range startRange = new Range (pos.x, pos.x + mWp.size.x, pos.y);
 
-		IWaypoint destPoint = graph.GetLadder (destPos);
+		// RoomModel destRoomModel = mConverter.GetRoomModel (destRoom);
+		IWaypoint destPoint = roomModel.GetLadder (destPos);
 		if (destPoint == null) {
-			destPoint = EdgeUtil.FindUnderEdge (graph.edges, destPos.x, destPos.x + mWp.size.x, destPos.y);
+			destPoint = EdgeUtil.FindUnderEdge (roomModel.edges, destPos.x, destPos.x + mWp.size.x, destPos.y);
 			if (destPoint != null) destPos.y = destPoint.GetRect ().y;
 		}
 		Range destRange = new Range (destPos.x, destPos.x + mWp.size.x, destPos.y);
 
 		if (startPoint != null && destPoint != null) {
-			AStarSearch search = new AStarSearch (graph, mWp, startPoint, startRange, destPoint, destRange);
+			RoomSearch search = new RoomSearch (mAWFacade.GetRoomGraph (roomModel), mWp,
+				startPoint, startRange, destPoint, destRange);
 			List<IWaypointPath> result;
 			while (search.Step (out result)) ;
 

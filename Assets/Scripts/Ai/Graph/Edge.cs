@@ -3,12 +3,11 @@ using UnityEngine;
 
 public class Edge : IWaypoint {
 
-	public Edge (float x0, float y0, float x1, float y1, RoomGraph room = null) {
+	public Edge (float x0, float y0, float x1, float y1) {
 		this.x0 = x0;
 		this.x1 = x1;
 		this.y0 = y0;
 		this.y1 = y1;
-		this.room = room;
 
 		if (Mathf.Abs (y0 - y1) > Mathf.Abs (x0 - x1)) isVert = true;
 		else isHorz = true;
@@ -26,10 +25,6 @@ public class Edge : IWaypoint {
 
 	public Rect GetRect () {
 		return new Rect (left, bottom, right - left, top - bottom);
-	}
-
-	public RoomGraph GetRoom () {
-		return room;
 	}
 
 	public void SplitVert(float x, out Edge e0, out Edge e1) {
@@ -79,6 +74,5 @@ public class Edge : IWaypoint {
 	public readonly float left;
 	public readonly float right;
 	public readonly float top;
-	public RoomGraph room;
 }
 
