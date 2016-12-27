@@ -60,7 +60,7 @@ public class SceneModelConverter {
 				
 				LadderModel ladderModel = mLadderMap[ladder].Item2;
 				Edge topEdge = EdgeUtil.FindLadderTopEdge (
-					ladderModel.GetRect (), mRoomMap[ladder.GetDestRoom ()].edges);
+					ladderModel.GetRect (), mRoomMap[ladder.GetDestRoom ()].GetEdges ());
 
 				if (topEdge != null) {
 					RoomModel bottomRoom = mRoomMap[ladder.GetRoom ()];

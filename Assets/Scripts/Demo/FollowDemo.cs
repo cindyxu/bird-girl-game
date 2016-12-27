@@ -8,7 +8,7 @@ public class FollowDemo : MonoBehaviour {
 	public static KeyBindingManager keybindingManager = new KeyBindingManager ();
 
 	public Room room;
-	public HumanoidInhabitant walker;
+	public PlatformerInhabitant walker;
 	public GameObject cursor;
 	public GameObject debugObjectsRoot;
 

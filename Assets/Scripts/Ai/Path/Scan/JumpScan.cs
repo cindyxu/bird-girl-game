@@ -14,13 +14,13 @@ public class JumpScan {
 
 	public const float EDGE_THRESHOLD = 0.1f;
 
-	public JumpScan (WalkerParams wp, Edge startEdge, float x, float vy, List<Edge> edges) {
+	public JumpScan (WalkerParams wp, Edge startEdge, float x, float vy, IEnumerable<Edge> edges) {
 		mStartEdge = startEdge;
 		mWp = wp;
 		initializeQueue (startEdge, x, vy, edges);
 	}
 
-	private void initializeQueue (Edge startEdge, float x, float vy, List<Edge> edges) {
+	private void initializeQueue (Edge startEdge, float x, float vy, IEnumerable<Edge> edges) {
 		float y = startEdge.y0;
 		float threshold = (vy > 0 ? EDGE_THRESHOLD : 0);
 		float exl = Mathf.Min (startEdge.x0, startEdge.x1) - mWp.size.x + threshold;
@@ -52,7 +52,7 @@ public class JumpScan {
 	}
 
 	// gets edges within the maximum x-distance of the furthest y
-	private List<Edge> getQualifiedEdges (float xl, float xr, float yi, float vyi, List<Edge> edges) {
+	private List<Edge> getQualifiedEdges (float xl, float xr, float yi, float vyi, IEnumerable<Edge> edges) {
 
 		float yZenithTop = yi + mWp.trajectory.GetDeltaYFromVyFinal (vyi, 0) + mWp.size.y;
 		float yMin = Mathf.Infinity;

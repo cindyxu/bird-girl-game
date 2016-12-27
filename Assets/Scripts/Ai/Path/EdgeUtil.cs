@@ -5,31 +5,29 @@ using UnityEngine;
 
 public static class EdgeUtil {
 
-	public static Edge FindUnderEdge (List<Edge> edges, float x0, float x1, float y) {
-		List<Edge> downEdges = edges.FindAll ((Edge edge) => edge.isDown && (edge.y0 <= y));
-		// descending
-		downEdges.Sort ((Edge edge0, Edge edge1) => edge1.y0.CompareTo (edge0.y0));
-		foreach (Edge edge in downEdges) {
-			if (edge.x0 < x1 && edge.x1 > x0) {
-				return edge;
+	public static Edge FindUnderEdge (IEnumerable<Edge> edges, float x0, float x1, float y) {
+		Edge bestEdge = null;
+		foreach (Edge edge in edges) {
+			if (edge.isDown && edge.x0 < x1 && edge.x1 > x0 && edge.y0 <= y &&
+				(bestEdge == null || edge.y0 > bestEdge.y0)) {
+				bestEdge = edge;
 			}
 		}
-		return null;
+		return bestEdge;
 	}
 
-	public static Edge FindOverEdge (List<Edge> edges, float x0, float x1, float y) {
-		List<Edge> downEdges = edges.FindAll ((Edge edge) => edge.isDown && (edge.y0 > y));
-		// ascending
-		downEdges.Sort ((Edge edge0, Edge edge1) => edge0.y0.CompareTo (edge1.y0));
-		foreach (Edge edge in downEdges) {
-			if (edge.x0 < x1 && edge.x1 > x0) {
-				return edge;
+	public static Edge FindOverEdge (IEnumerable<Edge> edges, float x0, float x1, float y) {
+		Edge bestEdge = null;
+		foreach (Edge edge in edges) {
+			if (edge.isDown && edge.x0 < x1 && edge.x1 > x0 && edge.y0 > y &&
+				(bestEdge == null || edge.y0 < bestEdge.y0)) {
+				bestEdge = edge;
 			}
 		}
-		return null;
+		return bestEdge;
 	}
 
-	public static Edge FindOnEdge (List<Edge> edges, float x0, float x1, float y) {
+	public static Edge FindOnEdge (IEnumerable<Edge> edges, float x0, float x1, float y) {
 		foreach (Edge edge in edges) {
 			if (edge.isDown && edge.y0 == y && edge.x0 < x1 && edge.x1 > x0) {
 				return edge;
@@ -38,7 +36,7 @@ public static class EdgeUtil {
 		return null;
 	}
 
-	public static Edge FindLadderBottomEdge (Rect ladder, List<Edge> edges) {
+	public static Edge FindLadderBottomEdge (Rect ladder, IEnumerable<Edge> edges) {
 		foreach (Edge e in edges) {
 			if (e.isDown && e.left <= ladder.xMin && e.right >= ladder.xMax) {
 				if (e.y0 == ladder.yMin) {
@@ -49,7 +47,7 @@ public static class EdgeUtil {
 		return null;
 	}
 
-	public static Edge FindLadderTopEdge (Rect ladder, List<Edge> edges) {
+	public static Edge FindLadderTopEdge (Rect ladder, IEnumerable<Edge> edges) {
 		foreach (Edge e in edges) {
 			if (e.isDown && e.left <= ladder.xMin && e.right >= ladder.xMax) {
 				if (e.y0 == ladder.yMax) {

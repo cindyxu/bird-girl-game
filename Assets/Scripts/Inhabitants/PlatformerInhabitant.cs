@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 
-public class HumanoidInhabitant : Inhabitant {
+public class PlatformerInhabitant : Inhabitant {
 
 	public float climbSpd;
 	public float walkSpd;
@@ -16,7 +16,7 @@ public class HumanoidInhabitant : Inhabitant {
 		WalkerParams walkerParams = new WalkerParams (collider2D.bounds.size, walkSpd, jumpSpd, climbSpd,
 			rigidbody2D.mass * rigidbody2D.gravityScale * Physics2D.gravity.y, maxVelocity);
 		
-		return new HumanoidController (this, walkerParams);
+		return new PlatformerController (this, walkerParams);
 	}
 
 }

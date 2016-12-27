@@ -6,7 +6,7 @@ using UnityEngine;
 
 public static class WaypointPathBuilder {
 	
-	public static List<IWaypointPath> BuildJumpPaths (WalkerParams wp, List<Edge> edges, Edge edge) {
+	public static List<IWaypointPath> BuildJumpPaths (WalkerParams wp, IEnumerable<Edge> edges, Edge edge) {
 		JumpScan jumpScan = new JumpScan (wp, edge, edge.x0, wp.jumpSpd, edges);
 		while (jumpScan.Step ()) ;
 		List<JumpPath> jumpPaths = jumpScan.GetPaths ();

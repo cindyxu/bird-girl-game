@@ -26,7 +26,7 @@ public class RoomSearch {
 		Log.logger.Log (Log.AI_SEARCH, "<b>starting Astar: from " + startPoint + " to " + destPoint + ",</b>");
 
 		mWp = wp;
-		mEvaluator = new HumanoidSearchEvaluator (wp);
+		mEvaluator = new PlatformerSearchEvaluator (wp);
 		mGraph = graph;
 		mOpenQueue = new FastPriorityQueue<WaypointNode> (graph.paths.Count * graph.paths.Count);
 		mStartPoint = startPoint;

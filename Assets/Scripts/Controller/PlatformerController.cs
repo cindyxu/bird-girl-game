@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class HumanoidController : IController {
+public class PlatformerController : IController {
 
 	private readonly WalkLocomotion mWalkLocomotion;
 	private readonly LadderLocomotion mLadderLocomotion;
@@ -11,17 +11,17 @@ public class HumanoidController : IController {
 	private InputFeedSwitcher mInputSwitcher;
 
 	private readonly WalkerParams mWp;
-	private HumanoidFacade mHFacade;
+	private PlatformerFacade mHFacade;
 
 	private AiWalkerFacadeImpl mAwFacade;
 
-	public HumanoidController (Inhabitant inhabitant, WalkerParams wp) {
+	public PlatformerController (Inhabitant inhabitant, WalkerParams wp) {
 		mInhabitant = inhabitant;
 		mWp = wp;
 
 		InputCatcher inputCatcher = new InputCatcher ();
 		mInputSwitcher = new InputFeedSwitcher (inputCatcher);
-		mHFacade = new HumanoidFacade ();
+		mHFacade = new PlatformerFacade ();
 		mAwFacade = new AiWalkerFacadeImpl (mWp, inhabitant.GetFacade (), mHFacade);
 
 		mWalkLocomotion = new WalkLocomotion (mInhabitant.GetFacade (), inputCatcher, mWp);

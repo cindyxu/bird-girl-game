@@ -16,7 +16,7 @@ public class AiWalkerInputFeeder : InputFeeder {
 	private bool mInputOn = false;
 
 	public AiWalkerInputFeeder (WalkerParams wp,
-		InhabitantFacade facade, HumanoidFacade hFacade, AiWalkerFacadeImpl aiFacade) {
+		InhabitantFacade facade, PlatformerFacade hFacade, AiWalkerFacadeImpl aiFacade) {
 		mWp = wp;
 		mAiFacade = aiFacade;
 	}

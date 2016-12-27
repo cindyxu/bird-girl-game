@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class HumanoidFacade {
+public class PlatformerFacade {
 
 	public delegate void OnJumpEvent ();
 	public event OnJumpEvent onJump;
@@ -12,10 +12,10 @@ public class HumanoidFacade {
 	private Ladder mLadder;
 	private SortedEdge mSortedEdge;
 
-	public HumanoidFacade () : this (null, null) {
+	public PlatformerFacade () : this (null, null) {
 	}
 
-	public HumanoidFacade (Ladder ladder, SortedEdge sortedEdge) {
+	public PlatformerFacade (Ladder ladder, SortedEdge sortedEdge) {
 		mLadder = ladder;
 		mSortedEdge = sortedEdge;
 	}

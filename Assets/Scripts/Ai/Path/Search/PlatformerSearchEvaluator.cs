@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class HumanoidSearchEvaluator : ISearchEvaluator {
+public class PlatformerSearchEvaluator : ISearchEvaluator {
 
 	private WalkerParams mWp;
 
-	public HumanoidSearchEvaluator (WalkerParams wp) {
+	public PlatformerSearchEvaluator (WalkerParams wp) {
 		mWp = wp;
 	}
 

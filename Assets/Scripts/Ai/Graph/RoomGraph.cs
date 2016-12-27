@@ -18,10 +18,10 @@ public class RoomGraph {
 	}
 
 	public void addJumpPaths (RoomModel model, WalkerParams wp) {
-		foreach (Edge edge in model.edges) {
+		foreach (Edge edge in model.GetEdges ()) {
 			if (edge.isDown) {
 				Log.logger.Log (Log.AI_SCAN, "scanning for " + edge);
-				List<IWaypointPath> edgePaths = WaypointPathBuilder.BuildJumpPaths (wp, model.edges, edge);
+				List<IWaypointPath> edgePaths = WaypointPathBuilder.BuildJumpPaths (wp, model.GetEdges (), edge);
 				Log.logger.Log (Log.AI_SCAN, "found " + edgePaths.Count + " paths");
 				if (paths.ContainsKey (edge)) {
 					paths [edge].AddRange (edgePaths);
@@ -33,9 +33,9 @@ public class RoomGraph {
 	}
 
 	public void addLadderPaths (RoomModel model, WalkerParams wp) {
-		foreach (LadderModel ladderModel in model.ladderModels) {
-			Edge topEdge = EdgeUtil.FindLadderTopEdge (ladderModel.rect, model.edges);
-			Edge bottomEdge = EdgeUtil.FindLadderBottomEdge (ladderModel.rect, model.edges);
+		foreach (LadderModel ladderModel in model.GetLadders ()) {
+			Edge topEdge = EdgeUtil.FindLadderTopEdge (ladderModel.rect, model.GetEdges ());
+			Edge bottomEdge = EdgeUtil.FindLadderBottomEdge (ladderModel.rect, model.GetEdges ());
 			List<LadderWaypointPath> ladderPaths =
 				WaypointPathBuilder.BuildLadderPaths (wp, ladderModel, topEdge, bottomEdge);
 			if (ladderPaths != null) {

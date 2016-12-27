@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 public class SceneGraph {
@@ -17,11 +18,11 @@ public class SceneGraph {
 		mRoomPathsTo[path.GetEndRoom ()].Add (path);
 	}
 
-	public List<IRoomPath> GetRoomPathsFrom (RoomModel model) {
-		return mRoomPathsFrom[model];
+	public IEnumerable<IRoomPath> GetRoomPathsFrom (RoomModel model) {
+		return new ReadOnlyCollection<IRoomPath> (mRoomPathsFrom[model]);
 	}
 
-	public List<IRoomPath> GetRoomPathsTo (RoomModel model) {
-		return mRoomPathsTo[model];
+	public IEnumerable<IRoomPath> GetRoomPathsTo (RoomModel model) {
+		return new ReadOnlyCollection<IRoomPath> (mRoomPathsTo[model]);
 	}
 }

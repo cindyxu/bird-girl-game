@@ -19,11 +19,11 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 	private Edge mEdge;
 
 	private InhabitantFacade mFacade;
-	private HumanoidFacade mHFacade;
+	private PlatformerFacade mHFacade;
 
 	private bool mObserving = false;
 
-	public AiWalkerFacadeImpl (WalkerParams wp, InhabitantFacade facade, HumanoidFacade hFacade) {
+	public AiWalkerFacadeImpl (WalkerParams wp, InhabitantFacade facade, PlatformerFacade hFacade) {
 		mWp = wp;
 		mFacade = facade;
 		mHFacade = hFacade;
@@ -106,7 +106,7 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 
 	private Edge getGroundedEdge (SortedEdge sortedEdge) {
 		Vector2 position = GetPosition ();
-		return EdgeUtil.FindOnEdge (mRoomModel.edges,
+		return EdgeUtil.FindOnEdge (mRoomModel.GetEdges (),
 			position.x, position.x + mWp.size.x, sortedEdge.transform.position.y);
 	}
 
