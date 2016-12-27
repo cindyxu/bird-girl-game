@@ -9,20 +9,20 @@ public class PlatformerController : IController {
 
 	private Inhabitant mInhabitant;
 	private InputFeedSwitcher mInputSwitcher;
+	private BehaviourSwitcher mBehaviourSwitcher;
 
 	private readonly WalkerParams mWp;
-	private PlatformerFacade mHFacade;
-
-	private AiWalkerFacadeImpl mAwFacade;
+	private PlatformerFacade mPlFacade;
 
 	public PlatformerController (Inhabitant inhabitant, WalkerParams wp) {
 		mInhabitant = inhabitant;
 		mWp = wp;
 
 		InputCatcher inputCatcher = new InputCatcher ();
+		mPlFacade = new PlatformerFacade ();
+
 		mInputSwitcher = new InputFeedSwitcher (inputCatcher);
-		mHFacade = new PlatformerFacade ();
-		mAwFacade = new AiWalkerFacadeImpl (mWp, inhabitant.GetFacade (), mHFacade);
+		mBehaviourSwitcher = new BehaviourSwitcher (mInputSwitcher);
 
 		mWalkLocomotion = new WalkLocomotion (mInhabitant.GetFacade (), inputCatcher, mWp);
 		mWalkLocomotion.onClimbLadder += OnClimbLadder;
@@ -32,50 +32,25 @@ public class PlatformerController : IController {
 		mLadderLocomotion = new LadderLocomotion (mInhabitant.GetFacade (), inputCatcher, mWp);
 		mLadderLocomotion.onLadderEndReached += OnLadderEndReached;
 		mLadderLocomotion.onLadderDismount += OnLadderDismount;
-
-		mInputSwitcher.SetBaseInputFeeder (new AiWalkerInputFeeder (
-			mWp, mInhabitant.GetFacade (), mHFacade, mAwFacade));
 	}
 
 	public bool RequestMoveTo (string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
-		switch (locomotion) {
-			case "walk":
-//				mWalkLocomotion.SetWalkSpeed (1);
-				AiWalkerInputFeeder followFeeder =
-					new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mHFacade, mAwFacade);
-				AiWalkerInputFeeder.OnReachDestination onReachDestination = delegate {
-					RequestFinishRequest ();
-					callback ();
-				};
-				followFeeder.SetDest (getDest, onReachDestination);
-				mInputSwitcher.SetOverrideInputFeeder (followFeeder);
-				return true;
-			default:
-				return false;
-		}
+		mBehaviourSwitcher.RequestMoveTo (locomotion, getDest, callback);
+		return true;
 	}
 
 	public bool RequestFreeze () {
-		AiWalkerInputFeeder freezeFeeder =
-			new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mHFacade, mAwFacade);
-		mInputSwitcher.SetOverrideInputFeeder (freezeFeeder);
+		mBehaviourSwitcher.RequestFreeze ();
 		return true;
 	}
 
 	public bool RequestFinishRequest () {
-//		mWalkLocomotion.SetWalkSpeed (2);
-		mInputSwitcher.SetOverrideInputFeeder (null);
+		mBehaviourSwitcher.RequestFinishRequest ();
 		return true;
 	}
 
 	public bool EnablePlayerControl (bool enable) {
-		if (enable && !(mInputSwitcher.GetBaseInputFeeder () is PlayerInputFeeder)) {
-			mInputSwitcher.SetBaseInputFeeder (
-				new PlayerInputFeeder (mInhabitant.GetFacade ().GetKeyBindingManager ()));
-		} else if (!enable && !(mInputSwitcher.GetBaseInputFeeder () is AiWalkerInputFeeder)) {
-			mInputSwitcher.SetBaseInputFeeder (
-				new AiWalkerInputFeeder (mWp, mInhabitant.GetFacade (), mHFacade, mAwFacade));
-		}
+		mBehaviourSwitcher.RequestPlayerControl ();
 		return true;
 	}
 
@@ -84,31 +59,33 @@ public class PlatformerController : IController {
 	}
 
 	public void InitializeAi (SceneModelConverter converter) {
-		mAwFacade.Initialize (converter);
+		mInputSwitcher.SetAiInputFeeder (new AiWalkerInputFeeder (mWp, converter, mInhabitant.GetFacade (), mPlFacade));
+	}
+
+	public void InitializePlayer (KeyBindingManager km) {
+		mInputSwitcher.SetPlayerInputFeeder (new PlayerInputFeeder (km));
+	}
+
+	public IInputFeeder GetInputFeeder () {
+		return mInputSwitcher.GetCurrentInputFeeder ();
 	}
 
 	public void Act () {
 		mInputSwitcher.FeedInput ();
 	}
 
-	public InputFeeder GetInputFeeder () {
-		InputFeeder feeder = mInputSwitcher.GetOverrideInputFeeder ();
-		if (feeder != null) return feeder;
-		return mInputSwitcher.GetBaseInputFeeder ();
-	}
-
 	void OnClimbLadder (Ladder ladder, int direction) {
 		mLadderLocomotion.SetLadder (ladder);
 		mInhabitant.StartLocomotion (mLadderLocomotion);
-		mHFacade.OnClimbLadder (ladder);
+		mPlFacade.OnClimbLadder (ladder);
 	}
 
 	void OnJump () {
-		mHFacade.OnJump ();
+		mPlFacade.OnJump ();
 	}
 
 	void OnGrounded (SortedEdge edge) {
-		mHFacade.OnGrounded (edge);
+		mPlFacade.OnGrounded (edge);
 	}
 
 	void OnLadderEndReached (int direction) {

@@ -2,34 +2,33 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class AiWalkerInputFeeder : InputFeeder {
+public class AiWalkerInputFeeder : IAiInputFeeder {
 
-	public delegate void OnReachDestination ();
 	private event OnReachDestination mOnReachDestination;
 
 	private readonly WalkerParams mWp;
-	private readonly AiWalkerFacadeImpl mAiFacade;
+	private readonly AiWalkerFacadeImpl mAwFacade;
 
 	private Inhabitant.GetDest mGetDest;
 	private ScenePathPlanner mScenePathPlanner;
 
 	private bool mInputOn = false;
 
-	public AiWalkerInputFeeder (WalkerParams wp,
-		InhabitantFacade facade, PlatformerFacade hFacade, AiWalkerFacadeImpl aiFacade) {
+	public AiWalkerInputFeeder (WalkerParams wp, SceneModelConverter converter,
+		InhabitantFacade facade, PlatformerFacade plFacade) {
 		mWp = wp;
-		mAiFacade = aiFacade;
+		mAwFacade = new AiWalkerFacadeImpl (wp, converter, facade, plFacade);
 	}
 
 	public void SetDest (Inhabitant.GetDest getDest, OnReachDestination onReachDest) {
 		mGetDest = getDest;
 		mOnReachDestination = onReachDest;
 		if (mInputOn) {
-			mScenePathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
+			mScenePathPlanner = getDest != null ? new ScenePathPlanner (mWp, mAwFacade, mGetDest) : null;
 		}
 	}
 
-	public override void FeedInput (InputCatcher catcher) {
+	public void FeedInput (InputCatcher catcher) {
 		if (mScenePathPlanner != null) {
 			mScenePathPlanner.OnUpdate ();
 			if (mScenePathPlanner.FeedInput (catcher)) {
@@ -43,16 +42,16 @@ public class AiWalkerInputFeeder : InputFeeder {
 		}
 	}
 
-	public override void OnBeginInput (InputCatcher catcher) {
-		mAiFacade.StartObserving ();
+	public void OnBeginInput (InputCatcher catcher) {
+		mAwFacade.StartObserving ();
 		if (mGetDest != null) {
-			mScenePathPlanner = new ScenePathPlanner (mWp, mAiFacade, mGetDest);
+			mScenePathPlanner = mGetDest != null ? new ScenePathPlanner (mWp, mAwFacade, mGetDest) : null;
 		}
 		mInputOn = true;
 	}
 
-	public override void OnEndInput (InputCatcher catcher) {
-		mAiFacade.StopObserving ();
+	public void OnEndInput (InputCatcher catcher) {
+		mAwFacade.StopObserving ();
 		mScenePathPlanner = null;
 		mInputOn = false;
 	}

@@ -7,7 +7,9 @@ public interface IController {
 	bool RequestFreeze ();
 	bool RequestFinishRequest ();
 	bool EnablePlayerControl (bool enable);
-	InputFeeder GetInputFeeder ();
+	IInputFeeder GetInputFeeder ();
+
+	void InitializePlayer (KeyBindingManager km);
 	void InitializeAi (SceneModelConverter converter);
 }
 

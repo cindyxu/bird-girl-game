@@ -5,8 +5,6 @@ public delegate void OnAiGroundedEvent (Edge edge);
 
 public interface IAiWalkerFacade {
 
-	void Initialize (SceneModelConverter converter);
-
 	Edge GetEdge ();
 
 	LadderModel GetLadder ();

@@ -52,7 +52,7 @@ public class SceneState : MonoBehaviour {
 		GameObject go = (GameObject) GameObject.Instantiate (res, position, Quaternion.identity);
 		Inhabitant inhabitant = go.GetComponent<Inhabitant> ();
 		inhabitant.GetFacade ().GetRoomTraveller ().TransportTo (room, sortingLayerName);
-		inhabitant.GetFacade ().SetKeyBindingManager (mKeybindingManager);
+		inhabitant.InitializePlayer (mKeybindingManager);
 		inhabitant.InitializeAi (mSceneModelConverter);
 		return inhabitant;
 	}

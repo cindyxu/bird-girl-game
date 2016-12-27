@@ -51,6 +51,10 @@ public class Inhabitant : MonoBehaviour {
 		mController.InitializeAi (converter);
 	}
 
+	public void InitializePlayer (KeyBindingManager km) {
+		mController.InitializePlayer (km);
+	}
+
 	public virtual IController CreateController () {
 		return null;
 	}

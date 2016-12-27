@@ -15,7 +15,7 @@ public class FollowDemo : MonoBehaviour {
 	private Ladder[] mLadders;
 
 	void Start () {
-		walker.GetFacade ().SetKeyBindingManager (keybindingManager);
+		walker.InitializePlayer (keybindingManager);
 		walker.InitializeAi (new SceneModelConverter (new List<Room> { room }));
 		walker.RequestEnablePlayerControl (true);
 
@@ -63,8 +63,10 @@ public class FollowDemo : MonoBehaviour {
 				// need to get scene path planner from here
 				AiWalkerInputFeeder aiInputFeeder =
 					(AiWalkerInputFeeder) walker.GetController ().GetInputFeeder ();
-				ScenePathPlanner planner = aiInputFeeder.GetScenePathPlanner ();
-				drawPlan (planner);
+				if (aiInputFeeder != null) {
+					ScenePathPlanner planner = aiInputFeeder.GetScenePathPlanner ();
+					drawPlan (planner);
+				}
 			}
 			cursor.transform.position = new Vector3 (mousePos.x, mousePos.y, 0);
 		};

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerInputFeeder : InputFeeder {
+public class PlayerInputFeeder : IInputFeeder {
 
 	private KeyBindingManager mKmManager;
 
@@ -9,7 +9,7 @@ public class PlayerInputFeeder : InputFeeder {
 		mKmManager = kmManager;
 	}
 
-	public override void OnBeginInput (InputCatcher catcher) {
+	public void OnBeginInput (InputCatcher catcher) {
 		if (mKmManager.GetKey (ActionKey.LEFT)) {
 			catcher.OnLeftPress ();
 		}
@@ -18,10 +18,10 @@ public class PlayerInputFeeder : InputFeeder {
 		}
 	}
 
-	public override void OnEndInput (InputCatcher catcher) {
+	public void OnEndInput (InputCatcher catcher) {
 	}
 
-	public override void FeedInput (InputCatcher catcher) {
+	public void FeedInput (InputCatcher catcher) {
 		if (mKmManager.GetKeyDown (ActionKey.LEFT)) {
 			catcher.OnLeftPress ();
 		}

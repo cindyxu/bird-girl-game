@@ -3,53 +3,75 @@
 public class InputFeedSwitcher {
 
 	private readonly InputCatcher mInputCatcher;
-	private InputFeeder mBaseInputFeeder;
-	private InputFeeder mOverrideInputFeeder;
+
+	private IInputFeeder mPlayerInputFeeder;
+	private IAiInputFeeder mAiInputFeeder;
+
+	private bool mAiActive = true;
 
 	public InputFeedSwitcher (InputCatcher inputCatcher) {
 		mInputCatcher = inputCatcher;
 	}
 
-	public InputFeeder GetBaseInputFeeder () {
-		return mBaseInputFeeder;
-	}
-
-	public InputFeeder GetOverrideInputFeeder () {
-		return mOverrideInputFeeder;
-	}
-
-	public void SetBaseInputFeeder(InputFeeder inputFeeder) {
-		if (mBaseInputFeeder != null && mOverrideInputFeeder == null) {
-			mBaseInputFeeder.OnEndInput (mInputCatcher);
+	public void SetPlayerInputFeeder (IInputFeeder playerInputFeeder) {
+		if (mPlayerInputFeeder != null && !mAiActive) {
+			mPlayerInputFeeder.OnEndInput (mInputCatcher);
 		}
-		mBaseInputFeeder = inputFeeder;
-		if (mOverrideInputFeeder == null) {
-			mBaseInputFeeder.OnBeginInput (mInputCatcher);
+		mPlayerInputFeeder = playerInputFeeder;
+		if (mPlayerInputFeeder != null && !mAiActive) {
+			mPlayerInputFeeder.OnBeginInput (mInputCatcher);
 		}
 	}
 
-	public void SetOverrideInputFeeder(InputFeeder inputFeeder) {
-		InputFeeder pOverrideInputFeeder = mOverrideInputFeeder;
-		if (pOverrideInputFeeder != null) {
-			pOverrideInputFeeder.OnEndInput (mInputCatcher);
+	public void SetAiInputFeeder (IAiInputFeeder aiInputFeeder) {
+		if (mAiInputFeeder != null && mAiActive) {
+			mAiInputFeeder.OnEndInput (mInputCatcher);
 		}
-		mOverrideInputFeeder = inputFeeder;
-		if (mOverrideInputFeeder != null) {
-			if (pOverrideInputFeeder == null && mBaseInputFeeder != null) {
-				mBaseInputFeeder.OnEndInput (mInputCatcher);
-			}
-			mOverrideInputFeeder.OnBeginInput (mInputCatcher);
-		} else {
-			mBaseInputFeeder.OnBeginInput (mInputCatcher);
+		mAiInputFeeder = aiInputFeeder;
+		if (mAiInputFeeder != null && mAiActive) {
+			mAiInputFeeder.OnBeginInput (mInputCatcher);
 		}
+	}
+
+	public IInputFeeder GetPlayerInputFeeder () {
+		return mPlayerInputFeeder;
+	}
+
+	public IAiInputFeeder GetAiInputFeeder () {
+		return mAiInputFeeder;
+	}
+
+	public IInputFeeder GetCurrentInputFeeder () {
+		return mAiActive ? mAiInputFeeder : mPlayerInputFeeder;
+	}
+
+	public void StartPlayerInputFeeder () {
+		startInputFeeder (false);
+	}
+
+	public void StartAiInputFeeder () {
+		startInputFeeder (true);
 	}
 
 	public void FeedInput () {
 		mInputCatcher.FlushPresses ();
-		if (mOverrideInputFeeder != null) {
-			mOverrideInputFeeder.FeedInput (mInputCatcher);
-		} else {
-			mBaseInputFeeder.FeedInput (mInputCatcher);
+		IInputFeeder currentFeeder = mAiActive ? mAiInputFeeder : mPlayerInputFeeder;
+		if (currentFeeder != null) {
+			currentFeeder.FeedInput (mInputCatcher);
+		}
+	}
+
+	private void startInputFeeder (bool ai) {
+		if (mAiActive == ai) return;
+
+		IInputFeeder currentFeeder = mAiActive ? mAiInputFeeder : mPlayerInputFeeder;
+		if (currentFeeder != null) {
+			currentFeeder.OnEndInput (mInputCatcher);
+		}
+		mAiActive = ai;
+		currentFeeder = mAiActive ? mAiInputFeeder : mPlayerInputFeeder;
+		if (currentFeeder != null) {
+			currentFeeder.OnBeginInput (mInputCatcher);
 		}
 	}
 }

@@ -19,20 +19,15 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 	private Edge mEdge;
 
 	private InhabitantFacade mFacade;
-	private PlatformerFacade mHFacade;
+	private PlatformerFacade mPlFacade;
 
-	private bool mObserving = false;
-
-	public AiWalkerFacadeImpl (WalkerParams wp, InhabitantFacade facade, PlatformerFacade hFacade) {
+	public AiWalkerFacadeImpl (WalkerParams wp, SceneModelConverter converter,
+		InhabitantFacade facade, PlatformerFacade plFacade) {
 		mWp = wp;
 		mFacade = facade;
-		mHFacade = hFacade;
-	}
-
-	public void Initialize (SceneModelConverter converter) {
+		mPlFacade = plFacade;
 		mConverter = converter;
 		mSceneGraph = mConverter.CreateSceneGraph (mWp);
-		initializeState ();
 	}
 
 	public Edge GetEdge () {
@@ -63,18 +58,16 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 	}
 
 	public void StartObserving () {
-		mHFacade.onClimbLadder += OnClimbLadder;
-		mHFacade.onGrounded += OnGrounded;
+		mPlFacade.onClimbLadder += OnClimbLadder;
+		mPlFacade.onGrounded += OnGrounded;
 		mFacade.GetRoomTraveller ().onEnterRoom += OnEnterRoom;
-		mObserving = true;
 		initializeState ();
 	}
 
 	public void StopObserving () {
-		mHFacade.onClimbLadder -= OnClimbLadder;
-		mHFacade.onGrounded -= OnGrounded;
+		mPlFacade.onClimbLadder -= OnClimbLadder;
+		mPlFacade.onGrounded -= OnGrounded;
 		mFacade.GetRoomTraveller ().onEnterRoom -= OnEnterRoom;
-		mObserving = false;
 	}
 
 	public void OnEnterRoom (RoomTraveller traveller, Room room) {
@@ -95,13 +88,11 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 	}
 
 	private void initializeState () {
-		if (mConverter != null && mObserving) {
-			Room room = mFacade.GetRoomTraveller ().GetCurrentRoom ();
-			mRoomModel = (room != null ? mConverter.GetRoomModel (room) : null);
-			mEdge = mHFacade.GetSortedEdge () != null ? getGroundedEdge (mHFacade.GetSortedEdge ()) : null;
-			mLadder = mHFacade.GetLadder () != null ?
-				mConverter.GetLadderModel (mHFacade.GetLadder ()).Item2 : null;
-		}
+		Room room = mFacade.GetRoomTraveller ().GetCurrentRoom ();
+		mRoomModel = (room != null ? mConverter.GetRoomModel (room) : null);
+		mEdge = mPlFacade.GetSortedEdge () != null ? getGroundedEdge (mPlFacade.GetSortedEdge ()) : null;
+		mLadder = mPlFacade.GetLadder () != null ?
+			mConverter.GetLadderModel (mPlFacade.GetLadder ()).Item2 : null;
 	}
 
 	private Edge getGroundedEdge (SortedEdge sortedEdge) {
