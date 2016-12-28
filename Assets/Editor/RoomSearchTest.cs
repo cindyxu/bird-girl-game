@@ -18,7 +18,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		List<IWaypointPath> result;
@@ -41,7 +41,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		List<IWaypointPath> result;
@@ -66,7 +66,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		List<IWaypointPath> result;
@@ -87,7 +87,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
@@ -108,7 +108,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
@@ -130,7 +130,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
@@ -152,7 +152,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges, ladders);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -181,7 +181,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges, ladders);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 1), 
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 2));
 
@@ -202,7 +202,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges, ladders);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 1), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -227,7 +227,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges, ladders);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -254,7 +254,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -277,7 +277,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
@@ -300,7 +300,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -323,7 +323,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
@@ -363,7 +363,7 @@ public class RoomSearchTest {
 
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		RoomSearch search = new RoomSearch (graph, wp,
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 

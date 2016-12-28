@@ -14,19 +14,19 @@ public class RoomSearch {
 	private readonly IWaypoint mDestPoint;
 	private readonly Range mDestRange;
 
-	private readonly WalkerParams mWp;
+	private readonly Vector2 mSize;
 	private readonly ISearchEvaluator mEvaluator;
 
 	private IWaypoint mStartPoint;
 	private List<IWaypointPath> mPathChain;
 
-	public RoomSearch (RoomGraph graph, WalkerParams wp, 
+	public RoomSearch (RoomGraph graph, Vector2 size, ISearchEvaluator evaluator, 
 		IWaypoint startPoint, Range startRange, IWaypoint destPoint, Range destRange) {
 
 		Log.logger.Log (Log.AI_SEARCH, "<b>starting Astar: from " + startPoint + " to " + destPoint + ",</b>");
 
-		mWp = wp;
-		mEvaluator = new PlatformerSearchEvaluator (wp);
+		mSize = size;
+		mEvaluator = evaluator;
 		mGraph = graph;
 		mOpenQueue = new FastPriorityQueue<WaypointNode> (graph.paths.Count * graph.paths.Count);
 		mStartPoint = startPoint;
@@ -117,8 +117,8 @@ public class RoomSearch {
 	}
 
 	private Range getTaperedStartRange (Range fromRange, Range startRange) {
-		float tnxli = Mathf.Min (Mathf.Max (fromRange.xl, startRange.xl), startRange.xr - mWp.size.x);
-		float tnxri = Mathf.Min (Mathf.Max (fromRange.xr, startRange.xl + mWp.size.x), startRange.xr);
+		float tnxli = Mathf.Min (Mathf.Max (fromRange.xl, startRange.xl), startRange.xr - mSize.x);
+		float tnxri = Mathf.Min (Mathf.Max (fromRange.xr, startRange.xl + mSize.x), startRange.xr);
 		return new Range (tnxli, tnxri, startRange.y);
 	}
 

@@ -13,6 +13,8 @@ public interface IAiWalkerFacade {
 
 	RoomGraph GetRoomGraph (RoomModel room);
 
+	SceneGraph GetSceneGraph ();
+
 	Vector2 GetPosition ();
 
 	Vector2 GetVelocity ();

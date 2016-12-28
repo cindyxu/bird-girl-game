@@ -46,8 +46,8 @@ public class ScenePathPlanner {
 		Range destRange = new Range (destPos.x, destPos.x + mWp.size.x, destPos.y);
 
 		if (startPoint != null && destPoint != null) {
-			RoomSearch search = new RoomSearch (mAWFacade.GetRoomGraph (roomModel), mWp,
-				startPoint, startRange, destPoint, destRange);
+			RoomSearch search = new RoomSearch (mAWFacade.GetRoomGraph (roomModel), mWp.size,
+				new PlatformerSearchEvaluator (mWp), startPoint, startRange, destPoint, destRange);
 			List<IWaypointPath> result;
 			while (search.Step (out result)) ;
 

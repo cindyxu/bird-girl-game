@@ -57,6 +57,10 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 		return mRoomGraphs[room];
 	}
 
+	public SceneGraph GetSceneGraph () {
+		return mSceneGraph;
+	}
+
 	public void StartObserving () {
 		mPlFacade.onClimbLadder += OnClimbLadder;
 		mPlFacade.onGrounded += OnGrounded;
