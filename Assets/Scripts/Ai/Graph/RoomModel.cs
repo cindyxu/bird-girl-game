@@ -5,14 +5,14 @@ using System.Collections.ObjectModel;
 
 public class RoomModel {
 
-	private List<Edge> mEdges = new List<Edge> ();
+	private List<Edge> mRawEdges = new List<Edge> ();
 	private List<LadderModel> mLadderModels = new List<LadderModel> ();
 	private List<DoorModel> mDoorModels = new List<DoorModel> ();
 
 	public RoomModel (IEnumerable<Edge> edges,
 		IEnumerable<LadderModel> ladders = null, IEnumerable<DoorModel> doors = null) {
 
-		this.mEdges.AddRange (edges);
+		this.mRawEdges.AddRange (edges);
 		if (ladders != null) {
 			this.mLadderModels.AddRange (ladders);
 		} if (doors != null) {
@@ -20,8 +20,8 @@ public class RoomModel {
 		}
 	}
 
-	public IEnumerable<Edge> GetEdges () {
-		return new ReadOnlyCollection<Edge> (mEdges);
+	public IEnumerable<Edge> GetRawEdges () {
+		return new ReadOnlyCollection<Edge> (mRawEdges);
 	}
 
 	public IEnumerable<LadderModel> GetLadders () {

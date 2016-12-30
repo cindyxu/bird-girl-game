@@ -27,7 +27,7 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 		mFacade = facade;
 		mPlFacade = plFacade;
 		mConverter = converter;
-		mSceneGraph = mConverter.CreateSceneGraph (mWp);
+		mSceneGraph = mConverter.CreateSceneGraph (mWp, mRoomGraphs);
 	}
 
 	public Edge GetEdge () {
@@ -101,7 +101,7 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 
 	private Edge getGroundedEdge (SortedEdge sortedEdge) {
 		Vector2 position = GetPosition ();
-		return EdgeUtil.FindOnEdge (mRoomModel.GetEdges (),
+		return EdgeUtil.FindOnEdge (GetRoomGraph (mRoomModel).GetEdges (),
 			position.x, position.x + mWp.size.x, sortedEdge.transform.position.y);
 	}
 

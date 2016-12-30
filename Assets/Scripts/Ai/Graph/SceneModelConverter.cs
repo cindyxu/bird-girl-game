@@ -15,7 +15,7 @@ public class SceneModelConverter {
 	public SceneModelConverter (IEnumerable<Room> rooms) {
 		
 		foreach (Room room in rooms) {
-			List<Edge> edges = buildEdges (room);
+			List<Edge> edges = buildRawEdges (room);
 			Dictionary<Ladder, LadderModel> ladderMap = buildLadders (room);
 			Dictionary<IntraDoorTrigger, DoorModel> doorMap = buildDoors (room);
 
@@ -46,21 +46,22 @@ public class SceneModelConverter {
 		return mLadderMap [ladder];
 	}
 
-	public SceneGraph CreateSceneGraph (WalkerParams wp) {
+	public SceneGraph CreateSceneGraph (WalkerParams wp, IDictionary<RoomModel, RoomGraph> roomGraphs) {
 		SceneGraph graph = new SceneGraph ();
-		populateLadderRoomPaths (graph, wp);
+		populateLadderRoomPaths (graph, wp, roomGraphs);
 		populateDoorRoomPaths (graph, wp);
 		return graph;
 	}
 
-	private void populateLadderRoomPaths (SceneGraph graph, WalkerParams wp) {
+	private void populateLadderRoomPaths (SceneGraph graph, WalkerParams wp,
+		IDictionary<RoomModel, RoomGraph> roomGraphs) {
 		// add room paths for any ladders that reach into the next room
 		foreach (Ladder ladder in mLadderMap.Keys) {
 			if (ladder.GetDestRoom () != ladder.GetRoom ()) {
 				
 				LadderModel ladderModel = mLadderMap[ladder].Item2;
 				Edge topEdge = EdgeUtil.FindLadderTopEdge (
-					ladderModel.GetRect (), mRoomMap[ladder.GetDestRoom ()].GetEdges ());
+					ladderModel.GetRect (), roomGraphs[mRoomMap[ladder.GetDestRoom ()]].GetEdges ());
 
 				if (topEdge != null) {
 					RoomModel bottomRoom = mRoomMap[ladder.GetRoom ()];
@@ -96,13 +97,13 @@ public class SceneModelConverter {
 		return doors;
 	}
 
-	private static List<Edge> buildEdges (Room room) {
+	private static List<Edge> buildRawEdges (Room room) {
 		SortedEdge[] sortedEdges = room.GetSortedEdges ();
 		EdgeCollider2D[] colliders = new EdgeCollider2D [sortedEdges.Length];
 		for (int i = 0; i < sortedEdges.Length; i++) {
 			colliders [i] = sortedEdges [i].GetComponent<EdgeCollider2D> ();
 		}
-		return EdgeBuilder.BuildEdges (colliders);
+		return EdgeBuilder.BuildRawEdges (colliders);
 	}
 
 	private static Dictionary<Ladder, LadderModel> buildLadders (Room room) {

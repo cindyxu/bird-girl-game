@@ -11,8 +11,8 @@ public class RenderSearch {
 		Vector2 dest, List<Edge> edges) {
 		RoomModel model = new RoomModel (edges);
 		RoomGraph graph = new RoomGraph (model, wp);
-		Edge startEdge = EdgeUtil.FindUnderEdge (model.GetEdges (), start.x, start.x + wp.size.x, start.y);
-		Edge destEdge = EdgeUtil.FindUnderEdge (model.GetEdges (), dest.x, dest.x + wp.size.x, dest.y);
+		Edge startEdge = EdgeUtil.FindUnderEdge (graph.GetEdges (), start.x, start.x + wp.size.x, start.y);
+		Edge destEdge = EdgeUtil.FindUnderEdge (graph.GetEdges (), dest.x, dest.x + wp.size.x, dest.y);
 		mSearch = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			startEdge, new Range (start.x, start.x + wp.size.x, start.y),
 			destEdge, new Range (dest.x, dest.x + wp.size.x, dest.y));

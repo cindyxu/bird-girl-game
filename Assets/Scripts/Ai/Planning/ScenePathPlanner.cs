@@ -40,7 +40,8 @@ public class ScenePathPlanner {
 		// RoomModel destRoomModel = mConverter.GetRoomModel (destRoom);
 		IWaypoint destPoint = roomModel.GetLadder (destPos);
 		if (destPoint == null) {
-			destPoint = EdgeUtil.FindUnderEdge (roomModel.GetEdges (), destPos.x, destPos.x + mWp.size.x, destPos.y);
+			IEnumerable<Edge> edges = mAWFacade.GetRoomGraph (roomModel).GetEdges ();
+			destPoint = EdgeUtil.FindUnderEdge (edges, destPos.x, destPos.x + mWp.size.x, destPos.y);
 			if (destPoint != null) destPos.y = destPoint.GetRect ().y;
 		}
 		Range destRange = new Range (destPos.x, destPos.x + mWp.size.x, destPos.y);

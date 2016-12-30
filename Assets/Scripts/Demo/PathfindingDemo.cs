@@ -25,11 +25,11 @@ public class PathfindingDemo : MonoBehaviour {
 		searchButton.onClick.AddListener (StartSearch);
 		stepButton.onClick.AddListener (Step);
 
-		EdgeCollider2D[] edgeColliders = FindObjectsOfType<EdgeCollider2D> ();
-		mEdges = EdgeBuilder.BuildEdges (edgeColliders);
 		mWp = new WalkerParams (walker.GetComponent<BoxCollider2D> ().size, walkSpd, jumpSpd, climbSpd,
 			walker.GetComponent <Rigidbody2D> ().gravityScale * Physics2D.gravity.y,
 			terminalV);
+		EdgeCollider2D[] edgeColliders = FindObjectsOfType<EdgeCollider2D> ();
+		mEdges = EdgeBuilder.SplitEdges (EdgeBuilder.BuildRawEdges (edgeColliders), mWp.size.y);
 
 		foreach (Edge edge in mEdges) {
 			Debug.Log ("created edge: " + edge + " " +
