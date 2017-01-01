@@ -30,7 +30,7 @@ public class DoorPath : IRoomPath {
 		return new Range (fromRect.xMin, fromRect.xMax, fromRect.yMin);
 	}
 
-	public Range GetEndRange () {
+	public Range GetEndRange (Range range) {
 		return mEndRange;
 	}
 
@@ -40,19 +40,6 @@ public class DoorPath : IRoomPath {
 
 	public RoomModel GetEndRoom () {
 		return mEndRoom;
-	}
-
-	// do we care about this?
-	public float GetTravelTime () {
-		return 0;
-	}
-
-	public float GetPenaltyMult () {
-		return 1;
-	}
-
-	public float GetMovement () {
-		return 0;
 	}
 }
 

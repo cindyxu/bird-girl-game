@@ -3,18 +3,24 @@ using UnityEngine;
 
 public class DoorModel : IWaypoint {
 
-	private readonly Rect rect;
+	private readonly Rect mRect;
+	private readonly int mDir;
 
-	public DoorModel (Rect rect) {
-		this.rect = rect;
+	public DoorModel (Rect rect, int dir) {
+		mRect = rect;
+		mDir = dir;
 	}
 
 	public Rect GetRect () {
-		return rect;
+		return mRect;
+	}
+
+	public int GetDir () {
+		return mDir;
 	}
 
 	public override string ToString () {
-		return string.Format ("[DoorModel " + rect + "]");
+		return string.Format ("[DoorModel " + mRect + "]");
 	}
 
 }

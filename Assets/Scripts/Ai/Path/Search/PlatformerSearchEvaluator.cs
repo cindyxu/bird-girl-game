@@ -43,12 +43,17 @@ public class PlatformerSearchEvaluator : ISearchEvaluator {
 		return Mathf.Max (Mathf.Max (xlf + mWp.size.x - xr, xl + mWp.size.x - xrf), 0);
 	}
 
-	public float EstRemainingTime (Range fromRange, Range toRange) {
-		float distLeftX = GetDistLeftX (fromRange.xl, fromRange.xr, toRange.xl, toRange.xr);
+	public float EstRemainingTime (Range fromPointRange, float fxl, float fxr,
+		Range toPointRange, float txl, float txr) {
+		float distLeftX = GetDistLeftX (fxl, fxr, txl, txr);
+		float gapDist = Mathf.Max (
+			Mathf.Max (toPointRange.xl - fromPointRange.xr, fromPointRange.xl - toPointRange.xr), 0);
 		float estTime = 0;
-		if (fromRange.y != toRange.y || distLeftX > 0) {
-			estTime += EstRemainingAirTime (toRange.y - fromRange.y, ref distLeftX);
+		if (!Mathf.Approximately (fromPointRange.y, toPointRange.y) || gapDist >= mWp.size.x) {
+			estTime += EstRemainingAirTime (toPointRange.y - fromPointRange.y, ref distLeftX);
 		}
-		return estTime + (distLeftX / mWp.walkSpd);
+		estTime += (distLeftX / mWp.walkSpd);
+
+		return estTime;
 	}
 }

@@ -14,7 +14,8 @@ public class JumpPath : IWaypointPath {
 		mStartEdge = startEdge;
 		mEndEdge = endEdge;
 		mLeafArea = leafArea;
-		mTravelTime = wp.trajectory.GetDeltaTimeFromVyFinal (leafArea.root.end.vy, leafArea.end.vy);
+		mTravelTime = wp.trajectory.GetDeltaTimeFromDeltaY (
+			leafArea.root.end.vy, -1, leafArea.end.y - leafArea.root.end.y);
 		mMovement = mTravelTime * wp.walkSpd;
 		mPenaltyMult = evaluatePenaltyMult (wp);
 	}

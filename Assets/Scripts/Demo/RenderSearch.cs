@@ -19,8 +19,7 @@ public class RenderSearch {
 	}
 
 	public void StepSearch () {
-		List<IWaypointPath> result;
-		mSearch.Step (out result);
+		mSearch.Step ();
 		renderSearch ();
 	}
 

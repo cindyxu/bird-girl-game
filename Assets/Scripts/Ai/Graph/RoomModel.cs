@@ -28,6 +28,10 @@ public class RoomModel {
 		return new ReadOnlyCollection<LadderModel> (mLadderModels);
 	}
 
+	public IEnumerable<DoorModel> GetDoors () {
+		return new ReadOnlyCollection<DoorModel> (mDoorModels);
+	}
+
 	public LadderModel GetLadder (Vector2 pos) {
 		foreach (LadderModel ladderModel in mLadderModels) {
 			if (ladderModel.GetRect ().Contains (pos)) {

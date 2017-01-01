@@ -3,17 +3,13 @@ using UnityEngine;
 
 public delegate void OnAiGroundedEvent (Edge edge);
 
-public interface IAiWalkerFacade {
+public interface IAiWalkerFacade : IGrapher {
 
 	Edge GetEdge ();
 
 	LadderModel GetLadder ();
 
 	RoomModel GetRoomModel ();
-
-	RoomGraph GetRoomGraph (RoomModel room);
-
-	SceneGraph GetSceneGraph ();
 
 	Vector2 GetPosition ();
 

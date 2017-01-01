@@ -49,7 +49,7 @@ public class Edge : IWaypoint {
 
 	public override string ToString()
 	{
-		return "Edge: " + x0 + ", " + y0 + ", " + x1 + ", " + y1;
+		return "[Edge " + x0 + ", " + y0 + ", " + x1 + ", " + y1 + "]";
 	}
 
 	public static int SortByLeftAsc(Edge edge1, Edge edge2) {

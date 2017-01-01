@@ -8,7 +8,7 @@ public class RoomSearchTest {
 	WalkerParams wp = new WalkerParams (new Vector2 (1, 1), 5, 18, 10, -50, -100);
 
 	[Test]
-	public void GoalOneEdgeAcross_returnsChainToEdge()
+	public void GoalOneEdgeAcrossRight_returnsChainToEdge()
 	{
 		List<Edge> edges = new List<Edge> ();
 		Edge start = new Edge (0, 0, 1, 0);
@@ -21,8 +21,32 @@ public class RoomSearchTest {
 		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
+
+		Assert.AreEqual (start, result [0].GetStartPoint ());
+		Assert.AreEqual (dest, result [0].GetEndPoint ());
+	}
+
+	[Test]
+	public void GoalOneEdgeAcrossLeft_returnsChainToEdge()
+	{
+		List<Edge> edges = new List<Edge> ();
+		Edge start = new Edge (2, 0, 3, 0);
+		Edge dest = new Edge (0, 0, 1, 0);
+		edges.Add (start);
+		edges.Add (dest);
+
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
+
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (start, result [0].GetStartPoint ());
 		Assert.AreEqual (dest, result [0].GetEndPoint ());
@@ -44,13 +68,39 @@ public class RoomSearchTest {
 		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (start, result [0].GetStartPoint ());
 		Assert.AreEqual (mid, result [0].GetEndPoint ());
 		Assert.AreEqual (mid, result [1].GetStartPoint ());
 		Assert.AreEqual (dest, result [1].GetEndPoint ());
+	}
+
+	[Test]
+	public void GoalAcrossAndClose_returnsDropPathInChain()
+	{
+		List<Edge> edges = new List<Edge> ();
+		Edge start = new Edge (0, 0, 1, 0);
+		Edge dest = new Edge (1.5f, 0, 2.5f, 0);
+		edges.Add (start);
+		edges.Add (dest);
+
+		RoomModel model = new RoomModel (edges);
+		RoomGraph graph = new RoomGraph (model, wp);
+
+		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
+			start, new Range (start.left, start.left + wp.size.x, start.y0), 
+			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
+
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
+
+		JumpPath jumpPath = (JumpPath) result[0];
+		Assert.AreEqual (start, jumpPath.GetStartPoint ());
+		Assert.AreEqual (dest, jumpPath.GetEndPoint ());
+		Assert.True (jumpPath.IsDropPath ());
 	}
 
 	[Test]
@@ -69,8 +119,9 @@ public class RoomSearchTest {
 		RoomSearch search = new RoomSearch (graph, wp.size, new PlatformerSearchEvaluator (wp),
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (start, result [0].GetStartPoint ());
 		Assert.AreEqual (dest, result [0].GetEndPoint ());
@@ -91,8 +142,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.IsNull (result);
 	}
@@ -112,8 +163,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (start, result [0].GetStartPoint ());
 		Assert.AreEqual (dest, result [0].GetEndPoint ());
@@ -134,8 +185,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (start, result [0].GetStartPoint ());
 		Assert.AreEqual (dest, result [0].GetEndPoint ());
@@ -156,8 +207,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		foreach (IWaypointPath path in result) {
 			Debug.Log ("path : " + path.GetStartPoint () + ", " + path.GetStartRange ());
@@ -185,8 +236,8 @@ public class RoomSearchTest {
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 1), 
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 2));
 
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (0, result.Count);
 	}
@@ -206,8 +257,8 @@ public class RoomSearchTest {
 			ladder, new Range (ladder.rect.xMin, ladder.rect.xMin + wp.size.x, 1), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (1, result.Count);
 		Assert.AreEqual (dest, result [0].GetEndPoint ());
@@ -231,8 +282,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (4, result.Count);
 		Assert.AreEqual (start, result [0].GetStartPoint ());
@@ -258,8 +309,7 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<IWaypointPath> result;
-		search.Step (out result) ;
+		search.Step () ;
 		WaypointNode bestNode = search.peekQueue ();
 		Assert.AreEqual (bestNode.waypoint, dest);
 	}
@@ -281,8 +331,7 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		List<IWaypointPath> result;
-		search.Step (out result) ;
+		search.Step () ;
 		WaypointNode bestNode = search.peekQueue ();
 		Assert.AreEqual (bestNode.waypoint, dest);
 	}
@@ -304,8 +353,7 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<IWaypointPath> result;
-		search.Step (out result) ;
+		search.Step () ;
 		WaypointNode bestNode = search.peekQueue ();
 		Assert.AreEqual (bestNode.waypoint, dest);
 	}
@@ -327,8 +375,7 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<IWaypointPath> result;
-		search.Step (out result) ;
+		search.Step () ;
 		WaypointNode bestNode = search.peekQueue ();
 		Assert.AreEqual (bestNode.waypoint, dest);
 	}
@@ -367,8 +414,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		List<IWaypointPath> result;
-		while (search.Step (out result)) ;
+		while (search.Step ()) ;
+		List<IWaypointPath> result = search.GetPathChain ();
 
 		Assert.AreEqual (start, result [0].GetStartPoint ());
 		Assert.AreEqual (short0, result [0].GetEndPoint ());

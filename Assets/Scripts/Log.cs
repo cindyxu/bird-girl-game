@@ -7,7 +7,8 @@ public static class Log
 {
 	public const string CUTSCENE = "CUTSCENE";
 	public const string AI_SCAN = "AI_SCAN";
-	public const string AI_SEARCH = "AI_SEARCH";
+	public const string AI_ROOM_SEARCH = "AI_ROOM_SEARCH";
+	public const string AI_SCENE_SEARCH = "AI_SCENE_SEARCH";
 	public const string AI_PLAN = "AI_PLAN";
 	public const string AI_INPUT = "AI_INPUT";
 	public const string DIALOGUE = "DIALOGUE";
@@ -21,7 +22,8 @@ public static class Log
 
 	static Log () {
 		filters = new string[] {
-			AI_PLAN
+			AI_SCENE_SEARCH,
+			AI_ROOM_SEARCH
 		};
 		logger = new Logger (new LogHandler (filters));
 	}

@@ -5,18 +5,25 @@ using Priority_Queue;
 public class RoomNode : FastPriorityQueueNode, IComparable {
 
 	// steps taken
-	public readonly List<IWaypointPath> waypointChain;
-	public readonly IRoomPath roomPath;
+	public readonly List<IWaypointPath> parentChain;
+	public readonly IRoomPath parentRoomPath;
+	public readonly RoomModel room;
+	public readonly IWaypoint waypoint;
+	public readonly Range range;
 
 	// priority
 	public readonly float g;
 
 	// current location
 
-	public RoomNode (List<IWaypointPath> chain, IRoomPath roomPath, float g) {
-		this.waypointChain = chain;
-		this.roomPath = roomPath;
+	public RoomNode (RoomModel room, IWaypoint waypoint, Range range, float g,
+		List<IWaypointPath> parentChain = null, IRoomPath parentRoomPath = null) {
+		this.room = room;
+		this.waypoint = waypoint;
+		this.range = range;
 		this.g = g;
+		this.parentChain = parentChain;
+		this.parentRoomPath = parentRoomPath;
 	}
 
 	public int CompareTo (object other) {

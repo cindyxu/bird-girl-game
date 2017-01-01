@@ -6,7 +6,7 @@ public interface ISearchEvaluator {
 	
 	float GetTravelTime (Range fromRange, Range toRange);
 
-	float EstRemainingTime (Range fromRange, Range destRange);
+	float EstRemainingTime (Range fromRange, float fxl, float fxr, Range toRange, float txl, float txr);
 
 }
 

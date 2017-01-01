@@ -91,7 +91,6 @@ public class Room : MonoBehaviour {
 
 	public void Update () {
 		mElapsedTime = Mathf.Min (mElapsedTime + Time.deltaTime, mTotalTime);
-		DebugPanel.Log (name, mElapsedTime);
 		setAlpha (evaluateAlpha ());
 	}
 

@@ -23,10 +23,21 @@ public class EdgeBuilder {
 			float px = collider.transform.position.x + collider.offset.x;
 			float py = collider.transform.position.y + collider.offset.y;
 
-			float minX = px - horz * collider.bounds.extents.x;
-			float maxX = px + horz * collider.bounds.extents.x;
-			float minY = py - vert * collider.bounds.extents.y;
-			float maxY = py + vert * collider.bounds.extents.y;
+			// assume none of the parents are rotated here ...
+			float scale = 1;
+			Transform cparent = collider.transform;
+			while (cparent != null) {
+				scale *= cparent.localScale.x;
+				cparent = cparent.parent;
+			}
+
+			float extentsX = (vert > horz ? 0 : scale / 2);
+			float extentsY = (vert > horz ? scale / 2 : 0);
+
+			float minX = px - horz * extentsX;
+			float maxX = px + horz * extentsX;
+			float minY = py - vert * extentsY;
+			float maxY = py + vert * extentsY;
 
 			if (platformEffector != null && platformEffector.useOneWay) {
 				if ((vert > 0 && collider.transform.up.x < 0) || (horz > 0 && collider.transform.up.y > 0)) {

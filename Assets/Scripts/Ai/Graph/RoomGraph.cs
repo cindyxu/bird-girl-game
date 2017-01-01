@@ -16,6 +16,7 @@ public class RoomGraph {
 		paths = new Dictionary<IWaypoint, List<IWaypointPath>> ();
 		addJumpPaths (model, wp);
 		addLadderPaths (model, wp);
+		addEdgeDoorPaths (model, wp);
 	}
 
 	public IEnumerable<Edge> GetEdges () {
@@ -50,6 +51,35 @@ public class RoomGraph {
 					}
 					paths [path.GetStartPoint ()].Add (path);
 				}
+			}
+		}
+	}
+
+	public void addEdgeDoorPaths (RoomModel model, WalkerParams wp) {
+		foreach (DoorModel doorModel in model.GetDoors ()) {
+			Rect rect = doorModel.GetRect ();
+
+			Range enterDoorRange, exitDoorRange;
+			if (doorModel.GetDir () < 0) {
+				enterDoorRange = exitDoorRange = new Range (rect.xMin - wp.size.x, rect.xMin, rect.yMin);
+			} else if (doorModel.GetDir () > 0) {
+				enterDoorRange = exitDoorRange = new Range (rect.xMax, rect.xMax + wp.size.x, rect.yMin);
+			} else {
+				enterDoorRange = new Range (rect.xMin - wp.size.x, rect.xMax + wp.size.x, rect.yMin);
+				float xc = rect.xMin + (rect.xMax - rect.xMin) / 2;
+				exitDoorRange = new Range (xc - wp.size.x / 2, xc + wp.size.x / 2, rect.yMin);
+			}
+
+			IEnumerable<Edge> edges = EdgeUtil.FindOnEdges (mEdges, enterDoorRange.xl, enterDoorRange.xr, rect.yMin);
+
+			foreach (Edge edge in edges) {
+				if (!paths.ContainsKey(edge)) paths[edge] = new List<IWaypointPath> ();
+				paths[edge].Add (new EdgeDoorPath (edge, doorModel, true, enterDoorRange));
+			}
+			Edge exitEdge = EdgeUtil.FindOnEdge (mEdges, exitDoorRange.xl, exitDoorRange.xr, exitDoorRange.y);
+			if (exitEdge != null) {
+				if (!paths.ContainsKey(doorModel)) paths[doorModel] = new List<IWaypointPath> ();
+				paths[doorModel].Add (new EdgeDoorPath (exitEdge, doorModel, false, exitDoorRange));
 			}
 		}
 	}
