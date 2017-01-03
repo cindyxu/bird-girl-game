@@ -11,6 +11,10 @@ public struct Range {
 		this.y = y;
 	}
 
+	public float GetWidth () {
+		return xr - xl;
+	}
+
 	public override string ToString () {
 		return string.Format ("[Range {0}, {1}, {2}]", xl, xr, y);
 	}

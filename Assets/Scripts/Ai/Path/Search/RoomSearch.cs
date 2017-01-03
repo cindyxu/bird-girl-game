@@ -7,8 +7,8 @@ using Priority_Queue;
 public class RoomSearch {
 
 	private readonly FastPriorityQueue<WaypointNode> mOpenQueue;
-	private readonly Dictionary<IWaypointPath, HeuristicRange<WaypointNode>> mBestHeuristics = 
-		new Dictionary<IWaypointPath, HeuristicRange<WaypointNode>> ();
+	private readonly Dictionary<IWaypointPath, HeuristicRange<ParentPath>> mBestHeuristics = 
+		new Dictionary<IWaypointPath, HeuristicRange<ParentPath>> ();
 
 	private readonly RoomGraph mGraph;
 	private IWaypoint mStartPoint;
@@ -36,19 +36,11 @@ public class RoomSearch {
 
 		if (graph.paths.Count > 0) {
 			mOpenQueue = new FastPriorityQueue<WaypointNode> (graph.paths.Count * graph.paths.Count);
-			startSearch (startPoint, startRange);
+			IEnumerable<IWaypointPath> paths = graph.paths[mStartPoint];
+			foreach (IWaypointPath path in paths) {
+				processNeighborPath (null, path);
+			}
 		}
-	}
-
-	private void startSearch (IWaypoint startPoint, Range startRange) {
-		WaypointNode startNode = new WaypointNode (null, startPoint, startRange, 0);
-		Rect startRect = startPoint.GetRect ();
-		Rect destRect = mDestPoint.GetRect ();
-		mOpenQueue.Enqueue (startNode, mEvaluator.EstRemainingTime (
-			new Range (startRect.xMin, startRect.xMax, startRect.center.y),
-			startRange.xl, startRange.xr,
-			new Range (destRect.xMin, destRect.xMax, destRect.center.y),
-			mDestRange.xl, mDestRange.xr));
 	}
 
 	public IEnumerator<WaypointNode> getQueueEnumerator () {
@@ -59,31 +51,35 @@ public class RoomSearch {
 		return mOpenQueue.First;
 	}
 
-	public List<IWaypointPath> reconstructChain (WaypointNode end) {
-		List<IWaypointPath> chain = new List<IWaypointPath> ();
-		WaypointNode curr = end;
-		while (curr != null && curr.waypointPath != null) {
-			chain.Add (curr.waypointPath);
+	public void reconstructChain (IWaypointPath end, out List<IWaypointPath> chain, out Range endRange) {
+		chain = new List<IWaypointPath> ();
+		endRange = getTaperedStartRange (mStartRange, mEndRange);
 
-			if (curr.waypoint == mStartPoint) break;
-			if (!mBestHeuristics.ContainsKey (curr.waypointPath)) break;
+		IWaypointPath curr = end;
+		while (curr != null) {
+			chain.Add (curr);
 
-			HeuristicRange<WaypointNode> ranges = mBestHeuristics [curr.waypointPath];
-			Range currRange = curr.waypointPath.GetStartRange ();
+			if (curr.GetStartPoint () == mStartPoint) break;
+			if (!mBestHeuristics.ContainsKey (curr)) break;
 
-			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, WaypointNode pnode) {
+			HeuristicRange<ParentPath> ranges = mBestHeuristics [curr];
+			Range currRange = curr.GetStartRange ();
+
+			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, ParentPath pnode) {
 				if (pnode == null) return Mathf.Infinity;
 				float rank = pnode.g + mEvaluator.GetTravelTime (pnode.range, currRange);
 				return rank;
 			});
 			float rxl, rxr;
-			WaypointNode node;
+			ParentPath node;
 			ranges.getRangeAtIndex (idx, out rxl, out rxr, out node);
 
-			curr = node;
+			if (curr == end) {
+				endRange = node.range;
+			}
+			curr = node.path;
 		}
 		chain.Reverse ();
-		return chain;
 	}
 
 	public bool Step () {
@@ -111,10 +107,11 @@ public class RoomSearch {
 
 		WaypointNode bestNode = mOpenQueue.Dequeue ();
 
-		if (bestNode.waypoint.Equals (mDestPoint)) {
+		if (bestNode.path.GetEndPoint ().Equals (mDestPoint)) {
 			Log.logger.Log (Log.AI_ROOM_SEARCH, "<b>found best path!</b>");
-			mPathChain = reconstructChain (bestNode);
-			mEndRange = bestNode.range;
+
+			reconstructChain (bestNode.path, out mPathChain, out mEndRange);
+
 			string s = "";
 			foreach (IWaypointPath path in mPathChain) {
 				s += path.GetEndPoint () + " ";
@@ -123,15 +120,15 @@ public class RoomSearch {
 			return true;
 		}
 
-		Log.logger.Log (Log.AI_ROOM_SEARCH, "continue - current edge " + bestNode.waypoint);
-		if (!mGraph.paths.ContainsKey (bestNode.waypoint)) {
+		Log.logger.Log (Log.AI_ROOM_SEARCH, "continue - current edge " + bestNode.path.GetEndPoint ());
+		if (!mGraph.paths.ContainsKey (bestNode.path.GetEndPoint ())) {
 			Log.logger.Log (Log.AI_ROOM_SEARCH, "no paths from edge!");
 			return true;
 		}
-		List<IWaypointPath> neighborPaths = mGraph.paths [bestNode.waypoint];
+		List<IWaypointPath> neighborPaths = mGraph.paths [bestNode.path.GetEndPoint ()];
 		Log.logger.Log (Log.AI_ROOM_SEARCH, neighborPaths.Count + " paths");
 		foreach (IWaypointPath neighborPath in neighborPaths) {
-			processNeighborPath (bestNode, neighborPath);
+			processNeighborPath (bestNode.path, neighborPath);
 		}
 		return true;
 	}
@@ -156,44 +153,75 @@ public class RoomSearch {
 		return new Range (xlf, xrf, fullEndRange.y);
 	}
 
-	private void processNeighborPath (WaypointNode parentNode, IWaypointPath neighborPath) {
-		IWaypoint endPoint = neighborPath.GetEndPoint ();
+	private Eppy.Tuple<Range, float> GetBestG (IWaypointPath fromPath, Range toRange) {
+		if (fromPath != null) {
+			int i = mBestHeuristics[fromPath].getMinRangeIndex (delegate (float xl, float xr, ParentPath pnode) {
+				if (pnode == null) return Mathf.Infinity;
+				float rank = pnode.g + mEvaluator.GetTravelTime (pnode.range, toRange);
+				return rank;
+			});
+			float pxl, pxr;
+			ParentPath parentNode;
+			mBestHeuristics[fromPath].getRangeAtIndex (i, out pxl, out pxr, out parentNode);
+			return new Eppy.Tuple<Range, float> (parentNode.range, parentNode.g);
+		} else {
+			return new Eppy.Tuple<Range, float> (mStartRange, 0);
+		}
+	}
 
+	private void processNeighborPath (IWaypointPath fromPath, IWaypointPath toPath) {
+		IWaypoint endPoint = toPath.GetEndPoint ();
 		Log.logger.Log (Log.AI_ROOM_SEARCH, "process path to " + endPoint);
 
-		Range startRange = neighborPath.GetStartRange ();
-		startRange = getTaperedStartRange (parentNode.range, startRange);
+		Eppy.Tuple<Range, float> bestPair = GetBestG (fromPath, toPath.GetStartRange ());
+		Range fromRange = bestPair.Item1;
+		float fromG = bestPair.Item2;
+
+		Range startRange = toPath.GetStartRange ();
+		startRange = getTaperedStartRange (fromRange, startRange);
 
 		Log.logger.Log (Log.AI_ROOM_SEARCH, "tapered start range: " + startRange.xl + ", " + startRange.xr);
 
-		float walkTime = mEvaluator.GetTravelTime (parentNode.range, startRange);
-		float tentativeG = parentNode.g + walkTime + 
-			neighborPath.GetTravelTime () * neighborPath.GetPenaltyMult ();
+		float walkTime = mEvaluator.GetTravelTime (fromRange, startRange);
+		float tentativeG = fromG + walkTime + 
+			toPath.GetTravelTime () * toPath.GetPenaltyMult ();
 
-		Range endRange = neighborPath.GetEndRange ();
-		Range taperedEndRange = getTaperedEndRange (startRange, endRange, neighborPath.GetMovement ());
+		Range endRange = toPath.GetEndRange ();
+		Range taperedEndRange = getTaperedEndRange (startRange, endRange, toPath.GetMovement ());
 		Log.logger.Log (Log.AI_ROOM_SEARCH, "tapered end range: " + taperedEndRange.xl + ", " + taperedEndRange.xr);
 
-		if (!mBestHeuristics.ContainsKey (neighborPath)) {
-			mBestHeuristics[neighborPath] = new HeuristicRange<WaypointNode> (endRange.xr - endRange.xl);
+		ParentPath node = new ParentPath (fromPath, taperedEndRange, tentativeG);
+
+		if (!mBestHeuristics.ContainsKey (toPath)) {
+			mBestHeuristics[toPath] = new HeuristicRange<ParentPath> (endRange.xr - endRange.xl);
 		}
-		HeuristicRange<WaypointNode> heuristic = mBestHeuristics [neighborPath];
+		HeuristicRange<ParentPath> heuristic = mBestHeuristics [toPath];
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (taperedEndRange.xl - endRange.xl, taperedEndRange.xr - endRange.xl, 
-			parentNode, out writeRange, out newRange);
+			node, out writeRange, out newRange);
 		if (writeRange) Log.logger.Log (Log.AI_ROOM_SEARCH, "  wrote heuristic " + tentativeG);
 		if (!newRange) {
 			Log.logger.Log (Log.AI_ROOM_SEARCH, "  did not add new heuristic " + tentativeG);
 			return;
-		} 
-		WaypointNode node = new WaypointNode (neighborPath, neighborPath.GetEndPoint (), 
-			taperedEndRange, tentativeG);
+		}
 
-		float f = tentativeG + mEvaluator.EstRemainingTime (
-			node.waypointPath.GetEndRange (), node.range.xl, node.range.xr,
+		Rect endRect = toPath.GetEndPoint ().GetRect ();
+		float f = tentativeG + mEvaluator.EstRemainingTime (new Range (endRect.xMin, endRect.xMax, endRect.yMin),
+			node.range.xl, node.range.xr,
 			new Range (mDestPoint.GetRect ().xMin, mDestPoint.GetRect ().xMax, mDestPoint.GetRect ().center.y),
 			mDestRange.xl, mDestRange.xr);
 		Log.logger.Log (Log.AI_ROOM_SEARCH, "  new node! " + f);
-		mOpenQueue.Enqueue (node, f);
+		mOpenQueue.Enqueue (new WaypointNode (toPath), f);
 	}
+
+	public class WaypointNode : FastPriorityQueueNode {
+
+		public readonly IWaypointPath path;
+
+		public WaypointNode (IWaypointPath path) {
+			this.path = path;
+		}
+
+	}
+
 }

@@ -309,9 +309,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		search.Step () ;
-		WaypointNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.waypoint, dest);
+		RoomSearch.WaypointNode bestNode = search.peekQueue ();
+		Assert.AreEqual (dest, bestNode.path.GetEndPoint ());
 	}
 
 	[Test]
@@ -331,9 +330,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 		
-		search.Step () ;
-		WaypointNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.waypoint, dest);
+		RoomSearch.WaypointNode bestNode = search.peekQueue ();
+		Assert.AreEqual (dest, bestNode.path.GetEndPoint ());
 	}
 
 	[Test]
@@ -353,9 +351,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		search.Step () ;
-		WaypointNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.waypoint, dest);
+		RoomSearch.WaypointNode bestNode = search.peekQueue ();
+		Assert.AreEqual (dest, bestNode.path.GetEndPoint ());
 	}
 
 	[Test]
@@ -375,9 +372,8 @@ public class RoomSearchTest {
 			start, new Range (start.left, start.left + wp.size.x, start.y0), 
 			dest, new Range (dest.left, dest.left + wp.size.x, dest.y0));
 
-		search.Step () ;
-		WaypointNode bestNode = search.peekQueue ();
-		Assert.AreEqual (bestNode.waypoint, dest);
+		RoomSearch.WaypointNode bestNode = search.peekQueue ();
+		Assert.AreEqual (bestNode.path.GetEndPoint (), dest);
 	}
 
 	[Test]

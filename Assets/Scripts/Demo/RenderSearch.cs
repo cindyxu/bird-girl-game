@@ -24,15 +24,17 @@ public class RenderSearch {
 	}
 
 	private void renderSearch () {
-		IEnumerator<WaypointNode> enumerator = mSearch.getQueueEnumerator ();
+		IEnumerator<RoomSearch.WaypointNode> enumerator = mSearch.getQueueEnumerator ();
 		do {
-			WaypointNode node = enumerator.Current;
-			renderNode (node);
+			RoomSearch.WaypointNode node = enumerator.Current;
+			renderChain (node.path);
 		} while (enumerator.MoveNext ());
 	}
 
-	private void renderNode (WaypointNode node) {
-		List<IWaypointPath> chain = mSearch.reconstructChain (node);
+	private void renderChain (IWaypointPath end) {
+		List<IWaypointPath> chain;
+		Range chainRange;
+		mSearch.reconstructChain (end, out chain, out chainRange);
 		foreach (IWaypointPath path in chain) {
 			Range endRange = path.GetEndRange ();
 			mDrawLines.Add (RenderUtils.CreateLine (endRange.xl, path.GetEndPoint ().GetRect ().yMin, 

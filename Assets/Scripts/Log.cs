@@ -22,8 +22,6 @@ public static class Log
 
 	static Log () {
 		filters = new string[] {
-			AI_SCENE_SEARCH,
-			AI_ROOM_SEARCH
 		};
 		logger = new Logger (new LogHandler (filters));
 	}

@@ -4,22 +4,20 @@ using System.Collections;
 using System.Collections.Generic;
 using Priority_Queue;
 
-public class WaypointNode : FastPriorityQueueNode, IComparable {
-	public readonly IWaypointPath waypointPath;
-	public readonly IWaypoint waypoint;
+public class ParentPath : IComparable {
+	public readonly IWaypointPath path;
 	public readonly Range range;
 	public readonly float g;
 
-	public WaypointNode (IWaypointPath path, IWaypoint waypoint, Range range, float g) {
-		this.waypointPath = path;
-		this.waypoint = waypoint;
+	public ParentPath (IWaypointPath path, Range range, float g) {
+		this.path = path;
 		this.range = range;
 		this.g = g;
 	}
 
 	public int CompareTo (object other) {
 		if (other == null) return 1;
-		WaypointNode node = other as WaypointNode;
+		ParentPath node = other as ParentPath;
 		if (node != null) {
 			return g.CompareTo (node.g);
 		} else throw new Exception ();
