@@ -7,8 +7,8 @@ using Priority_Queue;
 public class RoomSearch {
 
 	private readonly FastPriorityQueue<WaypointNode> mOpenQueue;
-	private readonly Dictionary<IWaypointPath, HeuristicRange<ParentPath>> mBestHeuristics = 
-		new Dictionary<IWaypointPath, HeuristicRange<ParentPath>> ();
+	private readonly Dictionary<IWaypointPath, HeuristicRange<AStarWaypointPath>> mBestHeuristics = 
+		new Dictionary<IWaypointPath, HeuristicRange<AStarWaypointPath>> ();
 
 	private readonly RoomGraph mGraph;
 	private IWaypoint mStartPoint;
@@ -19,7 +19,9 @@ public class RoomSearch {
 	private readonly Vector2 mSize;
 	private readonly ISearchEvaluator mEvaluator;
 
+	// resulting list of paths that can be taken to reach dest
 	private List<IWaypointPath> mPathChain;
+	// the sub range of the dest range which will be reached first
 	private Range mEndRange;
 
 	public RoomSearch (RoomGraph graph, Vector2 size, ISearchEvaluator evaluator, 
@@ -62,16 +64,16 @@ public class RoomSearch {
 			if (curr.GetStartPoint () == mStartPoint) break;
 			if (!mBestHeuristics.ContainsKey (curr)) break;
 
-			HeuristicRange<ParentPath> ranges = mBestHeuristics [curr];
+			HeuristicRange<AStarWaypointPath> ranges = mBestHeuristics [curr];
 			Range currRange = curr.GetStartRange ();
 
-			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, ParentPath pnode) {
+			int idx = ranges.getMinRangeIndex (delegate (float xl, float xr, AStarWaypointPath pnode) {
 				if (pnode == null) return Mathf.Infinity;
 				float rank = pnode.g + mEvaluator.GetTravelTime (pnode.range, currRange);
 				return rank;
 			});
 			float rxl, rxr;
-			ParentPath node;
+			AStarWaypointPath node;
 			ranges.getRangeAtIndex (idx, out rxl, out rxr, out node);
 
 			if (curr == end) {
@@ -141,12 +143,14 @@ public class RoomSearch {
 		return mEndRange;
 	}
 
+	// the range in startRange which can be reached most quickly from fromRange. at least as wide as character.
 	private Range getTaperedStartRange (Range fromRange, Range startRange) {
 		float tnxli = Mathf.Min (Mathf.Max (fromRange.xl, startRange.xl), startRange.xr - mSize.x);
 		float tnxri = Mathf.Min (Mathf.Max (fromRange.xr, startRange.xl + mSize.x), startRange.xr);
 		return new Range (tnxli, tnxri, startRange.y);
 	}
 
+	// the sub end range which can be reached, given start range and movement
 	private Range getTaperedEndRange (Range startRange, Range fullEndRange, float movement) {
 		float xlf = Mathf.Max (fullEndRange.xl, startRange.xl - movement);
 		float xrf = Mathf.Min (fullEndRange.xr, startRange.xr + movement);
@@ -155,13 +159,13 @@ public class RoomSearch {
 
 	private Eppy.Tuple<Range, float> GetBestG (IWaypointPath fromPath, Range toRange) {
 		if (fromPath != null) {
-			int i = mBestHeuristics[fromPath].getMinRangeIndex (delegate (float xl, float xr, ParentPath pnode) {
+			int i = mBestHeuristics[fromPath].getMinRangeIndex (delegate (float xl, float xr, AStarWaypointPath pnode) {
 				if (pnode == null) return Mathf.Infinity;
 				float rank = pnode.g + mEvaluator.GetTravelTime (pnode.range, toRange);
 				return rank;
 			});
 			float pxl, pxr;
-			ParentPath parentNode;
+			AStarWaypointPath parentNode;
 			mBestHeuristics[fromPath].getRangeAtIndex (i, out pxl, out pxr, out parentNode);
 			return new Eppy.Tuple<Range, float> (parentNode.range, parentNode.g);
 		} else {
@@ -173,29 +177,32 @@ public class RoomSearch {
 		IWaypoint endPoint = toPath.GetEndPoint ();
 		Log.logger.Log (Log.AI_ROOM_SEARCH, "process path to " + endPoint);
 
+		// get best range from which we can get to toPath
 		Eppy.Tuple<Range, float> bestPair = GetBestG (fromPath, toPath.GetStartRange ());
 		Range fromRange = bestPair.Item1;
 		float fromG = bestPair.Item2;
 
+		// figure out range from which to embark on toPath
 		Range startRange = toPath.GetStartRange ();
 		startRange = getTaperedStartRange (fromRange, startRange);
-
 		Log.logger.Log (Log.AI_ROOM_SEARCH, "tapered start range: " + startRange.xl + ", " + startRange.xr);
 
+		// cost of travelling on toPath
 		float walkTime = mEvaluator.GetTravelTime (fromRange, startRange);
 		float tentativeG = fromG + walkTime + 
 			toPath.GetTravelTime () * toPath.GetPenaltyMult ();
 
+		// figure out end range in toPath, given start range
 		Range endRange = toPath.GetEndRange ();
 		Range taperedEndRange = getTaperedEndRange (startRange, endRange, toPath.GetMovement ());
 		Log.logger.Log (Log.AI_ROOM_SEARCH, "tapered end range: " + taperedEndRange.xl + ", " + taperedEndRange.xr);
 
-		ParentPath node = new ParentPath (fromPath, taperedEndRange, tentativeG);
-
+		// attempt to add fromPath as parent in heuristic range
+		AStarWaypointPath node = new AStarWaypointPath (fromPath, taperedEndRange, tentativeG);
 		if (!mBestHeuristics.ContainsKey (toPath)) {
-			mBestHeuristics[toPath] = new HeuristicRange<ParentPath> (endRange.xr - endRange.xl);
+			mBestHeuristics[toPath] = new HeuristicRange<AStarWaypointPath> (endRange.xr - endRange.xl);
 		}
-		HeuristicRange<ParentPath> heuristic = mBestHeuristics [toPath];
+		HeuristicRange<AStarWaypointPath> heuristic = mBestHeuristics [toPath];
 		bool writeRange, newRange;
 		heuristic.addTentativeHeuristic (taperedEndRange.xl - endRange.xl, taperedEndRange.xr - endRange.xl, 
 			node, out writeRange, out newRange);
@@ -205,6 +212,7 @@ public class RoomSearch {
 			return;
 		}
 
+		// enqueue toPath with f value
 		Rect endRect = toPath.GetEndPoint ().GetRect ();
 		float f = tentativeG + mEvaluator.EstRemainingTime (new Range (endRect.xMin, endRect.xMax, endRect.yMin),
 			node.range.xl, node.range.xr,
