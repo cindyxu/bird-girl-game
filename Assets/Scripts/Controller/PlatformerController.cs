@@ -16,6 +16,9 @@ public class PlatformerController : IController {
 
 	public PlatformerController (Inhabitant inhabitant, WalkerParams wp) {
 		mInhabitant = inhabitant;
+		mInhabitant.onDoorEnter += OnDoorEnter;
+		mInhabitant.onDoorExit += OnDoorExit;
+
 		mWp = wp;
 
 		InputCatcher inputCatcher = new InputCatcher ();
@@ -95,6 +98,14 @@ public class PlatformerController : IController {
 	void OnLadderDismount (int direction) {
 		mInhabitant.StartLocomotion (mWalkLocomotion);
 		mWalkLocomotion.LadderJump (direction);
+	}
+
+	void OnDoorEnter (DoorTrigger door) {
+		mPlFacade.OnEnterDoor (door);
+	}
+
+	void OnDoorExit (DoorTrigger door) {
+		mPlFacade.OnExitDoor (door);
 	}
 
 }

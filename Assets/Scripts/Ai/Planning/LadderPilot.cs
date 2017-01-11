@@ -25,7 +25,7 @@ public class LadderPilot : IPathPilot {
 	public bool FeedInput (InputCatcher inputCatcher) {
 
 		// no longer on ladder.
-		if (mAiFacade.GetLadder () == null) {
+		if (mAiFacade.GetLadderModel () == null) {
 			return true;
 		}
 
@@ -52,7 +52,7 @@ public class LadderPilot : IPathPilot {
 		if (mVDir == 0) {
 			return true;
 		}
-		Rect ladderRect = mAiFacade.GetLadder ().rect;
+		Rect ladderRect = mAiFacade.GetLadderModel ().rect;
 		// if we are moving to a different part of the ladder
 		if (mTargetRange.y > ladderRect.yMin && mTargetRange.y < ladderRect.yMax) {
 			return (vDir != mVDir);

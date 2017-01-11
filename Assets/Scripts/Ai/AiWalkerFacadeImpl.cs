@@ -6,6 +6,8 @@ using UnityEngine;
 public class AiWalkerFacadeImpl : IAiWalkerFacade {
 
 	public event OnAiGroundedEvent onGrounded;
+	public event OnAiEnterDoorEvent onEnterDoor;
+	public event OnAiExitDoorEvent onExitDoor;
 
 	private readonly WalkerParams mWp;
 
@@ -17,6 +19,7 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 
 	private LadderModel mLadder;
 	private Edge mEdge;
+	private DoorModel mDoor;
 
 	private InhabitantFacade mFacade;
 	private PlatformerFacade mPlFacade;
@@ -34,12 +37,16 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 		return mEdge;
 	}
 
-	public LadderModel GetLadder () {
+	public LadderModel GetLadderModel () {
 		return mLadder;
 	}
 
 	public RoomModel GetRoomModel () {
 		return mRoomModel;
+	}
+
+	public DoorModel GetDoorModel () {
+		return mDoor;
 	}
 
 	public Vector2 GetPosition () {
@@ -89,6 +96,16 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 		else mEdge = null;
 		mLadder = null;
 		if (onGrounded != null) onGrounded (mEdge);
+	}
+
+	public void OnEnterDoor (DoorTrigger door) {
+		mDoor = mConverter.GetDoorModel (door).Item2;
+		if (onEnterDoor != null) onEnterDoor (mDoor);
+	}
+
+	public void OnExitDoor (DoorTrigger door) {
+		mDoor = null;
+		if (onExitDoor != null) onExitDoor (mDoor);
 	}
 
 	private void initializeState () {

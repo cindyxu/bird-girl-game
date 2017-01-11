@@ -30,7 +30,7 @@ public class ScenePathPlanner {
 		RoomModel roomModel = mAWFacade.GetRoomModel ();
 		IWaypoint startPoint = null;
 		Vector2 pos = mAWFacade.GetPosition ();
-		if (mAWFacade.GetLadder () != null) startPoint = mAWFacade.GetLadder ();
+		if (mAWFacade.GetLadderModel () != null) startPoint = mAWFacade.GetLadderModel ();
 		else if (mAWFacade.GetEdge () != null) {
 			startPoint = mAWFacade.GetEdge ();
 			pos.y = mAWFacade.GetEdge ().y0;

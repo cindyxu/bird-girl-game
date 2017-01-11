@@ -21,9 +21,6 @@ public class DefaultDoorLeaveEvent {
 	}
 
 	public void StartEvent(System.Action callback) {
-//		Action onFinished = delegate() {
-//			StartDisappear(callback);
-//		};
 
 		Action onFinished = delegate() {
 			mTargetRigidbody2D.constraints = mConstraints;

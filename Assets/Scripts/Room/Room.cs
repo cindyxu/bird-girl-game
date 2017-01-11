@@ -41,8 +41,8 @@ public class Room : MonoBehaviour {
 		return mLadderDescends;
 	}
 
-	public IntraDoorTrigger[] GetIntraDoors () {
-		return GetComponentsInChildren <IntraDoorTrigger> ();
+	public DoorTrigger[] GetDoors () {
+		return GetComponentsInChildren <DoorTrigger> ();
 	}
 
 	public void Enter (GameObject obj) {

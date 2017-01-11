@@ -15,6 +15,8 @@ public class TestAiWalkerFacade : IAiWalkerFacade {
 	private Dictionary<RoomModel, RoomGraph> mRoomGraphs = new Dictionary<RoomModel, RoomGraph> ();
 
 	public event OnAiGroundedEvent onGrounded;
+	public event OnAiEnterDoorEvent onEnterDoor;
+	public event OnAiExitDoorEvent onExitDoor;
 
 	public RoomModel GetRoomModel () { return roomModel; }
 
@@ -24,7 +26,7 @@ public class TestAiWalkerFacade : IAiWalkerFacade {
 
 	public Edge GetEdge () { return edge; }
 
-	public LadderModel GetLadder () { return ladder; }
+	public LadderModel GetLadderModel () { return ladder; }
 
 	public Vector2 GetPosition () { return position; }
 

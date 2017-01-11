@@ -9,15 +9,15 @@ public class SceneModelConverter {
 	private Dictionary<Ladder, Eppy.Tuple<RoomModel, LadderModel>> mLadderMap =
 		new Dictionary<Ladder, Eppy.Tuple<RoomModel, LadderModel>> ();
 	
-	private Dictionary<IntraDoorTrigger, Eppy.Tuple<RoomModel, DoorModel>> mDoorMap =
-		new Dictionary<IntraDoorTrigger, Eppy.Tuple<RoomModel, DoorModel>> ();
+	private Dictionary<DoorTrigger, Eppy.Tuple<RoomModel, DoorModel>> mDoorMap =
+		new Dictionary<DoorTrigger, Eppy.Tuple<RoomModel, DoorModel>> ();
 	
 	public SceneModelConverter (IEnumerable<Room> rooms) {
 		
 		foreach (Room room in rooms) {
 			List<Edge> edges = buildRawEdges (room);
 			Dictionary<Ladder, LadderModel> ladderMap = buildLadders (room);
-			Dictionary<IntraDoorTrigger, DoorModel> doorMap = buildDoors (room);
+			Dictionary<DoorTrigger, DoorModel> doorMap = buildDoors (room);
 
 			RoomModel roomModel = new RoomModel (edges, ladderMap.Values, doorMap.Values);
 			mRoomMap.Add (room, roomModel);
@@ -30,7 +30,7 @@ public class SceneModelConverter {
 			}
 
 			// add doors to global dictionary
-			Dictionary<IntraDoorTrigger, DoorModel>.Enumerator doorEnum = doorMap.GetEnumerator ();
+			Dictionary<DoorTrigger, DoorModel>.Enumerator doorEnum = doorMap.GetEnumerator ();
 			while (doorEnum.MoveNext ()) {
 				mDoorMap.Add (doorEnum.Current.Key,
 					new Eppy.Tuple<RoomModel, DoorModel> (roomModel, doorEnum.Current.Value));
@@ -44,6 +44,10 @@ public class SceneModelConverter {
 
 	public Eppy.Tuple<RoomModel, LadderModel> GetLadderModel (Ladder ladder) {
 		return mLadderMap [ladder];
+	}
+
+	public Eppy.Tuple<RoomModel, DoorModel> GetDoorModel (DoorTrigger door) {
+		return mDoorMap [door];
 	}
 
 	public SceneGraph CreateSceneGraph (WalkerParams wp, IDictionary<RoomModel, RoomGraph> roomGraphs) {
@@ -75,23 +79,27 @@ public class SceneModelConverter {
 
 	private void populateDoorRoomPaths (SceneGraph graph, WalkerParams wp) {
 		// add room paths for all doors
-		foreach (IntraDoorTrigger doorTrigger in mDoorMap.Keys) {
-			RoomModel startGraph = mRoomMap[doorTrigger.GetRoom ()];
-			DoorModel startDoor = mDoorMap[doorTrigger].Item2;
+		foreach (DoorTrigger doorTrigger in mDoorMap.Keys) {
 
-			RoomModel endGraph = mDoorMap[doorTrigger.destination].Item1;
-			DoorModel endDoor = mDoorMap[doorTrigger.destination].Item2;
+			IntraDoorTrigger intraDoorTrigger = doorTrigger as IntraDoorTrigger;
+			if (intraDoorTrigger == null) continue;
 
-			Vector2 dest = doorTrigger.destination.GetTargetPosition (wp.size);
+			RoomModel startGraph = mRoomMap[intraDoorTrigger.GetRoom ()];
+			DoorModel startDoor = mDoorMap[intraDoorTrigger].Item2;
+
+			RoomModel endGraph = mDoorMap[intraDoorTrigger.destination].Item1;
+			DoorModel endDoor = mDoorMap[intraDoorTrigger.destination].Item2;
+
+			Vector2 dest = intraDoorTrigger.destination.GetTargetPosition (wp.size);
 
 			graph.AddRoomPath (new DoorPath (startGraph, startDoor, endGraph, endDoor,
 				new Range (dest.x - wp.size.x / 2, dest.x + wp.size.x / 2, dest.y + wp.size.y / 2)));
 		}
 	}
 
-	private static Dictionary<IntraDoorTrigger, DoorModel> buildDoors (Room room) {
-		Dictionary<IntraDoorTrigger, DoorModel> doors = new Dictionary<IntraDoorTrigger, DoorModel> ();
-		foreach (IntraDoorTrigger door in room.GetIntraDoors ()) {
+	private static Dictionary<DoorTrigger, DoorModel> buildDoors (Room room) {
+		Dictionary<DoorTrigger, DoorModel> doors = new Dictionary<DoorTrigger, DoorModel> ();
+		foreach (DoorTrigger door in room.GetDoors ()) {
 			doors.Add (door, new DoorModel (door.GetRect (), door.GetDir ()));
 		}
 		return doors;

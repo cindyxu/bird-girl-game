@@ -3,6 +3,11 @@ using System.Collections;
 
 public class Inhabitant : MonoBehaviour {
 
+	public delegate void OnDoorEnter (DoorTrigger door);
+	public event OnDoorEnter onDoorEnter;
+	public delegate void OnDoorExit (DoorTrigger door);
+	public event OnDoorExit onDoorExit;
+
 	public Room startRoom;
 
 	private Locomotion mCurrentLocomotion;
@@ -129,5 +134,13 @@ public class Inhabitant : MonoBehaviour {
 	void OnTriggerStay2D(Collider2D other) {
 		if (mCurrentLocomotion != null) mCurrentLocomotion.HandleTriggerStay2D(other);
 		mTriggerer.HandleTriggerStay2D (other);
+	}
+
+	void HandleDoorEnter(DoorTrigger door) {
+		if (onDoorEnter != null) onDoorEnter (door);
+	}
+
+	void HandleDoorExit(DoorTrigger door) {
+		if (onDoorExit != null) onDoorExit (door);
 	}
 }

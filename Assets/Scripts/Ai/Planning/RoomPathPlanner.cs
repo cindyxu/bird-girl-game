@@ -160,7 +160,7 @@ public class RoomPathPlanner {
 			mTargetRange = targetRange;
 			mPath = path;
 
-			if (mAWFacade.GetLadder () != null) {
+			if (mAWFacade.GetLadderModel () != null) {
 				setPilot (new LadderPilot (mWp, mAWFacade, mStartRange));
 			} else {
 				setPilot (new WalkPilot (mWp, mAWFacade, mStartRange.xl, mStartRange.xr));
