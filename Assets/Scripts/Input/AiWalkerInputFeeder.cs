@@ -33,13 +33,18 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 	public void FeedInput (InputCatcher catcher) {
 		if (mScenePathPlanner != null) {
 			mScenePathPlanner.OnUpdate ();
-			if (mScenePathPlanner.FeedInput (catcher)) {
+			PlannerStatus status = mScenePathPlanner.FeedInput (catcher);
+			if (status == PlannerStatus.DONE) {
 				Log.logger.Log (Log.AI_INPUT, "reached goal!");
 				if (mOnReachDestination != null) {
 					mOnReachDestination ();
 					mOnReachDestination = null;
 				}
 				mScenePathPlanner = null;
+			} else if (status == PlannerStatus.FAILED) {
+				Log.logger.Log (Log.AI_INPUT, "failed to reach goal. retrying ... ");
+				mScenePathPlanner = 
+					mGetDest != null ? new ScenePathPlanner (mWp, mAwFacade, mConverter, mGetDest) : null;
 			}
 		}
 	}

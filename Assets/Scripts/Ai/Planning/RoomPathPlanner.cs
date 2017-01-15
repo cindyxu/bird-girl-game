@@ -8,12 +8,6 @@ public class RoomPathPlanner {
 
 	private static float SAFETY_THRESHOLD = 0.3f;
 
-	public enum Status {
-		ACTIVE,
-		FAILED,
-		DONE
-	}
-
 	private readonly WalkerParams mWp;
 	private readonly List<IWaypointPath> mChain;
 	private readonly List<Range> mTargetRanges;
@@ -23,7 +17,7 @@ public class RoomPathPlanner {
 	private readonly Range mDestRange;
 
 	private int mPathIdx = 0;
-	private Status mStatus = Status.ACTIVE;
+	private PlannerStatus mStatus = PlannerStatus.ACTIVE;
 
 	private WaypointPathPlanner mWaypointPlanner;
 
@@ -51,14 +45,14 @@ public class RoomPathPlanner {
 		mAWFacade.onGrounded -= OnGrounded;
 	}
 
-	public Status FeedInput (InputCatcher inputCatcher) {
+	public PlannerStatus FeedInput (InputCatcher inputCatcher) {
 		if (mWaypointPlanner != null) {
 			if (mWaypointPlanner.FeedInput (inputCatcher)) {
 				mWaypointPlanner = null;
 				if (mPathIdx < mChain.Count) {
 					mPathIdx++;
 					nextStep ();
-				} else mStatus = Status.DONE;
+				} else mStatus = PlannerStatus.DONE;
 			}
 		}
 		return mStatus;

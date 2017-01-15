@@ -14,6 +14,8 @@ public class FollowDemo : MonoBehaviour {
 	private Room[] mRooms;
 	private Ladder[] mLadders;
 
+	private RoomPathPlanner mCurrRoomPathPlanner;
+
 	void Start () {
 		walker.InitializePlayer (keybindingManager);
 		mRooms = FindObjectsOfType<Room> ();
@@ -63,30 +65,40 @@ public class FollowDemo : MonoBehaviour {
 				}, delegate {
 					//				Debug.Log ("reached destination!");
 				});
-
-				// need to get scene path planner from here
-				AiWalkerInputFeeder aiInputFeeder =
-					(AiWalkerInputFeeder) walker.GetController ().GetInputFeeder ();
-				if (aiInputFeeder != null) {
-					ScenePathPlanner planner = aiInputFeeder.GetScenePathPlanner ();
-					drawPlan (planner);
-				}
 			}
 			cursor.transform.position = new Vector3 (mousePos.x, mousePos.y, 0);
 		};
+
+		redraw ();
 	}
 
-	private void drawPlan(ScenePathPlanner planner) {
+	private void redraw () {
+		RoomPathPlanner roomPlanner = null;
+		// need to get scene path planner from here
+		AiWalkerInputFeeder aiInputFeeder =
+			walker.GetController ().GetInputFeeder () as AiWalkerInputFeeder;
+		if (aiInputFeeder != null) {
+			ScenePathPlanner scenePlanner = aiInputFeeder.GetScenePathPlanner ();
+			if (scenePlanner != null) {
+				roomPlanner = scenePlanner.GetCurrentRoomPathPlanner ();
+			}
+		}
+		if (mCurrRoomPathPlanner != roomPlanner) {
+			mCurrRoomPathPlanner = roomPlanner;
+			drawPlan ();
+		}
+	}
+
+	private void drawPlan() {
 
 		if (debugObjectsRoot != null) {
 			Destroy (debugObjectsRoot);
 		}
 		debugObjectsRoot = new GameObject ();
 
-		RoomPathPlanner roomPlanner = planner.GetCurrentRoomPathPlanner ();
-		if (roomPlanner != null) {
-			List<IWaypointPath> chain = roomPlanner.GetPathChain ();
-			List<Range> targetRanges = roomPlanner.GetTargetRanges ();
+		if (mCurrRoomPathPlanner != null) {
+			List<IWaypointPath> chain = mCurrRoomPathPlanner.GetPathChain ();
+			List<Range> targetRanges = mCurrRoomPathPlanner.GetTargetRanges ();
 
 			for (int i = 0; i < chain.Count; i++) {
 				IWaypointPath path = chain [i];

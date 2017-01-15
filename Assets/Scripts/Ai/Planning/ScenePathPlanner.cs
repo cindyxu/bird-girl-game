@@ -18,6 +18,8 @@ public class ScenePathPlanner {
 	private RoomPathPlanner mRoomPathPlanner;
 	private IPathPilot mRoomPathPilot;
 
+	private PlannerStatus mStatus = PlannerStatus.ACTIVE;
+
 	public ScenePathPlanner (WalkerParams wp, IAiWalkerFacade awFacade, SceneModelConverter converter,
 		Inhabitant.GetDest getDest) {
 		mWp = wp;
@@ -107,13 +109,14 @@ public class ScenePathPlanner {
 	public void OnUpdate () {
 	}
 
-	public bool FeedInput (InputCatcher inputCatcher) {
-		if (mRoomPathPlanner == null && mRoomPathPilot == null) return false;
+	public PlannerStatus FeedInput (InputCatcher inputCatcher) {
+		if (mStatus != PlannerStatus.ACTIVE) return mStatus;
+		if (mRoomPathPlanner == null && mRoomPathPilot == null) mStatus = PlannerStatus.DONE;
 		if (mRoomPathPlanner != null) {
-			RoomPathPlanner.Status status = mRoomPathPlanner.FeedInput (inputCatcher);
-			if (status.Equals (RoomPathPlanner.Status.FAILED)) {
-				searchPath ();
-			} else if (status.Equals (RoomPathPlanner.Status.DONE)) {
+			PlannerStatus status = mRoomPathPlanner.FeedInput (inputCatcher);
+			if (status.Equals (PlannerStatus.FAILED)) {
+				mStatus = PlannerStatus.FAILED;
+			} else if (status.Equals (PlannerStatus.DONE)) {
 				onRoomPathPlannerFinished (inputCatcher);
 			}
 		} else {
@@ -123,10 +126,10 @@ public class ScenePathPlanner {
 				onRoomFinished (inputCatcher);
 			}
 		}
-		return false;
+		return mStatus;
 	}
 
-	private bool onRoomPathPlannerFinished (InputCatcher catcher) {
+	private void onRoomPathPlannerFinished (InputCatcher catcher) {
 		mRoomPathPlanner = null;
 
 		IRoomPath roomPath = null;
@@ -139,20 +142,19 @@ public class ScenePathPlanner {
 		if (doorPath != null) {
 			mRoomPathPilot = new DoorPilot (mWp, mAWFacade);
 			mRoomPathPilot.Start (catcher);
-			return false;
 		} else {
-			return onRoomFinished (catcher);		
+			onRoomFinished (catcher);		
 		}
 	}
 
-	private bool onRoomFinished (InputCatcher catcher) {
+	private void onRoomFinished (InputCatcher catcher) {
 		mPathIdx++;
 		if (mPathIdx >= mResult.Count) {
 			Log.logger.Log (Log.AI_PLAN, "done planning!");
-			return true;
+			mStatus = PlannerStatus.DONE;
 		} else {
 			nextRoomPlanner ();
-			return FeedInput (catcher);
+			FeedInput (catcher);
 		}
 	}
 
