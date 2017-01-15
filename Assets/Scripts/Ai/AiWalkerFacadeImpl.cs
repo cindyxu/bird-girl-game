@@ -71,6 +71,8 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 	public void StartObserving () {
 		mPlFacade.onClimbLadder += OnClimbLadder;
 		mPlFacade.onGrounded += OnGrounded;
+		mPlFacade.onEnterDoor += OnEnterDoor;
+		mPlFacade.onExitDoor += OnExitDoor;
 		mFacade.GetRoomTraveller ().onEnterRoom += OnEnterRoom;
 		initializeState ();
 	}
@@ -78,6 +80,8 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 	public void StopObserving () {
 		mPlFacade.onClimbLadder -= OnClimbLadder;
 		mPlFacade.onGrounded -= OnGrounded;
+		mPlFacade.onEnterDoor -= OnEnterDoor;
+		mPlFacade.onExitDoor -= OnExitDoor;
 		mFacade.GetRoomTraveller ().onEnterRoom -= OnEnterRoom;
 	}
 

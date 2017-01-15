@@ -16,8 +16,12 @@ public class IntraDoorTrigger : DoorTrigger {
 		DoorLeaveEvent leaveEvent = CreateLeaveEvent (inhabitant);
 		DoorEnterEvent enterEvent = destination.CreateEnterEvent (inhabitant);
 
+		IntraDoorTrigger trigger = this;
+		inhabitant.HandleDoorEnter (trigger);
 		leaveEvent (delegate () {
-			enterEvent (delegate () {} );
+			enterEvent (delegate () {
+				inhabitant.HandleDoorExit (trigger);
+			} );
 		});
 
 		return true;

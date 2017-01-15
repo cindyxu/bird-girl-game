@@ -6,6 +6,7 @@ public class DoorPilot : IPathPilot {
 
 	private WalkerParams mWp;
 	private IAiWalkerFacade mAiFacade;
+	private bool mFinished = false;
 
 	public DoorPilot (WalkerParams wp, IAiWalkerFacade aiFacade) {
 		mAiFacade = aiFacade;
@@ -13,13 +14,25 @@ public class DoorPilot : IPathPilot {
 	}
 
 	public void Start (InputCatcher inputCatcher) {
+		inputCatcher.OnActionPress ();
+		mAiFacade.onEnterDoor += OnEnterDoor;
+		mAiFacade.onExitDoor += OnExitDoor;
 	}
 
 	public void Stop () {
+		mAiFacade.onEnterDoor -= OnEnterDoor;
+		mAiFacade.onExitDoor -= OnExitDoor;
 	}
 
 	public bool FeedInput (InputCatcher inputCatcher) {
-		return false;
+		return mFinished;
+	}
+
+	public void OnEnterDoor (DoorModel door) {
+	}
+
+	public void OnExitDoor (DoorModel door) {
+		mFinished = true;
 	}
 }
 

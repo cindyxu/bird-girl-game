@@ -26,7 +26,7 @@ public class WalkPilot : IPathPilot {
 		else if (x < mXlt) mDir = 1;
 		else mDir = 0;
 
-		Log.logger.Log (Log.AI_PLAN, "start walk pilot");
+		Log.logger.Log (Log.AI_PLAN, "start walk pilot to " + mXlt + ", " + mXrt);
 	}
 
 	public void Stop () {

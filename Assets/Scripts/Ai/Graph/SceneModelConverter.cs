@@ -52,6 +52,9 @@ public class SceneModelConverter {
 
 	public SceneGraph CreateSceneGraph (WalkerParams wp, IDictionary<RoomModel, RoomGraph> roomGraphs) {
 		SceneGraph graph = new SceneGraph ();
+		foreach (RoomModel room in mRoomMap.Values) {
+			graph.AddRoomModel (room);
+		}
 		populateLadderRoomPaths (graph, wp, roomGraphs);
 		populateDoorRoomPaths (graph, wp);
 		return graph;

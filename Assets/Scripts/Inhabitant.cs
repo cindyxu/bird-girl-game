@@ -136,11 +136,11 @@ public class Inhabitant : MonoBehaviour {
 		mTriggerer.HandleTriggerStay2D (other);
 	}
 
-	void HandleDoorEnter(DoorTrigger door) {
+	public void HandleDoorEnter(DoorTrigger door) {
 		if (onDoorEnter != null) onDoorEnter (door);
 	}
 
-	void HandleDoorExit(DoorTrigger door) {
+	public void HandleDoorExit(DoorTrigger door) {
 		if (onDoorExit != null) onDoorExit (door);
 	}
 }

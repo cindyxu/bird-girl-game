@@ -7,16 +7,17 @@ public class FollowDemo : MonoBehaviour {
 
 	public static KeyBindingManager keybindingManager = new KeyBindingManager ();
 
-	public Room room;
 	public PlatformerInhabitant walker;
 	public GameObject cursor;
 	public GameObject debugObjectsRoot;
 
+	private Room[] mRooms;
 	private Ladder[] mLadders;
 
 	void Start () {
 		walker.InitializePlayer (keybindingManager);
-		walker.InitializeAi (new SceneModelConverter (new List<Room> { room }));
+		mRooms = FindObjectsOfType<Room> ();
+		walker.InitializeAi (new SceneModelConverter (mRooms));
 		walker.RequestEnablePlayerControl (true);
 
 		mLadders = FindObjectsOfType<Ladder> ();
@@ -26,6 +27,7 @@ public class FollowDemo : MonoBehaviour {
 	void Update () {
 
 		BoxCollider2D walkerCollider = walker.GetComponent<BoxCollider2D> ();
+		Room destRoom = null;
 
 		if (Input.GetMouseButtonDown (0)) {
 			Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -36,6 +38,7 @@ public class FollowDemo : MonoBehaviour {
 				if (bounds.Contains ((Vector2) mousePos)) {
 					float tx = Mathf.Min (mousePos.x, bounds.max.x - walkerCollider.size.x);
 					movePos = new Vector2? (new Vector2 (tx, mousePos.y));
+					destRoom = ladder.GetComponentInParent<Room> ();
 					break;
 				}
 			}
@@ -46,6 +49,7 @@ public class FollowDemo : MonoBehaviour {
 					if (hit.collider != null && hit.collider != walkerCollider) {
 						movePos = new Vector2? (new Vector2 (mousePos.x - walker.GetFacade ().GetSize ().x / 2,
 							hit.collider.transform.position.y));
+						destRoom = hit.transform.GetComponentInParent<Room> ();
 						break;
 					}
 				}
@@ -54,7 +58,7 @@ public class FollowDemo : MonoBehaviour {
 			if (movePos.HasValue) {
 				walker.RequestMoveTo ("walk", delegate (out Room room, out Vector2 pos, out float dist) {
 					pos = movePos.Value;
-					room = this.room;
+					room = destRoom;
 					dist = 0.5f;
 				}, delegate {
 					//				Debug.Log ("reached destination!");

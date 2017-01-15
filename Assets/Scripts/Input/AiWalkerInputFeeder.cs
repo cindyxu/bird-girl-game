@@ -11,12 +11,14 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 
 	private Inhabitant.GetDest mGetDest;
 	private ScenePathPlanner mScenePathPlanner;
+	private SceneModelConverter mConverter;
 
 	private bool mInputOn = false;
 
 	public AiWalkerInputFeeder (WalkerParams wp, SceneModelConverter converter,
 		InhabitantFacade facade, PlatformerFacade plFacade) {
 		mWp = wp;
+		mConverter = converter;
 		mAwFacade = new AiWalkerFacadeImpl (wp, converter, facade, plFacade);
 	}
 
@@ -24,7 +26,7 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 		mGetDest = getDest;
 		mOnReachDestination = onReachDest;
 		if (mInputOn) {
-			mScenePathPlanner = getDest != null ? new ScenePathPlanner (mWp, mAwFacade, mGetDest) : null;
+			mScenePathPlanner = getDest != null ? new ScenePathPlanner (mWp, mAwFacade, mConverter, mGetDest) : null;
 		}
 	}
 
@@ -45,7 +47,7 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 	public void OnBeginInput (InputCatcher catcher) {
 		mAwFacade.StartObserving ();
 		if (mGetDest != null) {
-			mScenePathPlanner = mGetDest != null ? new ScenePathPlanner (mWp, mAwFacade, mGetDest) : null;
+			mScenePathPlanner = mGetDest != null ? new ScenePathPlanner (mWp, mAwFacade, mConverter, mGetDest) : null;
 		}
 		mInputOn = true;
 	}

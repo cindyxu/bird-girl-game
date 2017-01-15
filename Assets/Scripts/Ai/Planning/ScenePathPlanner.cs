@@ -7,19 +7,28 @@ public class ScenePathPlanner {
 
 	private Inhabitant.GetDest mGetDest;
 	private WalkerParams mWp;
-	private RoomPathPlanner mRoomPathPlanner;
 	private IAiWalkerFacade mAWFacade;
+	private SceneModelConverter mConverter;
 
-	public ScenePathPlanner (WalkerParams wp, IAiWalkerFacade awFacade,
+	private IWaypoint mDestPoint;
+	private Range mDestRange;
+	private List<Eppy.Tuple<List<IWaypointPath>, IRoomPath>> mResult;
+
+	private int mPathIdx;
+	private RoomPathPlanner mRoomPathPlanner;
+	private IPathPilot mRoomPathPilot;
+
+	public ScenePathPlanner (WalkerParams wp, IAiWalkerFacade awFacade, SceneModelConverter converter,
 		Inhabitant.GetDest getDest) {
 		mWp = wp;
 		mGetDest = getDest;
 		mAWFacade = awFacade;
+		mConverter = converter;
 
-		initializePath ();
+		searchPath ();
 	}
 
-	private void initializePath () {
+	private void searchPath () {
 
 		// pretend we're in the right room for now
 		Room destRoom;
@@ -27,7 +36,8 @@ public class ScenePathPlanner {
 		float minDist;
 		mGetDest (out destRoom, out destPos, out minDist);
 
-		RoomModel roomModel = mAWFacade.GetRoomModel ();
+		// start
+		RoomModel startRoomModel = mAWFacade.GetRoomModel ();
 		IWaypoint startPoint = null;
 		Vector2 pos = mAWFacade.GetPosition ();
 		if (mAWFacade.GetLadderModel () != null) startPoint = mAWFacade.GetLadderModel ();
@@ -37,40 +47,113 @@ public class ScenePathPlanner {
 		}
 		Range startRange = new Range (pos.x, pos.x + mWp.size.x, pos.y);
 
-		// RoomModel destRoomModel = mConverter.GetRoomModel (destRoom);
-		IWaypoint destPoint = roomModel.GetLadder (destPos);
+		// dest
+		RoomModel destRoomModel = mConverter.GetRoomModel (destRoom);
+		IWaypoint destPoint = destRoomModel.GetLadder (destPos);
 		if (destPoint == null) {
-			IEnumerable<Edge> edges = mAWFacade.GetRoomGraph (roomModel).GetEdges ();
+			IEnumerable<Edge> edges = mAWFacade.GetRoomGraph (destRoomModel).GetEdges ();
 			destPoint = EdgeUtil.FindUnderEdge (edges, destPos.x, destPos.x + mWp.size.x, destPos.y);
 			if (destPoint != null) destPos.y = destPoint.GetRect ().y;
 		}
 		Range destRange = new Range (destPos.x, destPos.x + mWp.size.x, destPos.y);
 
+		// search
 		if (startPoint != null && destPoint != null) {
-			RoomSearch search = new RoomSearch (mAWFacade.GetRoomGraph (roomModel), mWp.size,
-				new PlatformerSearchEvaluator (mWp), startPoint, startRange, destPoint, destRange);
+			SceneSearch search = new SceneSearch (mAWFacade, mWp.size, new PlatformerSearchEvaluator (mWp),
+			startRoomModel, startPoint, startRange, destRoomModel, destPoint, destRange);
 			
-			while (search.Step ()) ;
-			List<IWaypointPath> result = search.GetPathChain ();
-			if (result != null) {
-				setRoomPathPlanner (new RoomPathPlanner (mWp, mAWFacade, result, destPoint, destRange));
-			} else setRoomPathPlanner (null);
-		} else setRoomPathPlanner (null);
+			while (!search.Step ()) ;
+			List<Eppy.Tuple<List<IWaypointPath>, IRoomPath>> result = search.GetResult ();
+			initializePath (destPoint, destRange, result);
+		} else initializePath (null, new Range(), null);
+	}
+
+	private void initializePath (IWaypoint destPoint, Range destRange,
+		List<Eppy.Tuple<List<IWaypointPath>, IRoomPath>> result) {
+		mDestPoint = destPoint;
+		mDestRange = destRange;
+		mResult = result;
+		mPathIdx = 0;
+
+		if (mResult != null) {
+			nextRoomPlanner ();
+		}
+	}
+
+	private void nextRoomPlanner () {
+		List<IWaypointPath> pathChain;
+		IRoomPath roomPath = null;
+
+		if (mResult.Count > 0) {
+			Eppy.Tuple<List<IWaypointPath>, IRoomPath> tuple = mResult[mPathIdx];
+			pathChain = tuple.Item1;
+			roomPath = tuple.Item2;
+		} else {
+			pathChain = new List<IWaypointPath> ();
+		}
+
+		IWaypoint endPoint = mDestPoint;
+		Range endRange = mDestRange;
+		if (roomPath != null) {
+			endPoint = roomPath.GetStartPoint ();
+			endRange = roomPath.GetStartRange ();
+		} else {
+			endRange = mDestRange;
+		}
+
+		setRoomPathPlanner (new RoomPathPlanner (mWp, mAWFacade, pathChain, endPoint, endRange));
 	}
 
 	public void OnUpdate () {
 	}
 
 	public bool FeedInput (InputCatcher inputCatcher) {
-		if (mRoomPathPlanner == null) return false;
-		RoomPathPlanner.Status status = mRoomPathPlanner.FeedInput (inputCatcher);
-		if (status.Equals (RoomPathPlanner.Status.FAILED)) {
-			initializePath ();
-		} else if (status.Equals (RoomPathPlanner.Status.DONE)) {
-			Log.logger.Log (Log.AI_PLAN, "done planning!");
-			return true;
+		if (mRoomPathPlanner == null && mRoomPathPilot == null) return false;
+		if (mRoomPathPlanner != null) {
+			RoomPathPlanner.Status status = mRoomPathPlanner.FeedInput (inputCatcher);
+			if (status.Equals (RoomPathPlanner.Status.FAILED)) {
+				searchPath ();
+			} else if (status.Equals (RoomPathPlanner.Status.DONE)) {
+				onRoomPathPlannerFinished (inputCatcher);
+			}
+		} else {
+			if (mRoomPathPilot.FeedInput (inputCatcher)) {
+				mRoomPathPilot.Stop ();
+				mRoomPathPilot = null;
+				onRoomFinished (inputCatcher);
+			}
 		}
 		return false;
+	}
+
+	private bool onRoomPathPlannerFinished (InputCatcher catcher) {
+		mRoomPathPlanner = null;
+
+		IRoomPath roomPath = null;
+		if (mResult.Count > 0) {
+			Eppy.Tuple<List<IWaypointPath>, IRoomPath> tuple = mResult[mPathIdx];
+			roomPath = tuple.Item2;
+		}
+
+		DoorPath doorPath = roomPath as DoorPath;
+		if (doorPath != null) {
+			mRoomPathPilot = new DoorPilot (mWp, mAWFacade);
+			mRoomPathPilot.Start (catcher);
+			return false;
+		} else {
+			return onRoomFinished (catcher);		
+		}
+	}
+
+	private bool onRoomFinished (InputCatcher catcher) {
+		mPathIdx++;
+		if (mPathIdx >= mResult.Count) {
+			Log.logger.Log (Log.AI_PLAN, "done planning!");
+			return true;
+		} else {
+			nextRoomPlanner ();
+			return FeedInput (catcher);
+		}
 	}
 
 	public RoomPathPlanner GetCurrentRoomPathPlanner () {
