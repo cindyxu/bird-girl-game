@@ -18,6 +18,7 @@ public class Triggerer {
 
 	// Update is called once per frame
 	public bool TryTrigger () {
+		Debug.Log ("try trigger? " + mActionTriggers.Count);
 		for (int i = 0; i < mActionTriggers.Count; i++) {
 			if (mActionTriggers [i].Execute (mCollider2D.gameObject)) {
 				return true;

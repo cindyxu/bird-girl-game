@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class BehaviourSwitcher {
 
@@ -8,7 +9,8 @@ public class BehaviourSwitcher {
 
 	public BehaviourSwitcher (InputFeedSwitcher feedSwitcher) {
 		mFeedSwitcher = feedSwitcher;
-		mBaseBehaviour = mOverrideBehaviour = AiNoopBehaviour.instance;
+		mBaseBehaviour = AiNoopBehaviour.instance;
+		mOverrideBehaviour = null;
 	}
 
 	public IBehaviour GetBaseBehaviour () {
@@ -35,8 +37,12 @@ public class BehaviourSwitcher {
 		setOverrideBehaviour (null);
 	}
 
-	public void RequestPlayerControl () {
+	public void SetPlayerControl () {
 		setBaseBehaviour (PlayerBehaviour.instance);
+	}
+
+	public void SetFollow (Inhabitant.GetDest getDest) {
+		setOverrideBehaviour (new AiMoveToBehaviour ("run", getDest, null));
 	}
 
 	private void setBaseBehaviour (IBehaviour behaviour) {

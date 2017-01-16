@@ -26,12 +26,18 @@ public class SceneState : MonoBehaviour {
 
 		mPlayer = LoadInhabitant (GameState.GetPlayerRes (), spawnRoom, spawnPos, 
 			spawnSortingLayerName);
-		mPlayer.RequestEnablePlayerControl (true);
+		mPlayer.SetPlayerControl ();
 		cameraController.SetFollowTarget (mPlayer.gameObject);
 		mPlayerRoomController.Init (mPlayer.GetFacade ().GetRoomTraveller (), cameraController);
 
 		foreach (string fres in GameState.GetFollowersRes ()) {
-			mFollowers.Add (LoadInhabitant (fres, spawnRoom, spawnPos, spawnSortingLayerName));
+			Inhabitant follower = LoadInhabitant (fres, spawnRoom, spawnPos, spawnSortingLayerName);
+			follower.SetFollow (new Inhabitant.GetDest (delegate(out Room room, out Vector2 pos, out float minDist) {
+				room = mPlayer.GetFacade ().GetRoomTraveller ().GetCurrentRoom ();
+				pos = mPlayer.GetFacade ().GetPosition ();
+				minDist = 2;
+			}));
+			mFollowers.Add (follower);
 		}
 
 		BehaviourTreeOwner startTreeOwner = GetComponent<BehaviourTreeOwner> ();

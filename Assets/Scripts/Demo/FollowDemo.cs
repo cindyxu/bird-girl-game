@@ -20,7 +20,7 @@ public class FollowDemo : MonoBehaviour {
 		walker.InitializePlayer (keybindingManager);
 		mRooms = FindObjectsOfType<Room> ();
 		walker.InitializeAi (new SceneModelConverter (mRooms));
-		walker.RequestEnablePlayerControl (true);
+		walker.SetPlayerControl ();
 
 		mLadders = FindObjectsOfType<Ladder> ();
 	}

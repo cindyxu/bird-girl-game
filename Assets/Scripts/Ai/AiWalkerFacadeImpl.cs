@@ -30,6 +30,15 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 		mFacade = facade;
 		mPlFacade = plFacade;
 		mConverter = converter;
+		initializeGraphs ();
+	}
+
+	private void initializeGraphs () {
+		IEnumerable<Room> rooms = mFacade.GetRoomTraveller ().GetRooms ();
+		foreach (Room room in rooms) {
+			RoomModel roomModel = mConverter.GetRoomModel (room);
+			mRoomGraphs[roomModel] = new RoomGraph (roomModel, mWp);
+		}
 		mSceneGraph = mConverter.CreateSceneGraph (mWp, mRoomGraphs);
 	}
 
@@ -50,7 +59,7 @@ public class AiWalkerFacadeImpl : IAiWalkerFacade {
 	}
 
 	public Vector2 GetPosition () {
-		return mFacade.GetPosition () - new Vector2 (mWp.size.x / 2, mWp.size.y / 2);
+		return mFacade.GetPosition () + mFacade.GetOffset () - new Vector2 (mWp.size.x / 2, mWp.size.y / 2);
 	}
 
 	public Vector2 GetVelocity () {

@@ -52,9 +52,12 @@ public class PlatformerController : IController {
 		return true;
 	}
 
-	public bool EnablePlayerControl (bool enable) {
-		mBehaviourSwitcher.RequestPlayerControl ();
-		return true;
+	public void SetPlayerControl () {
+		mBehaviourSwitcher.SetPlayerControl ();
+	}
+
+	public void SetFollow (Inhabitant.GetDest getDest) {
+		mBehaviourSwitcher.SetFollow (getDest);
 	}
 
 	public Locomotion GetStartLocomotion () {

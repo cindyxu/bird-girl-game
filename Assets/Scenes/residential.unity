@@ -3283,7 +3283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraController: {fileID: 1075277027}
   spawnRoom: {fileID: 439883131}
-  spawnPos: {x: 0, y: 3}
+  spawnPos: {x: -14, y: 3}
   spawnSortingLayerName: slayer1
 --- !u!4 &645510021
 Transform:
@@ -5927,7 +5927,7 @@ MonoBehaviour:
   rightCollider: {fileID: 1481643009}
   topCollider: {fileID: 624100326}
   bottomCollider: {fileID: 1900002288}
-  descend: {fileID: 0}
+  descend: {fileID: 906756155}
 --- !u!4 &1190731218
 Transform:
   m_ObjectHideFlags: 0

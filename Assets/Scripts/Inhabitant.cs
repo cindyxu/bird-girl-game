@@ -8,8 +8,6 @@ public class Inhabitant : MonoBehaviour {
 	public delegate void OnDoorExit (DoorTrigger door);
 	public event OnDoorExit onDoorExit;
 
-	public Room startRoom;
-
 	private Locomotion mCurrentLocomotion;
 
 	private RoomTraveller mRoomTraveller;
@@ -39,13 +37,17 @@ public class Inhabitant : MonoBehaviour {
 		return mController.RequestFinishRequest ();
 	}
 
-	public bool RequestEnablePlayerControl (bool enable) {
-		return mController.EnablePlayerControl (enable);
+	public void SetPlayerControl () {
+		mController.SetPlayerControl ();
+	}
+
+	public void SetFollow (GetDest getDest) {
+		mController.SetFollow (getDest);
 	}
 
 	void Awake () {
 		mCollider2D = GetComponent<Collider2D> ();
-		mRoomTraveller = new RoomTraveller (gameObject, startRoom);
+		mRoomTraveller = new RoomTraveller (gameObject, null);
 		mTriggerer = new Triggerer (gameObject, mRoomTraveller);
 		mFacade = new InhabitantFacade (gameObject, mRoomTraveller, mTriggerer);
 

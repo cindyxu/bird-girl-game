@@ -5,10 +5,13 @@ using UnityEngine;
 
 public class ScenePathPlanner {
 
-	private Inhabitant.GetDest mGetDest;
-	private WalkerParams mWp;
-	private IAiWalkerFacade mAWFacade;
-	private SceneModelConverter mConverter;
+	private readonly WalkerParams mWp;
+	private readonly IAiWalkerFacade mAWFacade;
+	private readonly SceneModelConverter mConverter;
+
+	private readonly Room mDestRoom;
+	private Vector2 mDestPos;
+	private readonly float mMinDist;
 
 	private IWaypoint mDestPoint;
 	private Range mDestRange;
@@ -21,22 +24,18 @@ public class ScenePathPlanner {
 	private PlannerStatus mStatus = PlannerStatus.ACTIVE;
 
 	public ScenePathPlanner (WalkerParams wp, IAiWalkerFacade awFacade, SceneModelConverter converter,
-		Inhabitant.GetDest getDest) {
+		Room destRoom, Vector2 destPos, float minDist) {
 		mWp = wp;
-		mGetDest = getDest;
 		mAWFacade = awFacade;
 		mConverter = converter;
+
+		mDestRoom = destRoom;
+		mDestPos = destPos;
 
 		searchPath ();
 	}
 
 	private void searchPath () {
-
-		// pretend we're in the right room for now
-		Room destRoom;
-		Vector2 destPos;
-		float minDist;
-		mGetDest (out destRoom, out destPos, out minDist);
 
 		// start
 		RoomModel startRoomModel = mAWFacade.GetRoomModel ();
@@ -50,14 +49,14 @@ public class ScenePathPlanner {
 		Range startRange = new Range (pos.x, pos.x + mWp.size.x, pos.y);
 
 		// dest
-		RoomModel destRoomModel = mConverter.GetRoomModel (destRoom);
-		IWaypoint destPoint = destRoomModel.GetLadder (destPos);
+		RoomModel destRoomModel = mConverter.GetRoomModel (mDestRoom);
+		IWaypoint destPoint = destRoomModel.GetLadder (mDestPos);
 		if (destPoint == null) {
 			IEnumerable<Edge> edges = mAWFacade.GetRoomGraph (destRoomModel).GetEdges ();
-			destPoint = EdgeUtil.FindUnderEdge (edges, destPos.x, destPos.x + mWp.size.x, destPos.y);
-			if (destPoint != null) destPos.y = destPoint.GetRect ().y;
+			destPoint = EdgeUtil.FindUnderEdge (edges, mDestPos.x, mDestPos.x + mWp.size.x, mDestPos.y);
+			if (destPoint != null) mDestPos.y = destPoint.GetRect ().y;
 		}
-		Range destRange = new Range (destPos.x, destPos.x + mWp.size.x, destPos.y);
+		Range destRange = new Range (mDestPos.x, mDestPos.x + mWp.size.x, mDestPos.y);
 
 		// search
 		if (startPoint != null && destPoint != null) {
@@ -111,7 +110,10 @@ public class ScenePathPlanner {
 
 	public PlannerStatus FeedInput (InputCatcher inputCatcher) {
 		if (mStatus != PlannerStatus.ACTIVE) return mStatus;
-		if (mRoomPathPlanner == null && mRoomPathPilot == null) mStatus = PlannerStatus.DONE;
+		if (mRoomPathPlanner == null && mRoomPathPilot == null) {
+			mStatus = PlannerStatus.DONE;
+			return mStatus;
+		}
 		if (mRoomPathPlanner != null) {
 			PlannerStatus status = mRoomPathPlanner.FeedInput (inputCatcher);
 			if (status.Equals (PlannerStatus.FAILED)) {
@@ -130,7 +132,7 @@ public class ScenePathPlanner {
 	}
 
 	private void onRoomPathPlannerFinished (InputCatcher catcher) {
-		mRoomPathPlanner = null;
+		setRoomPathPlanner (null);
 
 		IRoomPath roomPath = null;
 		if (mResult.Count > 0) {
@@ -140,6 +142,7 @@ public class ScenePathPlanner {
 
 		DoorPath doorPath = roomPath as DoorPath;
 		if (doorPath != null) {
+			Debug.Log ("door path " + doorPath.GetStartRange ());
 			mRoomPathPilot = new DoorPilot (mWp, mAWFacade);
 			mRoomPathPilot.Start (catcher);
 		} else {

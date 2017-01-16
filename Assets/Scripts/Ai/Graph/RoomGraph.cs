@@ -59,16 +59,8 @@ public class RoomGraph {
 		foreach (DoorModel doorModel in model.GetDoors ()) {
 			Rect rect = doorModel.GetRect ();
 
-			Range enterDoorRange, exitDoorRange;
-			if (doorModel.GetDir () < 0) {
-				enterDoorRange = exitDoorRange = new Range (rect.xMin - wp.size.x, rect.xMin, rect.yMin);
-			} else if (doorModel.GetDir () > 0) {
-				enterDoorRange = exitDoorRange = new Range (rect.xMax, rect.xMax + wp.size.x, rect.yMin);
-			} else {
-				enterDoorRange = new Range (rect.xMin - wp.size.x, rect.xMax + wp.size.x, rect.yMin);
-				float xc = rect.xMin + (rect.xMax - rect.xMin) / 2;
-				exitDoorRange = new Range (xc - wp.size.x / 2, xc + wp.size.x / 2, rect.yMin);
-			}
+			Range enterDoorRange = doorModel.GetEnterRange (wp.size.x);
+			Range exitDoorRange = doorModel.GetExitRange (wp.size.x);
 
 			IEnumerable<Edge> edges = EdgeUtil.FindOnEdges (mEdges, enterDoorRange.xl, enterDoorRange.xr, rect.yMin);
 

@@ -7,14 +7,14 @@ public class DoorPath : IRoomPath {
 	private readonly RoomModel mStartRoom;
 	private readonly DoorModel mEndDoor;
 	private readonly RoomModel mEndRoom;
-	private readonly Range mEndRange;
+	private readonly float mWidth;
 
-	public DoorPath (RoomModel startRoom, DoorModel startDoor, RoomModel endRoom, DoorModel endDoor, Range endRange) {
+	public DoorPath (RoomModel startRoom, DoorModel startDoor, RoomModel endRoom, DoorModel endDoor, float width) {
 		mStartDoor = startDoor;
 		mStartRoom = startRoom;
 		mEndDoor = endDoor;
 		mEndRoom = endRoom;
-		mEndRange = endRange;
+		mWidth = width;
 	}
 
 	public IWaypoint GetStartPoint () {
@@ -26,12 +26,11 @@ public class DoorPath : IRoomPath {
 	}
 
 	public Range GetStartRange () {
-		Rect fromRect = mStartDoor.GetRect ();
-		return new Range (fromRect.xMin, fromRect.xMax, fromRect.yMin);
+		return mStartDoor.GetEnterRange (mWidth);
 	}
 
 	public Range GetEndRange (Range range) {
-		return mEndRange;
+		return mEndDoor.GetExitRange (mWidth);
 	}
 
 	public RoomModel GetStartRoom () {

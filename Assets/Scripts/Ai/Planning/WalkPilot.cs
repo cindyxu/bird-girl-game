@@ -63,6 +63,7 @@ public class WalkPilot : IPathPilot {
 			float leftLim = mXlt;
 			if (x < leftLim) return 1;
 		}
+
 		return 0;
 	}
 }

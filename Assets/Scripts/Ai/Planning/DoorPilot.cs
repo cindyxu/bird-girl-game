@@ -14,9 +14,9 @@ public class DoorPilot : IPathPilot {
 	}
 
 	public void Start (InputCatcher inputCatcher) {
-		inputCatcher.OnActionPress ();
 		mAiFacade.onEnterDoor += OnEnterDoor;
 		mAiFacade.onExitDoor += OnExitDoor;
+		inputCatcher.OnActionPress ();
 	}
 
 	public void Stop () {

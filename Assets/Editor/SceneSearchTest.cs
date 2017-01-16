@@ -56,11 +56,11 @@ public class SceneSearchTest {
 		grapher.GetSceneGraph ().AddRoomModel (model0);
 		grapher.GetSceneGraph ().AddRoomModel (model1);
 
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_0, model0, door0_0, new Range (2, 3, 0)));
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model0, door0_0, model1, door1_0, new Range (2, 3, 0)));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_0, model0, door0_0, wp.size.x));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model0, door0_0, model1, door1_0, wp.size.x));
 
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_1, model0, door0_1, new Range (5, 6, 0)));
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model0, door0_1, model1, door1_1, new Range (5, 6, 0)));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_1, model0, door0_1, wp.size.x));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model0, door0_1, model1, door1_1, wp.size.x));
 
 		grapher.SetRoomGraph (model0, new RoomGraph (model0, wp));
 		grapher.SetRoomGraph (model1, new RoomGraph (model0, wp));
@@ -130,11 +130,11 @@ public class SceneSearchTest {
 		grapher.GetSceneGraph ().AddRoomModel (model1);
 		grapher.GetSceneGraph ().AddRoomModel (model2);
 
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_0, model0, door0_0, new Range (2, 3, 0)));
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model0, door0_0, model1, door1_0, new Range (2, 3, 0)));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_0, model0, door0_0, wp.size.x));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model0, door0_0, model1, door1_0, wp.size.x));
 
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model2, door2_0, model1, door1_1, new Range (5, 6, 0)));
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_1, model2, door2_0, new Range (5, 6, 0)));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model2, door2_0, model1, door1_1, wp.size.x));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_1, model2, door2_0, wp.size.x));
 
 		grapher.SetRoomGraph (model0, new RoomGraph (model0, wp));
 		grapher.SetRoomGraph (model1, new RoomGraph (model1, wp));
@@ -215,8 +215,8 @@ public class SceneSearchTest {
 		grapher.GetSceneGraph ().AddRoomModel (model0);
 		grapher.GetSceneGraph ().AddRoomModel (model1);
 
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_0, model0, door0_0, new Range (2, 3, 0)));
-		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model0, door0_0, model1, door1_0, new Range (2, 3, 0)));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model1, door1_0, model0, door0_0, wp.size.x));
+		grapher.GetSceneGraph ().AddRoomPath (new DoorPath (model0, door0_0, model1, door1_0, wp.size.x));
 
 		RoomModel startRoom = model0;
 		IWaypoint startPoint = edge0_0;

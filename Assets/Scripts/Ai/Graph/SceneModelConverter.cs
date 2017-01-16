@@ -68,7 +68,7 @@ public class SceneModelConverter {
 				
 				LadderModel ladderModel = mLadderMap[ladder].Item2;
 				Edge topEdge = EdgeUtil.FindLadderTopEdge (
-					ladderModel.GetRect (), roomGraphs[mRoomMap[ladder.GetDestRoom ()]].GetEdges ());
+					ladderModel.GetRect (), roomGraphs [mRoomMap [ladder.GetDestRoom ()]].GetEdges ());
 
 				if (topEdge != null) {
 					RoomModel bottomRoom = mRoomMap[ladder.GetRoom ()];
@@ -93,14 +93,12 @@ public class SceneModelConverter {
 			RoomModel endGraph = mDoorMap[intraDoorTrigger.destination].Item1;
 			DoorModel endDoor = mDoorMap[intraDoorTrigger.destination].Item2;
 
-			Vector2 dest = intraDoorTrigger.destination.GetTargetPosition (wp.size);
-
-			graph.AddRoomPath (new DoorPath (startGraph, startDoor, endGraph, endDoor,
-				new Range (dest.x - wp.size.x / 2, dest.x + wp.size.x / 2, dest.y + wp.size.y / 2)));
+			graph.AddRoomPath (new DoorPath (startGraph, startDoor, endGraph, endDoor, wp.size.x));
 		}
 	}
 
 	private static Dictionary<DoorTrigger, DoorModel> buildDoors (Room room) {
+		Debug.Log ("building doors for " + room);
 		Dictionary<DoorTrigger, DoorModel> doors = new Dictionary<DoorTrigger, DoorModel> ();
 		foreach (DoorTrigger door in room.GetDoors ()) {
 			doors.Add (door, new DoorModel (door.GetRect (), door.GetDir ()));
