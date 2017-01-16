@@ -32,10 +32,9 @@ public class SceneState : MonoBehaviour {
 
 		foreach (string fres in GameState.GetFollowersRes ()) {
 			Inhabitant follower = LoadInhabitant (fres, spawnRoom, spawnPos, spawnSortingLayerName);
-			follower.SetFollow (new Inhabitant.GetDest (delegate(out Room room, out Vector2 pos, out float minDist) {
+			follower.SetFollow (new Inhabitant.GetDest (delegate(out Room room, out Vector2 pos) {
 				room = mPlayer.GetFacade ().GetRoomTraveller ().GetCurrentRoom ();
 				pos = mPlayer.GetFacade ().GetPosition ();
-				minDist = 2;
 			}));
 			mFollowers.Add (follower);
 		}

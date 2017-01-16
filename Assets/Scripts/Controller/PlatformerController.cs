@@ -37,8 +37,9 @@ public class PlatformerController : IController {
 		mLadderLocomotion.onLadderDismount += OnLadderDismount;
 	}
 
-	public bool RequestMoveTo (string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
-		mBehaviourSwitcher.RequestMoveTo (locomotion, getDest, callback);
+	public bool RequestMoveTo (Inhabitant.GetDest getDest, string locomotion, float minDist,
+		Inhabitant.OnCmdFinished callback) {
+		mBehaviourSwitcher.RequestMoveTo (getDest, locomotion, minDist, callback);
 		return true;
 	}
 

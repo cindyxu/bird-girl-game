@@ -21,12 +21,13 @@ public class BehaviourSwitcher {
 		return mOverrideBehaviour;
 	}
 
-	public void RequestMoveTo (string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
+	public void RequestMoveTo (Inhabitant.GetDest getDest, string locomotion, float minDist,
+		Inhabitant.OnCmdFinished callback) {
 		OnReachDestination onReachDestination = delegate {
 			setOverrideBehaviour (null);
 			callback ();
 		};
-		setOverrideBehaviour (new AiMoveToBehaviour (locomotion, getDest, onReachDestination));
+		setOverrideBehaviour (new AiMoveToBehaviour (getDest, locomotion, minDist, onReachDestination));
 	}
 
 	public void RequestFreeze () {
@@ -42,7 +43,7 @@ public class BehaviourSwitcher {
 	}
 
 	public void SetFollow (Inhabitant.GetDest getDest) {
-		setOverrideBehaviour (new AiMoveToBehaviour ("run", getDest, null));
+		setOverrideBehaviour (new AiMoveToBehaviour (getDest, "run", 2, null));
 	}
 
 	private void setBaseBehaviour (IBehaviour behaviour) {

@@ -8,6 +8,7 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 	private readonly AiWalkerFacadeImpl mAwFacade;
 	private readonly SceneModelConverter mConverter;
 
+	private float mMinDist;
 	private Inhabitant.GetDest mGetDest;
 	private event OnReachDestination mOnReachDestination;
 	private Eppy.Tuple<Room, Vector2> mLastDest;
@@ -22,17 +23,17 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 		mAwFacade = new AiWalkerFacadeImpl (wp, converter, facade, plFacade);
 	}
 
-	public void SetDest (Inhabitant.GetDest getDest, OnReachDestination onReachDest) {
+	public void SetDest (Inhabitant.GetDest getDest, float minDist, OnReachDestination onReachDest) {
+		mMinDist = minDist;
 		mGetDest = getDest;
 		if (mGetDest != null) {
 			Room room;
 			Vector2 pos;
-			float dist;
-			mGetDest (out room, out pos, out dist);
+			mGetDest (out room, out pos);
 			mLastDest = new Eppy.Tuple<Room, Vector2> (room, pos);
 			mOnReachDestination = onReachDest;
 			if (mInputOn) {
-				mScenePathPlanner = new ScenePathPlanner (mWp, mAwFacade, mConverter, room, pos, dist);
+				mScenePathPlanner = new ScenePathPlanner (mWp, mAwFacade, mConverter, room, pos, mMinDist);
 			}
 		} else {
 			mLastDest = null;
@@ -42,11 +43,11 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 
 	public void FeedInput (InputCatcher catcher) {
 		if (mGetDest != null) {
-			Room room; Vector2 pos; float dist;
-			mGetDest (out room, out pos, out dist);
+			Room room; Vector2 pos;
+			mGetDest (out room, out pos);
 			if (room != mLastDest.Item1 || !pos.Equals (mLastDest.Item2)) {
 				mLastDest = new Eppy.Tuple<Room, Vector2> (room, pos);
-				mScenePathPlanner = new ScenePathPlanner (mWp, mAwFacade, mConverter, room, pos, dist);
+				mScenePathPlanner = new ScenePathPlanner (mWp, mAwFacade, mConverter, room, pos, mMinDist);
 			}
 		}
 		if (mScenePathPlanner != null) {
@@ -61,10 +62,10 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 				mScenePathPlanner = null;
 			} else if (status == PlannerStatus.FAILED) {
 				Log.logger.Log (Log.AI_INPUT, "failed to reach goal. retrying ... ");
-				Room room; Vector2 pos; float dist;
-				mGetDest (out room, out pos, out dist);
+				Room room; Vector2 pos;
+				mGetDest (out room, out pos);
 				mScenePathPlanner = 
-					mGetDest != null ? new ScenePathPlanner (mWp, mAwFacade, mConverter, room, pos, dist) : null;
+					mGetDest != null ? new ScenePathPlanner (mWp, mAwFacade, mConverter, room, pos, mMinDist) : null;
 			}
 		}
 	}
@@ -72,7 +73,7 @@ public class AiWalkerInputFeeder : IAiInputFeeder {
 	public void OnBeginInput (InputCatcher catcher) {
 		mAwFacade.StartObserving ();
 		if (mGetDest != null) {
-			SetDest (mGetDest, mOnReachDestination);
+			SetDest (mGetDest, mMinDist, mOnReachDestination);
 		}
 		mInputOn = true;
 	}

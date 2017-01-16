@@ -58,10 +58,9 @@ public class FollowDemo : MonoBehaviour {
 			}
 
 			if (movePos.HasValue) {
-				walker.RequestMoveTo ("walk", delegate (out Room room, out Vector2 pos, out float dist) {
+				walker.RequestMoveTo ("walk", 0.5f, delegate (out Room room, out Vector2 pos) {
 					pos = movePos.Value;
 					room = destRoom;
-					dist = 0.5f;
 				}, delegate {
 					//				Debug.Log ("reached destination!");
 				});

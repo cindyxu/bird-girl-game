@@ -3,7 +3,8 @@
 public interface IController {
 	Locomotion GetStartLocomotion ();
 	void Act ();
-	bool RequestMoveTo (string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback);
+	bool RequestMoveTo (Inhabitant.GetDest getDest, string locomotion, float minDist,
+		Inhabitant.OnCmdFinished callback);
 	bool RequestFreeze ();
 	bool RequestFinishRequest ();
 	void SetPlayerControl ();

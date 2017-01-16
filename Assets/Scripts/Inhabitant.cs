@@ -18,15 +18,16 @@ public class Inhabitant : MonoBehaviour {
 	private Collider2D mCollider2D;
 
 	public delegate void OnCmdFinished();
-	public delegate void GetDest (out Room room, out Vector2 pos, out float minDist);
+	public delegate void GetDest (out Room room, out Vector2 pos);
 
 	protected Locomotion GetCurrentLocomotion () {
 		return mCurrentLocomotion;
 	}
 
 	// todo move these into a servant class
-	public bool RequestMoveTo (string locomotion, Inhabitant.GetDest getDest, Inhabitant.OnCmdFinished callback) {
-		return mController.RequestMoveTo (locomotion, getDest, callback);
+	public bool RequestMoveTo (string locomotion, float minDist, Inhabitant.GetDest getDest,
+		Inhabitant.OnCmdFinished callback) {
+		return mController.RequestMoveTo (getDest, locomotion, minDist, callback);
 	}
 
 	public bool RequestFreeze () {

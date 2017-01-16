@@ -19,10 +19,9 @@ namespace NodeCanvas.Tasks.Actions {
 		}
 
 		protected override void OnExecute() {
-			agent.RequestMoveTo (locomotion.value, delegate(out Room room, out Vector2 pos, out float minDist) {
+			agent.RequestMoveTo (locomotion.value, keepDistance, delegate(out Room room, out Vector2 pos) {
 				room = targetRoom.value;
 				pos = targetPosition.value;
-				minDist = keepDistance;
 			}, OnFinish);
 		}
 
