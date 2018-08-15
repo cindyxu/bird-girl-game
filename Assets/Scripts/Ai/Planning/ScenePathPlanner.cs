@@ -8,6 +8,7 @@ public class ScenePathPlanner {
 	private readonly WalkerParams mWp;
 	private readonly IAiWalkerFacade mAWFacade;
 	private readonly SceneModelConverter mConverter;
+	private readonly PlatformerSearchEvaluator mEvaluator;
 
 	private readonly Room mDestRoom;
 	private Vector2 mDestPos;
@@ -16,6 +17,7 @@ public class ScenePathPlanner {
 	private IWaypoint mDestPoint;
 	private Range mDestRange;
 	private List<Eppy.Tuple<List<IWaypointPath>, IRoomPath>> mResult;
+	private float mDistLeft;
 
 	private int mPathIdx;
 	private RoomPathPlanner mRoomPathPlanner;
@@ -28,6 +30,7 @@ public class ScenePathPlanner {
 		mWp = wp;
 		mAWFacade = awFacade;
 		mConverter = converter;
+		mEvaluator = new PlatformerSearchEvaluator (wp);
 
 		mDestRoom = destRoom;
 		mDestPos = destPos;
@@ -60,8 +63,8 @@ public class ScenePathPlanner {
 
 		// search
 		if (startPoint != null && destPoint != null) {
-			SceneSearch search = new SceneSearch (mAWFacade, mWp.size, new PlatformerSearchEvaluator (mWp),
-			startRoomModel, startPoint, startRange, destRoomModel, destPoint, destRange);
+			SceneSearch search = new SceneSearch (mAWFacade, mWp.size, mEvaluator, startRoomModel, startPoint,
+				startRange, destRoomModel, destPoint, destRange);
 			
 			while (!search.Step ()) ;
 			List<Eppy.Tuple<List<IWaypointPath>, IRoomPath>> result = search.GetResult ();
@@ -80,6 +83,17 @@ public class ScenePathPlanner {
 			nextRoomPlanner ();
 		}
 	}
+
+//	private float calculateDistLeft () {
+//		float distLeft = 0;
+//		for (int i = mPathIdx+1; i < mResult.Count; i++) {
+//			Eppy.Tuple<List<IWaypointPath>, IRoomPath> tuple = mResult[i];
+//			for (int j = 0; j < tuple.Item1.Count; j++) {
+//				distLeft += tuple.Item1[j].GetTravelTime ();
+//			}
+//
+//		}
+//	}
 
 	private void nextRoomPlanner () {
 		List<IWaypointPath> pathChain;

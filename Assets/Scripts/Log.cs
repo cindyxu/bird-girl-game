@@ -22,7 +22,7 @@ public static class Log
 
 	static Log () {
 		filters = new string[] {
-			AI_PLAN
+			AI_PLAN,
 		};
 		logger = new Logger (new LogHandler (filters));
 	}

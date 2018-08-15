@@ -34,13 +34,13 @@ public class PlayerRoomController {
 	}
 
 	void OnLeaveRoom(RoomTraveller traveller, Room room) {
-		if (room != null) {
+		if (room != null && mCameraController != null) {
 			room.Hide (TRANSITION_DURATION);
 		}
 	}
 
 	void OnEnterRoom(RoomTraveller traveller, Room room) {
-		if (room != null) {
+		if (room != null && mCameraController != null) {
 			room.Show (TRANSITION_DURATION);
 			mCameraController.FadeToRenderer (room.backgroundRenderer, TRANSITION_DURATION);
 		}

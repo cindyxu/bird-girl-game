@@ -7,9 +7,9 @@ public class FollowDemo : MonoBehaviour {
 
 	public static KeyBindingManager keybindingManager = new KeyBindingManager ();
 
-	public PlatformerInhabitant walker;
 	public GameObject cursor;
 	public GameObject debugObjectsRoot;
+	public SceneState sceneState;
 
 	private Room[] mRooms;
 	private Ladder[] mLadders;
@@ -17,17 +17,13 @@ public class FollowDemo : MonoBehaviour {
 	private RoomPathPlanner mCurrRoomPathPlanner;
 
 	void Start () {
-		walker.InitializePlayer (keybindingManager);
 		mRooms = FindObjectsOfType<Room> ();
-		walker.InitializeAi (new SceneModelConverter (mRooms));
-		walker.SetPlayerControl ();
-
 		mLadders = FindObjectsOfType<Ladder> ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-
+		Inhabitant walker = sceneState.GetPlayer ();
 		BoxCollider2D walkerCollider = walker.GetComponent<BoxCollider2D> ();
 		Room destRoom = null;
 
@@ -72,6 +68,7 @@ public class FollowDemo : MonoBehaviour {
 	}
 
 	private void redraw () {
+		Inhabitant walker = sceneState.GetPlayer ();
 		RoomPathPlanner roomPlanner = null;
 		// need to get scene path planner from here
 		AiWalkerInputFeeder aiInputFeeder =

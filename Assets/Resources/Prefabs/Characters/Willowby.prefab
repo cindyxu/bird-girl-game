@@ -123,8 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afd3578127ad6a94dbfda3ef08448032, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startRoom: {fileID: 0}
   climbSpd: 10
   walkSpd: 10
-  jumpSpd: 10
+  jumpSpd: 20
   maxVelocity: -100

@@ -134,7 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &2472972
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -213,7 +213,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &29609385
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -356,7 +356,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54465a6da4b3140a85387649dd0eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundRenderer: {fileID: 1805545481}
+  backgroundRenderer: {fileID: 0}
 --- !u!1 &50303280
 GameObject:
   m_ObjectHideFlags: 0
@@ -593,11 +593,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77115b515901ad7458ea28b60c025f7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftCollider: {fileID: 131062836}
-  rightCollider: {fileID: 106807882}
-  topCollider: {fileID: 1999929116}
-  bottomCollider: {fileID: 2032092089}
-  descend: {fileID: 926475883}
+  leftCollider: {fileID: 0}
+  rightCollider: {fileID: 0}
+  topCollider: {fileID: 0}
+  bottomCollider: {fileID: 0}
+  descend: {fileID: 0}
 --- !u!4 &80629234
 Transform:
   m_ObjectHideFlags: 0
@@ -1018,10 +1018,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac615fbde4bf32f4cb6ddf377a286d14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _serializedBlackboard: '{"_name":"SaveState","_variables":{"playerResource":{"_value":"willowby","_name":"playerResource","$type":"NodeCanvas.Framework.Variable`1[[System.String,
-    mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]"},"followersResource":{"_value":["passe"],"_name":"followersResource","_id":"e7ce2d57-3d63-40f6-a6d8-9552d907b846","$type":"NodeCanvas.Framework.Variable`1[[System.Collections.Generic.List`1[[System.String,
-    mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],
-    mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]"}}}'
+  _serializedBlackboard: '{"_variables":{}}'
   _objectReferences: []
   dontDestroy: 1
 --- !u!4 &239413855
@@ -1184,12 +1181,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a676940fce6344af1a70043b089a6c14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetTextObject: {fileID: 386376806}
-  punchObject: {fileID: 280834859}
+  targetTextObject: {fileID: 0}
+  punchObject: {fileID: 0}
   writingSpeed: 60
   punctuationPause: 0.25
   hiddenTextColor: {r: 1, g: 1, b: 1, a: 0}
-  writeWholeWords: 1
+  writeWholeWords: 0
   forceRichText: 1
   instantComplete: 1
 --- !u!114 &280834862
@@ -1204,7 +1201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bfca9b59b4f01b4189afcb30428446e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterName: Willowby
+  characterName: 
 --- !u!114 &280834863
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1427,7 +1424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &303994336
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -1508,7 +1505,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54465a6da4b3140a85387649dd0eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundRenderer: {fileID: 1805545481}
+  backgroundRenderer: {fileID: 0}
 --- !u!1 &338148584
 GameObject:
   m_ObjectHideFlags: 0
@@ -1539,7 +1536,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &338148586
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -1734,7 +1731,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &359557598
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -1808,8 +1805,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cf2eb429c2cac44ab2333a2f96ee66c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
-  destination: {fileID: 1148794208}
+  sortingLayerName: 
+  destination: {fileID: 0}
 --- !u!1 &378841076
 GameObject:
   m_ObjectHideFlags: 0
@@ -2043,7 +2040,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &398269754
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -2160,7 +2157,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54465a6da4b3140a85387649dd0eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundRenderer: {fileID: 1805545481}
+  backgroundRenderer: {fileID: 0}
 --- !u!1 &448260013
 GameObject:
   m_ObjectHideFlags: 0
@@ -2576,7 +2573,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54465a6da4b3140a85387649dd0eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundRenderer: {fileID: 1487331434}
+  backgroundRenderer: {fileID: 0}
 --- !u!4 &518904789
 Transform:
   m_ObjectHideFlags: 0
@@ -2647,7 +2644,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &542524645
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -2739,7 +2736,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &546258176
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -2945,7 +2942,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &565004626
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -3281,10 +3278,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f811892c4b825404d868441ea3dd0e8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraController: {fileID: 1075277027}
-  spawnRoom: {fileID: 439883131}
-  spawnPos: {x: -14, y: 3}
-  spawnSortingLayerName: slayer1
+  cameraController: {fileID: 0}
+  spawnRoom: {fileID: 0}
+  spawnPos: {x: 0, y: 0}
+  spawnSortingLayerName: 
 --- !u!4 &645510021
 Transform:
   m_ObjectHideFlags: 0
@@ -3435,7 +3432,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &706934937
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -3696,8 +3693,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69453facb79a98248b147e2ef4edb4ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: castle
-  destTargetName: LevelCrossTarget - to castle
+  levelName: 
+  destTargetName: 
 --- !u!68 &776103881
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -3882,7 +3879,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &868024577
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -3961,7 +3958,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &874342092
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -4241,8 +4238,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a676940fce6344af1a70043b089a6c14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetTextObject: {fileID: 139810335}
-  punchObject: {fileID: 901839215}
+  targetTextObject: {fileID: 0}
+  punchObject: {fileID: 0}
   writingSpeed: 60
   punctuationPause: 0.25
   hiddenTextColor: {r: 1, g: 1, b: 1, a: 0}
@@ -4261,7 +4258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bfca9b59b4f01b4189afcb30428446e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterName: Mom
+  characterName: 
 --- !u!114 &901839219
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4474,8 +4471,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43a3ddb05bf7c804bb4fbf35926a1bf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
-  ladder: {fileID: 80629233}
+  sortingLayerName: 
+  ladder: {fileID: 0}
 --- !u!1 &930217970
 GameObject:
   m_ObjectHideFlags: 0
@@ -4519,7 +4516,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &930217973
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -4656,7 +4653,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &955379342
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -4751,8 +4748,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cf2eb429c2cac44ab2333a2f96ee66c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
-  destination: {fileID: 1683008830}
+  sortingLayerName: 
+  destination: {fileID: 0}
 --- !u!68 &981742486
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -4811,7 +4808,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &985959717
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -4890,7 +4887,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &1013580158
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -5069,7 +5066,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54465a6da4b3140a85387649dd0eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundRenderer: {fileID: 1805545481}
+  backgroundRenderer: {fileID: 0}
 --- !u!1 &1054196840
 GameObject:
   m_ObjectHideFlags: 0
@@ -5100,7 +5097,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1054196842
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -5197,10 +5194,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac69cb35a399de9478bdf97fa0065cb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetViewportSizeInPixels: {x: 640, y: 480}
+  targetViewportSizeInPixels: {x: 480, y: 320}
   lockToPixels: 1
   pixelsPerUnit: 32
-  boundaryCollider: {fileID: 596334145}
+  boundaryCollider: {fileID: 0}
 --- !u!81 &1075277022
 AudioListener:
   m_ObjectHideFlags: 0
@@ -5286,8 +5283,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72105635479433749a8a70904e61a572, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  exteriorRenderer: {fileID: 1487331434}
-  interiorRenderer: {fileID: 1805545481}
+  exteriorRenderer: {fileID: 0}
+  interiorRenderer: {fileID: 0}
 --- !u!4 &1084367000
 Transform:
   m_ObjectHideFlags: 0
@@ -5344,7 +5341,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1093045230
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -5487,7 +5484,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1133691772
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -5535,8 +5532,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cf2eb429c2cac44ab2333a2f96ee66c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
-  destination: {fileID: 365530596}
+  sortingLayerName: 
+  destination: {fileID: 0}
 --- !u!4 &1148794209
 Transform:
   m_ObjectHideFlags: 0
@@ -5607,8 +5604,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cf2eb429c2cac44ab2333a2f96ee66c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
-  destination: {fileID: 1216867504}
+  sortingLayerName: 
+  destination: {fileID: 0}
 --- !u!1001 &1163840762
 Prefab:
   m_ObjectHideFlags: 0
@@ -5857,7 +5854,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &1184022129
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -6054,7 +6051,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1192559525
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -6135,7 +6132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54465a6da4b3140a85387649dd0eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundRenderer: {fileID: 1805545481}
+  backgroundRenderer: {fileID: 0}
 --- !u!4 &1216017529
 Transform:
   m_ObjectHideFlags: 0
@@ -6178,8 +6175,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cf2eb429c2cac44ab2333a2f96ee66c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
-  destination: {fileID: 1154469557}
+  sortingLayerName: 
+  destination: {fileID: 0}
 --- !u!68 &1216867505
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -6283,7 +6280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1251647103
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -6447,7 +6444,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1273141134
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -6556,7 +6553,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54465a6da4b3140a85387649dd0eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundRenderer: {fileID: 1805545481}
+  backgroundRenderer: {fileID: 0}
 --- !u!1001 &1343561548
 Prefab:
   m_ObjectHideFlags: 0
@@ -6723,7 +6720,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &1370669068
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -6923,7 +6920,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &1412022170
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -7002,7 +6999,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1426297559
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -7195,9 +7192,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72354bb57144d204db4ba262e9a59111, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pixelPerfectCam: {fileID: 1075277021}
-  color0: {r: 0.947, g: 0.9336435, b: 0.784116, a: 0}
-  color1: {r: 0.714273, g: 0.89280874, b: 0.903, a: 0}
+  pixelPerfectCam: {fileID: 0}
+  color0: {r: 0, g: 0, b: 0, a: 0}
+  color1: {r: 0, g: 0, b: 0, a: 0}
 --- !u!4 &1499926998
 Transform:
   m_ObjectHideFlags: 0
@@ -7409,7 +7406,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1588782741
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -7545,7 +7542,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1641312555
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -7624,7 +7621,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer1
+  sortingLayerName: 
 --- !u!68 &1671691342
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -7717,8 +7714,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cf2eb429c2cac44ab2333a2f96ee66c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
-  destination: {fileID: 981742485}
+  sortingLayerName: 
+  destination: {fileID: 0}
 --- !u!1 &1693228668
 GameObject:
   m_ObjectHideFlags: 0
@@ -8442,7 +8439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1832217068
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -8508,7 +8505,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &1842863947
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -8869,7 +8866,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54465a6da4b3140a85387649dd0eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundRenderer: {fileID: 1805545481}
+  backgroundRenderer: {fileID: 0}
 --- !u!1 &1999929114
 GameObject:
   m_ObjectHideFlags: 0
@@ -9061,7 +9058,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &2032915355
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -9204,7 +9201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &2058253592
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -9332,7 +9329,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &2114866871
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -9411,7 +9408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &2123198820
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -9474,7 +9471,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cd6c8a5762a58f4782aa6ee1387eae5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!4 &2131796762
 Transform:
   m_ObjectHideFlags: 0
@@ -9518,7 +9515,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efddd84ecd36caf449769e618626b70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingLayerName: slayer0
+  sortingLayerName: 
 --- !u!68 &2134320550
 EdgeCollider2D:
   m_ObjectHideFlags: 0

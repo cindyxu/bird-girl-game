@@ -27,7 +27,9 @@ public class SceneState : MonoBehaviour {
 		mPlayer = LoadInhabitant (GameState.GetPlayerRes (), spawnRoom, spawnPos, 
 			spawnSortingLayerName);
 		mPlayer.SetPlayerControl ();
-		cameraController.SetFollowTarget (mPlayer.gameObject);
+		if (cameraController) {
+			cameraController.SetFollowTarget (mPlayer.gameObject);
+		}
 		mPlayerRoomController.Init (mPlayer.GetFacade ().GetRoomTraveller (), cameraController);
 
 		foreach (string fres in GameState.GetFollowersRes ()) {
