@@ -35,13 +35,16 @@ public class DefaultDoorEnterEvent {
 		mTargetRigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
 
 		Vector2 position = mDoor.GetTargetPosition (mTargetCollider2D.bounds.size);
-		iTween.MoveTo (mInhabitant.gameObject, iTween.Hash (
-			"x", position.x - mTargetCollider2D.offset.x,
-			"y", position.y - mTargetCollider2D.offset.y,
-			"speed", 8,
-			"easetype", iTween.EaseType.linear,
-			"oncomplete", onFinished
-		));
+//		iTween.MoveTo (mInhabitant.gameObject, iTween.Hash (
+//			"x", position.x - mTargetCollider2D.offset.x,
+//			"y", position.y - mTargetCollider2D.offset.y,
+//			"speed", 8,
+//			"easetype", iTween.EaseType.linear,
+//			"oncomplete", onFinished
+//		));
+		mInhabitant.gameObject.transform.position =
+			new Vector2(position.x - mTargetCollider2D.offset.x, position.y - mTargetCollider2D.offset.y);
+		onFinished();
 	}
 
 }

@@ -14,9 +14,8 @@ public static class GameState {
 	private static OnSceneLoaded mOnSceneLoaded;
 
 	static GameState () {
-		sPlayerRes = "Passe";
+		sPlayerRes = "Protag";
 		mFollowersRes = new List<string> ();
-//		mFollowersRes.Add ("Willowby");
 	}
 
 	public static void LoadScene(string sceneName, OnSceneLoaded onSceneLoaded) {

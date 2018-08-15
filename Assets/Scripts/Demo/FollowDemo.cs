@@ -11,6 +11,9 @@ public class FollowDemo : MonoBehaviour {
 	public GameObject debugObjectsRoot;
 	public SceneState sceneState;
 
+	public Material edgeMaterial;
+	public Material stepMeshMaterial;
+
 	private Room[] mRooms;
 	private Ladder[] mLadders;
 
@@ -102,12 +105,12 @@ public class FollowDemo : MonoBehaviour {
 
 				if (path is JumpPath) {
 					JumpPath jumpPath = (JumpPath) path;
-					GameObject mesh = RenderUtils.CreateScanArea (jumpPath.GetScanArea ());
+					GameObject mesh = RenderUtils.CreateScanArea (jumpPath.GetScanArea (), stepMeshMaterial);
 					mesh.transform.SetParent (debugObjectsRoot.transform);
 				}
 
 				GameObject rangeLine = RenderUtils.CreateLine (
-                   targetRange.xl, targetRange.y, targetRange.xr, targetRange.y, 0.2f, Color.green);
+					targetRange.xl, targetRange.y, targetRange.xr, targetRange.y, 0.2f, Color.green, edgeMaterial);
 				rangeLine.transform.SetParent (debugObjectsRoot.transform);
 			}
 		}

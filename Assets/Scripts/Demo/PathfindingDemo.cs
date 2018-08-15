@@ -14,6 +14,8 @@ public class PathfindingDemo : MonoBehaviour {
 	public UnityEngine.UI.Button startButton;
 	public UnityEngine.UI.Button searchButton;
 	public UnityEngine.UI.Button stepButton;
+	public Material edgeMaterial;
+	public Material stepMaterial;
 
 	private List<Edge> mEdges;
 	private RenderScan mRenderScan;
@@ -38,7 +40,7 @@ public class PathfindingDemo : MonoBehaviour {
 				(edge.isUp ? "isUp" : "") + 
 				(edge.isDown ? "isDown" : ""));
 
-			RenderUtils.CreateLine (edge.x0, edge.y0, edge.x1, edge.y1, 0.1f, new Color (1, 1, 1, 0.1f));
+			RenderUtils.CreateLine (edge.x0, edge.y0, edge.x1, edge.y1, 0.1f, new Color (1, 1, 1, 0.1f), edgeMaterial);
 		}
 	}
 
@@ -51,7 +53,7 @@ public class PathfindingDemo : MonoBehaviour {
 
 		mRenderSearch = new RenderSearch (walkerCollider, targetCollider, mWp,
 			((Vector2) walker.transform.position) - mWp.size / 2, 
-			((Vector2) targetCollider.transform.position) - mWp.size / 2, mEdges);
+			((Vector2) targetCollider.transform.position) - mWp.size / 2, mEdges, edgeMaterial);
 	}
 
 	public void StartScan () {
@@ -65,8 +67,10 @@ public class PathfindingDemo : MonoBehaviour {
 			walker.transform.position.x + walkerCollider.size.x/2f, 
 			walker.transform.position.y);
 		if (underEdge != null) {
-			mRenderScan = new RenderScan (new JumpScan (mWp, underEdge, 
-				walker.transform.position.x - walkerCollider.size.x/2f, mWp.jumpSpd, mEdges));
+			mRenderScan = new RenderScan (
+				new JumpScan (
+					mWp, underEdge, walker.transform.position.x - walkerCollider.size.x/2f, mWp.jumpSpd, mEdges),
+				stepMaterial);
 			mRenderScan.UpdateGraph ();
 		} else {
 			mRenderScan = null;
